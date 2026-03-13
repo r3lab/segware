@@ -1,0 +1,12 @@
+{% if flexy_ftwo_current_quote_totals().countTotalItems > 0 %}
+    <div class="qupte-sumary" title="Orçamento">
+        <div class="header-mini-cart header-mini-list  pull-right hidden-sm hidden-xs btn-blue">
+            <a href="{{ path('flexy_ftwo_store_quote_list') }}" >
+            <span>
+                <i class="fa fa-file"></i>&nbsp;&nbsp;
+                <i class="quote-items-count">{{ flexy_ftwo_current_quote_totals().countTotalItems }}</i>
+            </span>
+            </a>
+        </div>
+    </div>
+{% endif %}

@@ -1,0 +1,103 @@
+{% set form = flexy_ftwo_form('address').address %}
+
+<div id="add-address" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Novo endereço</h4>
+            </div>
+            <div class="modal-body">
+                <form action="{{ path('flexy_ftwo_store_checkout_add_address') }}" method="post" class="form-list">
+                    <input type="hidden" value="Brasil" name="address[country]">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <a href="http://www.buscacep.correios.com.br/sistemas/buscacep/" target="_blank" class="pull-right">Esqueceu seu CEP?</a>
+
+                                {{ form_label(form.postcode) }}
+                                {{ form_widget(form.postcode, {'attr': { 'required':'true', 'class': 'flexy-input-postcode form-control', 'minlength':9, 'data-prefix' : 'address_' }}) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.state) }}
+                                <select id="address_state" name="address[state]" class="form-control">
+                                    <option value="" >Selecione...</option>
+                                    <option value="AC">Acre</option>
+                                    <option value="AL">Alagoas</option>
+                                    <option value="AP">Amapá</option>
+                                    <option value="AM">Amazonas</option>
+                                    <option value="BA">Bahia</option>
+                                    <option value="CE">Ceará</option>
+                                    <option value="DF">Distrito Federal</option>
+                                    <option value="ES">Espirito Santo</option>
+                                    <option value="GO">Goias</option>
+                                    <option value="MA">Maranhão</option>
+                                    <option value="MT">Mato Grosso</option>
+                                    <option value="MS">Mato Grosso do Sul</option>
+                                    <option value="MG">Minas Gerais</option>
+                                    <option value="PA">Pará</option>
+                                    <option value="PB">Paraíba</option>
+                                    <option value="PR">Paraná</option>
+                                    <option value="PE">Pernambuco</option>
+                                    <option value="PI">Piauí</option>
+                                    <option value="RJ">Rio de Janeiro</option>
+                                    <option value="RN">Rio Grande do Norte</option>
+                                    <option value="RS">Rio Grande do Sul</option>
+                                    <option value="RO">Rondônia</option>
+                                    <option value="RR">Roraima</option>
+                                    <option value="SC">Santa Catarina</option>
+                                    <option value="SP">São Paulo</option>
+                                    <option value="SE">Sergipe</option>
+                                    <option value="TO">Tocantins</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.street) }}
+                                {{ form_widget(form.street, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.number) }}
+                                {{ form_widget(form.number, {'attr': {'class': 'flexy-input-integer form-control'}}) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.district) }}
+                                {{ form_widget(form.district, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.city) }}
+                                {{ form_widget(form.city, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.complement) }}
+                                {{ form_widget(form.complement, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="insert_address" class="btn btn-light-blue">Inserir endereço</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

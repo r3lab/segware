@@ -1,0 +1,13 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+{% block content %}
+    <div style="{{ style.header }}">
+        <h1>Falta pouco. Sua loja está aguardando aprovação!</h1>
+    </div>
+    <div style="{{ style.inner }}">
+        <h3>Olá, {{ shoppingStore.platformUser.name }}!</h3>
+
+        <p>
+            Sua loja está aguardando aprovação do administrador. Assim que ela for aprovada, você será notificado via e-mail.
+        </p>
+    </div>
+{% endblock %}

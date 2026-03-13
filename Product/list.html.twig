@@ -1,0 +1,50 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% set title = category ? category.name : 'Produtos' %}
+
+{% block content %}
+    {% set path = [{'url': path('flexy_ftwo_store_product_list_all'), 'title' : 'Produtos'}] %}
+
+    {% if category %}
+        {% for step in f2_store_create_breadcrumbs({'category': category}) if step.categoryReferenceCode != 'destaques' %}
+            {% set path = path|merge([{'url': step.categoryUrl, 'title' : step.categoryName}]) %}
+        {% endfor %}
+    {% endif %}
+
+    {% set order = app.request.get('order', app.request.get('sortOrder', 'category-asc')) %}
+
+    {% set filters = {
+        useSearchParameters: 'true',
+        page: app.request.get('page', 1),
+        itemsPerPage: app.request.get('itemsPerPage', 15),
+        sortOrder: order,
+        filter: filterString,
+        showCustomVariants: 'true',
+        showOnlyAvailable: 'false',
+        shoppingStoreReferenceCode: shoppingStore.referenceCode,
+        category: {
+            referenceCode: category ? category.referenceCode : null,
+            isShopping: category ? (category.shoppingStore ? 'false' : 'true') : null
+        }
+    } %}
+
+    {% set result = f2_variant_list(filters) %}
+
+    {% include 'FlexyFtwoStoreBundle:Include:variant-list.html.twig' with {
+        path: path,
+        category : category,
+        variants : result.pagination,
+        totalResults : result.totalResults
+    } %}
+
+    {% if result.getJsonErrors %}
+        <script>
+            console.error(`{{ result.getJsonErrors|raw|e('js') }}`);
+        </script>
+    {% endif %}
+{% endblock %}
+
+{% block javascript %}
+    {%  include 'FlexyFtwoStoreBundle:Javascript:_sidebar.html.twig' %}
+    {%  include 'FlexyFtwoStoreBundle:Javascript:_list.html.twig' %}
+{% endblock %}

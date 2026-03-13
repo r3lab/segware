@@ -1,0 +1,118 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% set title = "Lista de desejos"  %}
+{% set isLightHeader = true %}
+{% set customer = flexy_ftwo_current_customer() %}
+{% set wishListLink = url('flexy_ftwo_store_wishlist_view', { 'referenceCode' : wishlist.referenceCode }) %}
+
+{% block content %}
+	{% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-wishlist-success'), 'error' : false} %}
+	{% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-wishlist-error'), 'error' : true} %}
+
+	<section>
+		<div class="second-page-container">
+			<div class="container">
+				{% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [{'title' : 'Lista de desejos' }]} %}
+				{% include 'FlexyFtwoStoreBundle:Customer:header.html.twig' with {customer: customer} %}
+
+				<p style="background: #EEE; border-radius: 5px; padding: 10px">
+					<i class="fa fa-star"></i>
+					Compartilhe com seus amigos
+					<a href="{{ wishListLink }}">{{ wishListLink }}</a>
+				</p>
+				<br/>
+				<table class="cart-table table table-striped wow fadeInLeft" data-wow-duration="1s">
+					<thead>
+						<tr>
+							<th class="card_product_image">Imagem</th>
+
+							<th class="card_product_name" style="text-align: left;">Produto</th>	
+
+							<th class="card_product_price" style="width: 150px;">Valor</th>
+
+							<th class="card_product_action" style="width:295px;">
+								<button class="btn btn-default-1 flexy-add-all-to-cart">Adicionar todos ao carrinho</button>
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for wish in wishlist.wishes if wishlist.wishes.count > 0 %}
+							{% set price = flexy_ftwo_product_variant_price(wish.product.masterVariant) %}
+							{% set promotion = flexy_ftwo_variant_promotion_catalog_details(wish.product.masterVariant) %}
+							{% set productUrl = flexy_ftwo_product_url(wish.product.masterVariant) %}
+							{% set variant = wish.product.masterVariant %}
+							{% set variantId = variant.id %}
+
+							<tr>
+								<td class="card_product_image" data-th="Imagem">
+									<a href="{{ flexy_ftwo_product_url(wish.product.masterVariant) }}"><img title="" alt="" src="{{ flexy_ftwo_image_placeholder_small(wish.product.masterImage, "img/product-placeholder.gif") }}"></a>
+								</td>
+
+								<td class="card_product_name" data-th="Produto" style="text-align: left;">
+									<a href="{{ productUrl }}">{{ wish.product.name }}</a><br>
+								</td>
+
+								<td class="card_product_price" data-th="Valor">
+									{% if store.config.displayPrice %}
+										{% if promotion %}
+											<del>R$
+												{{ price|number_format(2, ',', '.') }}</del>
+										{% endif %}
+
+										R$
+										{{ (promotion ? promotion.finalPrice : price)|number_format(2, ',', '.') }}
+									{% endif %}
+								</td>
+
+								<td class="card_product_total text-right" data-th="Ações">
+
+								{% if variant.product.isAvailableForSale == true %}
+									<button data-variant-id="{{ variantId }}" class="btn btn-default-1 flexy-add-to-cart">
+										<span class="fa fa-shopping-cart"></span>
+									</button>
+								{% endif %}
+                                
+								{% if variant.product.isAvailableForQuote == true %}
+									<button data-variant-id="{{ variantId }}" class="btn btn-default-1 flexy-add-to-quote">
+										<span class="fa fa-file"></span>
+									</button>
+								{% endif %}
+
+								{% if variant.product.isAvailableForBooking == true %}
+									<a href="{{ productUrl }}">
+									<button data-variant-id="{{ variantId }}" class="btn btn-default-1">
+										<span class="fa fa-user"></span>
+									</button>
+									</a>
+                                {% endif %}
+								
+								{% if customer and wishlist.customer.id == customer.id %}
+									<a href="{{ path('flexy_ftwo_store_wishlist_delete', {'id' : wish.id}) }}" class="btn btn-default-1">
+										<span class="fa fa-trash-o"></span>
+									</a>
+								{% endif %}
+								</td>
+							</tr>
+						{% else %}
+							<tr>
+								<td colspan="4">
+									<h3>Nenhum produto na sua lista de desejos.</h3>
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</section>
+{% endblock %}
+
+{% block javascript %}
+	<script src="{{ asset('bundles/flexyftwostore/js/wishlist/wish-list.js') }}"></script>
+	<script>
+		const wishList = new WishList('{{ path('flexy_ftwo_store_cart_add') }}');
+		$('.flexy-add-all-to-cart').click(function () {
+			wishList.addAll($(this))
+		})
+	</script>
+{% endblock %}

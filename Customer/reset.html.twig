@@ -1,0 +1,17 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+{% block javascriptHead %}
+    {% if store.googleReCaptcha.isActive %}
+        {{ store.googleReCaptcha.scriptTagHeadV3|raw }}
+    {% endif %}
+{% endblock %}
+
+{% block title %}{{ 'store.customer.forgot.title'|trans }}{% endblock %}
+
+{% block content %}
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <div>
+            <input type="submit" value="{{ 'resetting.reset.submit'|trans }}" />
+        </div>
+    {{ form_end(form) }}
+{% endblock %}

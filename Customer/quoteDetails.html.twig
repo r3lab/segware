@@ -1,0 +1,150 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+{% set title = "Orçamento " ~ quote.number %}
+{% set contacts = quote.getQuoteMessages() %}
+
+{% block content %}
+    <section>
+        <div class="second-page-container">
+            <div class="container">
+                {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [
+                    {'title' : 'Meus dados', 'url' : path('flexy_ftwo_store_customer_profile') },
+                    {'title' : title }
+                ]} %}
+
+                {% for flashMessage in app.session.flashbag.get('store-success') %}
+                    <div class="alert alert-success">
+                        {{ flashMessage|trans }}
+                    </div>
+                {% endfor %}
+
+				<div class="row">
+                	<div class="col-md-12">
+                        <h3>
+                            Orçamento {{ quote.number }}
+                            {% if quote.shoppingStore %}
+                                para
+                                <a href="{{ path("flexy_ftwo_store_shoppingStore_index", {shoppingStoreReferenceCode: quote.shoppingStore.referenceCode}) }}">
+                                {{ quote.shoppingStore.name }}
+                                </a>
+                            {% endif %}
+                        </h3>
+                    	<hr/>
+                        <br>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="box-border wow fadeInLeft animated" data-wow-duration="1s">
+                            <div class="table-responsive">
+                                <table class="cart-table table">
+                                    <thead>
+                                    <tr>
+                                        <th class="card_product_image hidden-xs hidden-sm"></th>
+                                        <th class="card_product_name">Produto</th>
+                                        <th class="card_product_model">Código</th>
+                                        <th class="card_product_price">Preço unit.</th>
+                                        <th class="card_product_quantity">Quantidade</th>
+                                        <th class="card_product_total">Total</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for item in quote.items %}
+                                        <tr>
+                                            <td class="card_product_image hidden-xs hidden-sm" data-th="Imagem"><img title="" alt="" src="{{ flexy_ftwo_image_placeholder_small(item.variant.product.masterImage, "img/product-placeholder.gif") }}"></td>
+                                            <td class="card_product_name" data-th="Produto">
+                                                {{ item.variant.product.name }}
+                                                <ul class="list-unstyled text-muted">
+                                                    {% for attributeValue in item.attributeValues %}
+                                                        <li>
+                                                            {% set attributeOption = attributeValue.option %}
+                                                            {% set attribute = attributeOption.attribute %}
+                                                            {% if attributeValue.value %}
+                                                                {% if attribute.type.isImage %}
+                                                                    {% set imageName = attributeValue.name~'-'~quote.number %}
+                                                                    <small>{{ attribute.name }}:</small><br>
+                                                                    <img src="{{ attributeValue.value }}" class="img-thumbnail" alt="{{ attribute.name }}"/>
+                                                                {% else %}
+                                                                    {{ attribute.name }}: {{ attributeValue.value }}
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </td>
+                                            <td class="card_product_model" data-th="Código">{{ item.variant.referenceCode }}</td>
+                                            <td class="card_product_price" data-th="Preço unit.">R$ {{ item.unitPriceWithDiscount|number_format(2, ',', '.') }}</td>
+                                            <td class="card_product_quantity" data-th="Quantidade">
+                                                {% if item.variant.isFractionalStock %}
+                                                    {{ item.quantity|number_format(3, ',', '.') }}
+                                                {% else %}
+                                                    {{ item.quantity }}
+                                                {% endif %}
+                                            </td>
+                                            <td class="card_product_total" data-th="Total">R$ {{ item.totalWithDiscount|number_format(2, ',', '.') }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <hr>
+                        Total: <strong>{{ quote.itemsTotalWithDiscount|number_format(2, ',', '.') }}</strong>
+                    </div>
+                </div>
+
+                <div class="row" id="message-list">
+                	<div class="col-md-12">
+                        <div class="page-header">
+                            <h3>
+                                <span class="fa fa-comments"></span> Mensagens sobre este orçamento
+                            </h3>
+                        </div>
+
+                        {% if contacts|length > 0 %}
+                            {% include 'FlexyFtwoStoreBundle:Contact:contact-list.html.twig' with {contacts : contacts, detailed: false} %}
+                        {% else %}
+                            <p class="text-center">Nenhuma mensagem sobre este orçamento.</p>
+                        {% endif %}
+
+                        {% include 'FlexyFtwoStoreBundle:Contact:contact-form.html.twig' with {contact : contacts|first, subject : quote.number, shoppingStore: quote.shoppingStore} %}
+                    </div>
+                </div>
+
+                {% if quote.observation %}
+                    <div class="row">
+                        <div class="col-md-12 text-left">
+                            Observações:
+                            <br/>
+                            <i>{{ quote.observation|nl2br }}</i>
+                            <hr>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <a href="{{ path('flexy_ftwo_store_quote_export', {'quoteId': quote.id}) }}" class="btn btn-default">
+                        	<i class="fa fa-shopping-quote"></i> Imprimir
+                        </a>
+                    </div>
+
+                    {% if not quote.isOnlyQuote %}
+                        <div class="col-md-6 text-right">
+                            <a href="{{ path('flexy_ftwo_store_quote_buy', {'id': quote.id}) }}" class="btn btn-checkout btn-light-blue">
+                                <i class="fa fa-shopping-quote"></i> Comprar
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascript %}
+    <script src="{{ asset('bundles/flexyftwostore/js/contact/attach.js') }}"></script>
+{% endblock %}

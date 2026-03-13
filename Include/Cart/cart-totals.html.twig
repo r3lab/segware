@@ -1,0 +1,34 @@
+{% set couponDiscountTotal = cart.promotionCouponDiscountTotal %}
+{% set catalogDiscount = cart.itemsTotal - cart.itemsTotalWithDiscount %}
+{% set cartDiscount = (cart.salePromotionDiscountTotal - (cart.salePromotionCouponDiscountTotal))|round(2) %}
+{% if store.config.displayPrice %}
+    <ul class="list-unstyled">
+        {% if cart.itemsTotalWithDiscount != cart.billingTotal %}
+            <li>Subtotal: <strong>R$ {{ cart.itemsTotalWithDiscount|number_format(2, ',', '.') }}</strong></li>
+        {% endif %}
+        {% if cartDiscount %}
+            <li>Desconto de carrinho: <strong>- R$ {{ cartDiscount|number_format(2, ',', '.') }}</strong></li>
+        {% endif %}
+        {% if couponDiscountTotal > 0 %}
+            <li>
+                Cupom {{ cart.coupon.code }}:
+                <strong>- R$ {{ couponDiscountTotal|number_format(2, ',', '.') }}</strong>
+            </li>
+        {% endif %}
+        {% for subSale in cart.sales if subSale.promotionCouponDiscountTotal > 0 %}
+            <li>
+                Cupom {{ subSale.coupon.code }}:
+                <strong>- R$ {{ subSale.promotionCouponDiscountTotal|number_format(2, ',', '.') }}</strong>
+            </li>
+        {% endfor %}
+        {% if withCheckoutData is defined and withCheckoutData %}
+            <li>Frete: <strong>R$ <span class="shipping-total">{{ 0|number_format(2, ',', '.') }}</span></strong></li>
+            <li class="discount-payment">Desconto de boleto: <strong>- R$ <span class="discount-payment-total">{{ 0|number_format(2, ',', '.') }}</span></strong></li>
+        {% endif %}
+        <li class="">
+            <b>Total:</b> <strong>R$ <span class="billing-total">{{ cart.total|number_format(2, ',', '.') }}</span></strong>
+        </li>
+    </ul>
+{% else %}
+    ---
+{% endif %}

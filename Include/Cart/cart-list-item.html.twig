@@ -1,0 +1,175 @@
+{% set variantMaxQuantity = flexy_ftwo_stock_locate_by_parameters({distributionCenterReferenceCode : distributionCenterReferenceCode, variantId: item.variant.id }).quantity %}
+{% set customAttributeValues = flexy_ftwo_cart_custom_attributes_by_variant_id(item.variant.id) %}
+
+{% if store.config.displayPrice %}
+    {% set promotionDetails = flexy_ftwo_item_promotion_details(item, app.request.get('zipCode')) %}
+    {% set itemTotalWithCatalogProgressiveAndBuyXGetY = item.total %}
+    {% set itemTotalWithCatalogAndProgressive = item.totalWithCatalogAndProgressiveDiscount %}
+    {% set hasBuyXGetYPromotion = promotionDetails and itemTotalWithCatalogProgressiveAndBuyXGetY != itemTotalWithCatalogAndProgressive %}
+{% endif %}
+{% set parentItem = false %}
+{% if item.parentItem is defined and item.parentItem is not null %}
+    {% set parentItem = item.parentItem %}
+{% endif %}
+
+{% set itemId = item.id %}
+{% if parentItem %}
+    {% set itemId = parentItem.id %}
+{% endif %}
+
+{% set isClonedItem = false %}
+{% if item.originalQuantity is not null and item.quantity != item.originalQuantity %}
+    {% set isClonedItem = true %}
+{% endif %}
+
+<tr class="{{ item.isAdditional ? 'additional-item' : '' }}">
+    <td class="card_product_image hidden-sm hidden-xs" data-th="Imagem">
+        <a href="{{ flexy_ftwo_product_url(item.variant, cart.shoppingStore.referenceCode) }}">
+            <img title="" alt=""
+                 src="{{ flexy_ftwo_image_placeholder_small(item.variant.product.masterImage, "img/product-placeholder.gif") }}">
+        </a>
+    </td>
+
+    <td class="card_product_name" data-th="Produto">
+        <input type="hidden" value="" class="product-shipping-method"
+               name="checkout[product][{{ item.stock.id }}][shippingMethod]" data-variant-id="{{ item.variant.id }}"
+               data-shopping-store="{{ (sale is defined and sale)?sale.shoppingStore.id:null }}"/>
+        <input type="hidden" value="" class="product-scheduled-delivery-period"
+               name="checkout[product][{{ item.stock.id }}][scheduledDeliveryPeriod]"
+               data-variant-id="{{ item.variant.id }}"
+               data-shopping-store="{{ (sale is defined and sale)?sale.shoppingStore.id:null }}"/>
+        <input type="hidden" value="" class="product-destination-address"
+               name="checkout[product][{{ item.stock.id }}][address]" data-variant-id="{{ item.variant.id }}"/>
+
+        <a{{ not item.isAdditional ? ' href=' ~ flexy_ftwo_product_url(item.variant, cart.shoppingStore.referenceCode) : '' }}>
+            {{ item.variant.product.name }}
+            {{ item.variant.product.isCustom ? "- " ~ item.variant.presentation : "" }}
+            {{ item.isAdditional ? ' (Adicional)' : '' }}
+            <br>
+            <span class="cart-product-ref">{{ item.variant.referenceCode }}</span>
+        </a>
+
+        {% if item.attributeValues|length > 0 %}
+            <ul class="list-unstyled text-muted">
+                {% for cartItemAttributeValue in item.attributeValues %}
+                    <li>
+                        {% set value = cartItemAttributeValue.value %}
+                        {% set cartItemAttributeOption = cartItemAttributeValue.option %}
+                        {% if value %}
+                            {% if cartItemAttributeOption.attribute.type.isImage %}
+                                {% set imageName = cartItemAttribute.name~'-'~quote.number %}
+                                <small>{{ cartItemAttributeOption.attribute.name }}:</small>
+                                <br>
+                                <img src="{{ value }}" class="img-thumbnail"
+                                     alt="{{ cartItemAttributeOption.attribute.name }}"/>
+                            {% else %}
+                                {{ cartItemAttributeOption.attribute.name }}: {{ value }}
+                            {% endif %}
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if item.variant.product.isKit %}
+            {% for productRelatedKit in item.variant.product.kitProducts %}
+                <small>
+                    <ul class="list-unstyled text-muted" style="margin-left: 25px">
+                        <li><strong>Item:</strong> {{ productRelatedKit.variant.product.name }} (Itens por
+                            kit: {{ productRelatedKit.quantity }})
+                        </li>
+                        <li><strong>Quantidade:</strong> {{ productRelatedKit.quantity * item.quantity }}</li>
+                    </ul>
+                </small>
+            {% endfor %}
+        {% endif %}
+    </td>
+
+    <td class="card_product_price" data-th="Preço unit.">
+        {% if store.config.displayPrice %}
+            {% if promotionDetails and promotionDetails.originalUnitPrice != promotionDetails.finalUnitPrice %}
+                <del>R$ {{ promotionDetails.originalUnitPrice|number_format(2, ',', '.') }}</del>
+                <br>
+            {% endif %}
+
+            {% set promotionalPrice = promotionDetails ? promotionDetails.finalUnitPrice : item.unitPriceWithDiscount %}
+
+            {% if item.cart.isBooking %}
+                {% set bookingPromotionPrice = promotionalPrice / item.quantityDaysByBeginAndEndBooking %}
+                R$ {{ bookingPromotionPrice|number_format(2, ',', '.') }}
+            {% else %}
+                R$ {{ promotionalPrice|number_format(2, ',', '.') }}
+            {% endif %}
+        {% else %}
+            ---
+        {% endif %}
+    </td>
+    {% if item.cart.isBooking %}
+        <td class="card_product_period" data-th="Período do Aluguel">
+            {{ item.bookingBeginDate|date("d/m/Y") }} à {{ item.bookingEndDate|date("d/m/Y") }} <br>
+     {% else %}
+    <td class="card_product_quantity" data-th="Quantidade">
+        {% if changeQuantity and not (hasBuyXGetYPromotion and promotionalPrice == 0) %}
+            {% if isClonedItem %}
+                <input type="number" class="flexy-cart-cloned-product-quantity stock-verified form-control"
+                       data-quantity="{{ item.quantity }}" data-original-quantity="{{ item.originalQuantity }}" min="1"
+                       value="{{ item.quantity }}"
+                       data-stock="{{ item.variant.product.stockControl and not cart.isQuote ? variantMaxQuantity : "" }}"
+                       data-cart-item-id="{{ itemId }}">
+            {% endif %}
+
+            {% if item.variant.isFractionalStock %}
+                <input type="{% if isClonedItem %}hidden{% else %}text{% endif %}"
+                       class="flexy-weight-mask flexy-cart-product-quantity form-control"
+                       id="cart-item-quantity-{{ item.id }}"
+                       data-quantity="{{ item.quantity|number_format(3, '.', ',') }}" min="0"
+                       value="{{ item.quantity|number_format(3, ',', '.') }}"
+                       data-stock="{{ item.variant.product.stockControl and not cart.isQuote ? variantMaxQuantity : "" }}"
+                       data-cart-item-id="{{ item.id }}">
+            {% else %}
+                <input type="{% if isClonedItem %}hidden{% else %}number{% endif %}"
+                       class="flexy-cart-product-quantity stock-verified form-control"
+                       id="cart-item-quantity-{{ item.id }}" data-quantity="{{ item.quantity }}" min="1"
+                       value="{{ item.quantity }}"
+                       data-stock="{{ item.variant.product.stockControl and not cart.isQuote ? variantMaxQuantity : "" }}"
+                       data-cart-item-id="{{ item.id }}">
+            {% endif %}
+        {% else %}
+            {{ item.quantity }}
+        {% endif %}
+        {% endif %}
+
+        {% if remove %}
+            {% if parentItem %}
+                <span class="flexy-cart-delete-cloned flexy-pointer fa fa-lg fa-trash-o"
+                      data-quantity="{{ item.quantity }}" data-original-quantity="{{ item.originalQuantity }}"
+                      data-cart-item-id="{{ itemId }}">
+                </span>
+            {% else %}
+                <a href="{{ path(cart.isQuote ? "flexy_ftwo_store_quote_delete" : "flexy_ftwo_store_cart_delete", {id : itemId}) }}"><i
+                            class="fa fa-lg fa-trash-o"></i></a>
+            {% endif %}
+        {% endif %}
+    </td>
+
+    <td class="card_product_total" id="card-product-total-{{ item.id }}" data-th="Total">
+        {% if store.config.displayPrice %}
+            {% if hasBuyXGetYPromotion %}
+                <del>R$ {{ itemTotalWithCatalogAndProgressive|number_format(2, ',', '.') }}</del>
+                <br>
+            {% endif %}
+
+            {% if hasBuyXGetYPromotion %}
+                <span data-toggle="modal" data-target="#buyXgetYModal-{{ itemId }}">
+                    <a data-toggle="tooltip" title="Detalhes das promoções aplicadas">
+                        R$ {{ itemTotalWithCatalogProgressiveAndBuyXGetY|number_format(2, ',', '.') }}
+                    </a>
+                </span>
+            {% else %}
+                R$ {{ itemTotalWithCatalogProgressiveAndBuyXGetY|number_format(2, ',', '.') }}
+            {% endif %}
+        {% else %}
+            ---
+        {% endif %}
+    </td>
+</tr>

@@ -1,0 +1,79 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+
+{% block content %}
+    <div style="{{ style.header }}">
+        <h1>Encontramos seu carrinho!</h1>
+    </div>
+    <div style="{{ style.inner }}">
+        <h3>Olá, {{ cart.customer.fullName }}.</h3>
+        <p>Identificamos que você iniciou uma compra em nossa loja, mas não a concluiu.</p>
+        <p>Caso você ainda tenha interesse em fazê-lo, basta clicar no link abaixo que você será direcionada para seu carrinho e poderá finalizar sua compra.</p>
+        <p style='margin-top:40px;'><a style='{{ style.button }}' href="{{ url('flexy_ftwo_store_cart_recovery', {'id': cart.id}) }}">Retomar compra</a></p>
+        <br/>
+        <p>Você havia adicionado os seguintes produtos em seu carrinho:</p>
+        <br/>
+        <table style="border:0; width:100%;" cellspacing="0" cellpadding="20">
+
+            {% for item in cart.allItems %}
+                {% set promotion = flexy_ftwo_item_promotion_details(item) %}
+                {% set variantPresentation = 'Produto removido' %}
+
+                {% if item.variant is not null %}
+                    {% set variantPresentation = item.variant.presentation %}
+                {% endif %}
+
+                <tr>
+                    <td style="{{ loop.index == cart.items.count ? '' : 'border-bottom:1px solid #eaeaea; '}}font-family: inherit;">
+                        {% for image in item.variant.product.images if image.isMaster %}
+                            <img src="{{ image.urlSmall }}" alt="{{ variantPresentation }}" style="max-width: 100px; max-height: 100px;"/>
+                        {% endfor %}
+                    </td>
+                    <td style="{{ loop.index == cart.items.count ? '' : 'border-bottom:1px solid #eaeaea; '}} border-left:1px solid #eaeaea; width: 70%;font-family: inherit;">
+                        <p>
+                            {{ variantPresentation }} <br/>
+                            <span style="font-size: 12px; color: #666;">Ref.: {{ item.variant.referenceCode  }}</span>
+                        </p>
+                        <p>Campos adicionais de produto:<p>
+
+                        {% for attributeValue in item.attributeValues %}
+                            {% if attributeValue.value is not empty %}
+                                {% set attributeOption = attributeValue.option %}
+                                {% set attribute = attributeOption.attribute %}
+                                {% if attribute.type.isImage %}
+                                    <li><small>{{ attribute.name }}:</small> <img class="img-thumbnail" src="{{ attributeValue.value }}" alt="{{ attribute.name }}"  width="100%"/></li>
+                                {% else %}
+                                    <li><small>{{ attribute.name }}: {{ attributeValue.value }}</small></li>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        <div><span style="color:#428bca;">Qtde:</span>
+                            {% if item.variant.isFractionalStock %}
+                                {{ item.quantity|number_format(3, ',', '.') }}
+                            {% else %}
+                                {{ item.quantity }}
+                            {% endif %}
+                        </div>
+                        {% if store.config.displayPrice %}
+                            {% if promotion %}
+                                {% if promotion.originalPrice == promotion.finalPrice %}
+                                    <p style="font-size:13px;">R$ {{ promotion.originalUnitPrice|number_format(2, ',', '') }}</p>
+                                {% else %}
+                                    <p style="color:#666; margin: 0; font-size: 14px;">
+                                        de R$ {{ item.unitPrice|number_format(2, ',', '') }}
+                                    </p>
+                                    <p style="font-weight: bold; margin: 0; color:#428bca;">por R$ {{ promotion.finalUnitPrice|number_format(2, ',', '') }}</p>
+                                {% endif %}
+                            {% else %}
+                                <p style="font-weight: bold; margin: 0; color: #428bca">R$ {{ item.unitPrice|number_format(2, ',', '.') }}</p>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <br/>
+        <p>Caso você tenha alguma dúvida quanto aos produtos ou o processo de compra, por favor, entre em contato através de nossa <a href="{{ url('flexy_ftwo_store_contact') }}" style="{{ style.link }}">Central de Atendimento</a>.</p>
+        {{ mailSignature|raw }}
+
+    </div>
+{% endblock %}

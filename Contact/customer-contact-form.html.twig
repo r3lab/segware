@@ -1,0 +1,17 @@
+{% block content %}
+    {% for flashMessage in app.session.flashbag.get('store-contact-success') %}
+        <div class="alert alert-success">
+            {{ flashMessage|trans }}
+        </div>
+    {% endfor %}
+    <div>
+        <label for="customerSubject" class="required">Assunto</label>
+        <input type="text" id="customerSubject" name="subject" required="required" class="form-control">
+        <input type="hidden" id="shoppingStoreReferenceCode" name="shoppingStoreReferenceCode" value="{{ f2_store_shoppingStore_current().referenceCode }}">
+    </div>
+    <div>
+        <label for="customerMessage" class="required">Mensagem</label>
+        <textarea id="customerMessage" name="message" required="required" class="form-control"></textarea>
+    </div>
+    <input type="button" class="pull-right btn btn-primary customer-contact-button" id="submit" name="submit" value="Cadastrar">
+{% endblock %}

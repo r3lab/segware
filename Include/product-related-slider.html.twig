@@ -1,0 +1,24 @@
+<section>
+    <div class="block2">
+        <div class="main-category-block ">
+            <div class="main-category-title gray">
+                <i class="fa fa-list"></i> {{ title }}:
+            </div>
+
+            {% if relatedProducts|length > 1 %}
+                {#<div class="toolbar-for-light product-related-nav">
+                    <a href="javascript:;" data-role="prev" data-carousel="#{{ id }}" class="prev"><i class="fa fa-angle-left"></i></a>
+                    <a href="javascript:;" data-role="next" data-carousel="#{{ id }}" class="next"><i class="fa fa-angle-right"></i></a>
+                </div>#}
+            {% endif %}
+        </div>
+
+        <div class="row">
+            {% for productRelated in relatedProducts|slice(0,4) if not additional or flexy_ftwo_variant_has_stock(productRelated.variant, dc) %}
+                <div class="col-md-3">
+                    {% include 'FlexyFtwoStoreBundle:Include:product.html.twig' with {'variant' : productRelated.variant, additional: additional , variantSalable : variantSalable , mainVariantId : mainVariantId is defined ? mainVariantId : null } %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>

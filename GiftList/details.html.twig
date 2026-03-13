@@ -1,0 +1,39 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+{% set title = 'Lista de presentes ' ~ giftList.eventName ~ ' (' ~ giftList.eventDate ~ ')' %}
+{% block content %}
+    <section class="second-page-container">
+        <div class="container">
+            {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [{'title' : title }]} %}
+            <div class="header-for-light">
+                <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                    {{ title }}
+                </h1>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-sm-12">
+                    <div class="variant-list">
+                        <div class="row flexy-display-mode">
+                            {% for gift in giftList.gifts %}
+                            <div class="col-xs-12 col-sm-6 col-md-4 text-center mb-25">
+                                {% include 'FlexyFtwoStoreBundle:Include:variant.html.twig' with {
+                                    variant : gift.product.masterVariant,
+                                    giftList : giftList,
+                                    gift : gift,
+                                    bought: gift.isTaken
+                                }
+                                %}
+                            </div>
+                            {% endfor %}
+                            {% if giftList.gifts|length == 0 %}
+                                <h2 class="nothing-found">Nenhum produto</h2>
+                                {% if giftList.belongsToCurrentCustomer %}
+                                    <a href="{{ path("flexy_ftwo_store_product_list_all") }}" class="btn btn_verde_fill">Adicione produtos à sua lista</a>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

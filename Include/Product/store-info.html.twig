@@ -1,0 +1,8 @@
+{# fixme #}
+{% if shoppingStore %}
+    {% set shoppingStoreEntity = flexy_ftwo_admin_get_shopping_store(shoppingStore.id) %}
+
+    <div class="">
+        <p>Vendido e entregue por <a href="{{ path("flexy_ftwo_store_shoppingStore_index", {shoppingStoreReferenceCode: shoppingStore.referenceCode}) }}">{{ shoppingStore.name }}</a></p>
+    </div>
+{% endif %}

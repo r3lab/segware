@@ -1,0 +1,101 @@
+{% set finalPrice = variant.finalPrice %}
+{% set url = giftList is not defined ? variant.url : path('flexy_ftwo_store_product_details', {'masterVariantReferenceCode': variant.referenceCode,'slug': variant.product.slug,'giftListReferenceCode': giftList.referenceCode}) %}
+{% if store.info.usesMultipleSales %}
+	{% if store.shoppingStore %}
+		{% set url = f2_store_shoppingStore_url('productDetails', {
+        'masterVariantReferenceCode': variant.referenceCode,
+        'slug': variant.product.slug,
+        }) %}
+		{% set dc = store.shoppingStore ? store.shoppingStore.distributionCenter.referenceCode : null %}
+		{% set finalPrice = flexy_ftwo_variantlist_variant_price(variant,dc) %}
+	{% else %}
+		{% set dc = variant.product.shoppingStore and variant.product.shoppingStore.distributionCenter ? variant.product.shoppingStore.distributionCenter.referenceCode : null %}
+		{% set finalPrice = flexy_ftwo_variantlist_variant_price(variant,dc) %}
+		{% if giftList is not defined %}
+			{% set url = variant.url %}
+		{% else %}
+			{% if variant.product.shoppingStore is null %}
+				{% set url = path('flexy_ftwo_store_product_details', {
+                    'masterVariantReferenceCode': variant.referenceCode,
+                    'slug': variant.product.slug,
+                    'giftListReferenceCode': giftList.referenceCode,
+                    'giftId': gift.id
+                }) %}
+			{% else %}
+				{% set url = path('flexy_ftwo_store_shoppingStore_product_details', {
+                    'shoppingStoreReferenceCode': variant.product.shoppingStore.referenceCode,
+                    'masterVariantReferenceCode': variant.referenceCode,
+                    'slug': variant.product.slug,
+                    'giftListReferenceCode': giftList.referenceCode,
+                    'giftId': gift.id
+                }) %}
+			{% endif %}
+		{% endif %}
+	{% endif %}
+{% endif %}
+{% set hasStock = flexy_ftwo_variant_dto_has_stock(variant, dc) %}
+{% set promotion = f2_store_variant_promotion_catalog_details(variant,(dc is defined)?dc:null) %}
+{% set installments = flexy_ftwo_installment_maximum_calculator(promotion ? promotion.finalPrice : finalPrice, {'variantReferenceCode': variant.referenceCode}) %}
+<article class="product light">
+	<figure class="figure-hover-overlay">
+		{% if f2_store_product_has_category(variant.product, 'lancamentos') %}
+			<div class="product-new">Novo</div>
+		{% endif %}
+
+		{% if gift is defined and gift and gift.isTaken %}
+			<div class="product-gift-bought">Comprado</div>
+		{% endif %}
+		<a class="flexy-product-image-container" href="{{ url }}" title="">
+			<span class="flexy-product-image-vertical-align-helper"></span>
+			<img src="{{ f2_store_image_placeholder_medium(variant.product.masterImage) }}" title="{{ variant.product.name }}" alt="{{ variant.product.name }}" class="flexy-product-image"/>
+		</a>
+		<div class="product-options">
+			{% if hasStock and variant.product.isAvailableForSale and giftList is not defined %}
+				<a href="javascript:void(0);" class="btn flexy-add-to-cart" title="Adicionar ao carrinho" data-variant-id="{{ variant.id }}" data-distributioncenter="{{ shoppingStore?shoppingStore.referenceCode:null }}">
+					<i class="fa fa-shopping-cart"></i>
+					<span class="flexy-product-options-btn-label">Comprar</span>
+				</a>
+			{% endif %}
+
+			{% if gift is defined and giftList.belongsToCurrentCustomer %}
+				<a href="javascript:void(0);" class="f2-remove-product-gift-list" data-gift-id="{{ gift.id }}" title="Remover da minha lista de presentes">
+					<i class="fa fa-gift"></i>
+					<i class="fa fa-minus"></i>
+				</a>
+			{% endif %}
+
+			<a href="{{ url }}" title="Mais informações" class="btn">
+				<i class="fa fa-plus"></i>
+				<span class="flexy-product-options-btn-label">Detalhes</span>
+			</a>
+		</div>
+	</figure>
+	<div class="product-caption">
+		<div class="block-name">
+			<a href="{{ url }}" class="product-name">{{ variant.product.name }}</a>
+			{% if store.config.displayPrice %}
+				<div class="product-price">
+					{% if (store.info.usesMultipleSales is empty and hasStock) or (store.info.usesMultipleSales and hasStock) %}
+						{% if promotion %}
+							<span class="full-price">de R$
+								{{ finalPrice|number_format(2, ',', '.') }}
+								por</span><br>
+						{% endif %}
+						<span class="final-price">R$
+							{{ (promotion ? promotion.finalPrice : finalPrice)|number_format(2, ',', '.') }}</span>
+						{% if installments.installmentNumber > 0 %}
+							<div class="installment">{{ installments.installmentNumber }}x de R$
+								{{ installments.installmentValue|number_format(2, ',', '.') }}</div>
+						{% endif %}
+						{% if store.paymentMethod.boleto and store.paymentMethod.boleto.discount %}
+							<div class="one-time-payment">à vista por
+								{{ ((promotion ? promotion.finalPrice : finalPrice)*((100-store.paymentMethod.boleto.discount)/100))|number_format(2, ',', '.') }}</div>
+						{% endif %}
+					{% else %}
+						<span class="product-unavailable">Indisponível</span>
+					{% endif %}
+				</div>
+			{% endif %}
+		</div>
+	</div>
+</article>

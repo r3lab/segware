@@ -1,0 +1,51 @@
+{% extends "FlexyFtwoStoreBundle:Layout:base.html.twig" %}
+
+{% set images = flexy_ftwo_banner_image_list('home-banner').images %}
+
+{% set filters = {
+    useSearchParameters: 'true',
+    itemsPerPage: 9,
+    sortOrder: 'category-asc',
+    showOnlyAvailable: 'false',
+    filter: filterString,
+    category: {
+        referenceCode: 'destaques',
+        isShopping: 'false'
+    },
+    shoppingStoreReferenceCode: shoppingStore.referenceCode
+} %}
+
+{% set result = f2_variant_list(filters) %}
+
+{% if result.pagination|length == 0 %}
+    {% set filters = {
+        useSearchParameters: 'true',
+        itemsPerPage: 9,
+        sortOrder: 'price-asc',
+        showOnlyAvailable: 'false',
+        filter: filterString,
+        shoppingStoreReferenceCode: shoppingStore.referenceCode
+    } %}
+
+    {% set result = f2_variant_list(filters) %}
+{% endif %}
+
+{% block content %}
+    {% include 'FlexyFtwoStoreBundle:Include/Common:main-banner.html.twig' with {images: images} %}
+
+    <section class="{{ images|length == 0 ? "first-page-container" : "" }}">
+        <div class="container">
+            <div class="row">
+                <aside class="col-md-3">
+                    {% include 'FlexyFtwoStoreBundle:Include:sidebar.html.twig' with {withFilter : true, withProducts: true, listAll: true} %}
+                </aside>
+
+                <div class="col-md-9">
+                    {% include 'FlexyFtwoStoreBundle:Include:variant-list-block.html.twig' with {title : 'Destaques', variants: result.pagination} %}
+
+                    {% include 'FlexyFtwoStoreBundle:Include:shopping-store-comments.html.twig' with {shoppingStore: shoppingStore} %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

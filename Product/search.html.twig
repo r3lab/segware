@@ -1,0 +1,43 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% set query = app.request.get('q', app.request.get('query', app.request.get('searchTerm'))) %}
+
+{% set title = 'Resultados para: ' ~ query %}
+
+{% block content %}
+    {% set path = [
+        {'url': path('flexy_ftwo_store_product_list_all'), 'title' : 'Produtos'},
+        {'title' : 'Resultados para: ' ~ query}
+    ] %}
+
+    {% set filters = {
+        useSearchParameters: 'true',
+        searchTerm: query,
+        page: page ?: 1,
+        sortOrder: order,
+        itemsPerPage: itemsPerPage ?: 15,
+        showOnlyAvailable: 'false',
+        shoppingStoreReferenceCode: shoppingStore.referenceCode,
+        filter: filterString,
+        showFilters: 'true'
+    } %}
+
+    {% set result = f2_store_variant_search(query, filters) %}
+
+    {% include 'FlexyFtwoStoreBundle:Include:variant-list.html.twig' with {
+        path: path,
+        variants : result.variants,
+        totalResults : result.totalResults
+    } %}
+
+    {% if result.errors %}
+        <script>
+            console.error(`{{ result.errors|raw|e('js') }}`);
+        </script>
+    {% endif %}
+{% endblock %}
+
+{% block javascript %}
+    {% include 'FlexyFtwoStoreBundle:Javascript:_sidebar.html.twig' %}
+    {% include 'FlexyFtwoStoreBundle:Javascript:_list.html.twig' %}
+{% endblock %}

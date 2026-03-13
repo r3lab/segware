@@ -1,0 +1,19 @@
+{% if alerts|length > 0 %}
+    {% if app.request.attributes.get('_route') == "flexy_ftwo_store_checkout" %}
+        {{ app.session.set('alertsSaved', alerts) }}
+    {% endif %}
+    <div class="alerts container">
+        {% for alert in alerts %}
+            <div class="alert alert-{{ not error ? 'success' : 'danger' }}">{{ (alert|trans)|raw }}<button class="close" data-dismiss="alert"><i class="fa fa-times"></i></button></div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% if app.request.get('addressId') is not empty and app.session.get('alertsSaved')|length > 0 %}
+    <div class="alerts container">
+        {% for alert in app.session.get('alertsSaved') %}
+            <div class="alert alert-danger">{{ (alert|trans)|raw }}<button class="close" data-dismiss="alert"><i class="fa fa-times"></i></button></div>
+        {% endfor %}
+    </div>
+    {{ app.session.set('alertsSaved', '') }}
+{% endif %}

@@ -1,0 +1,64 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+{% set title = 'Lista de presentes ' ~ giftList.eventName ~ ' (' ~ giftList.eventDate ~ ')' %}
+{% block content %}
+    <section class="second-page-container">
+        <div class="container">
+            {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [{'title' : title }]} %}
+            <div class="header-for-light">
+                <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                    {{ title }}
+                </h1>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-sm-12">
+                    <div class="variant-list">
+                        <div class="row flexy-display-mode">
+                            {% if giftList.gifts|length > 0 %}
+                            <div class="box-border wow fadeInLeft animated" data-wow-duration="1s">
+                                <div class="table-responsive">
+                                    <table class="cart-table table">
+                                        <thead>
+                                        <tr>
+                                            <th class="card_product_image hidden-xs hidden-sm"></th>
+                                            <th>Produto</th>
+                                            <th>Pedido</th>
+                                            <th>Data</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for gift in giftList.gifts %}
+                                            <tr>
+                                                <td class="card_product_image hidden-xs hidden-sm">
+                                                    <img src="{{ f2_store_image_placeholder_medium(gift.product.masterImage) }}"/>
+                                                </td>
+                                                <td>
+                                                    {{ gift.product.name }}
+                                                </td>
+                                                <td>
+                                                    {% for giftOrder in gift.orders %}
+                                                        {{ giftOrder.customer.name }}
+                                                        <br/>
+                                                        {{ giftOrder.customer.email }}
+                                                    {% endfor %}
+                                                </td>
+                                                <td>
+                                                    {% for giftOrder in gift.orders %}
+                                                        {{ giftOrder.createdAt|date('d/m/Y') }}
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% else %}
+                                <h2 class="nothing-found">Nenhum produto comprado até o momento</h2>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

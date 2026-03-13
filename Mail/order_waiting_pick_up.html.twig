@@ -1,0 +1,13 @@
+{% set infoMessage = "" %}
+{% if order.status.info %}
+    {% set infoMessage = "<p>Mensagem informativa: \"" ~ order.status.info ~ "\"<p>" %}
+{% endif %}
+{% include 'FlexyFtwoStoreBundle:Mail:order.html.twig' with {
+    'order' : order,
+    'title': 'Pedido aguardando retirada!',
+    'message' : "<p>Olá, " ~ order.customer.fullName ~ "!</p>
+                <p>Seu pedido, número <b>" ~  order.number ~ "</b>, está aguardando a retirada.</p>
+                " ~ infoMessage ~ "
+                <p>Agradecemos pela confiança em nossos produtos e serviços e será um prazer atendê-lo novamente.</p>
+                <p>Segue abaixo um resumo de sua compra.</p>"
+} %}

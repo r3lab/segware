@@ -1,0 +1,87 @@
+<div class="form-group">
+    <label class="form-label">{{ 'shoppingstore.form.responsible_name'|trans({},'FlexyFtwoAdminBundle') }}<span class="text-error">*</span></label>
+    <span class="help">{{ 'generic.name.help'|trans }}</span>
+    <div class="">
+        <input type="text" class="form-control" required="required" name="responsible[name]" id="responsibleName" value="{{ app.request.get('referenceCode', responsible.name)['name'] }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">{{ 'shoppingstore.form.responsible_phone'|trans({},'FlexyFtwoAdminBundle') }}<span class="text-error">*</span></label>
+    <span class="help">{{ 'generic.primaryPhone.help'|trans }}</span>
+    <div class="">
+        <input type="text" class="form-control flexy-input-phone" required="required" name="responsible[primaryPhone]" id="responsiblePrimaryPhone" value="{{ app.request.get('responsible')['primaryPhone'] ?: responsible.primaryPhone }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">{{ 'shoppingstore.form.responsible_email'|trans({},'FlexyFtwoAdminBundle') }}<span class="text-error">*</span></label>
+    <span class="help">{{ 'generic.email.help'|trans }}</span>
+    <div class="">
+        <input type="email" class="form-control" required="required" name="responsible[email]" id="responsibleEmail" value="{{ app.request.get('responsible')['email'] ?: responsible.email }}">
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="form-label">{{ 'shoppingstore.form.responsible_cpf'|trans({},'FlexyFtwoAdminBundle') }}<span class="text-error">*</span></label>
+    <span class="help">{{ 'generic.cpf.help'|trans }}</span>
+    <div class="">
+        <input type="text" class="form-control flexy-input-cpf" required="required" name="responsible[cpf]" id="responsibleCpf" value="{{ app.request.get('responsible')['cpf'] ?: responsible.cpf }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">{{ 'shoppingstore.form.responsible_dateofbirth'|trans({},'FlexyFtwoAdminBundle') }}<span class="text-error">*</span></label>
+    <span class="help">17/05/1990</span>
+    <div class="">
+        <input type="text" class="form-control flexy-input-date resetField" placeholder="dd/mm/aaaa" required="required" name="responsible[dateOfBirth]" id="responsibleDateOfBirth" value="{{ app.request.get('responsible')['dateOfBirth'] ?: responsible.dateOfBirth|date('d/m/Y') }}">
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="form-label">{{ 'shoppingstore.form.responsible_address_postcode'|trans({},'FlexyFtwoAdminBundle') }}<span class="text-error">*</span></label>
+    <span class="help">(Ex: 88080-300)</span>
+    <div class="">
+        <input type="text" class="form-control flexy-input-postcode" required="required" name="responsible[postcode]"  data-prefix="responsible_defaultAddress_" id="responsible_defaultAddress_postcode" value="{{ app.request.get('responsible')['postcode'] ?: responsible.postcode }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">{{ 'shoppingstore.form.responsible_address_street'|trans({},'FlexyFtwoAdminBundle') }}<span class="text-error">*</span></label>
+    <span class="help"></span>
+    <div class="">
+        <input type="text" class="form-control" required="required" name="responsible[street]" id="responsible_defaultAddress_street" value="{{ app.request.get('responsible')['street'] ?: responsible.street }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">{{ 'shoppingstore.form.responsible_address_number'|trans({},'FlexyFtwoAdminBundle') }}<span class="text-error">*</span></label>
+    <span class="help">(Ex: 123)</span>
+    <div class="">
+        <input type="text" class="form-control" required="required" name="responsible[number]" id="responsible_defaultAddress_number" value="{{ app.request.get('responsible')['number'] ?: responsible.number }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">{{ 'shoppingstore.form.responsible_address_complement'|trans({},'FlexyFtwoAdminBundle') }}<span class="text-error">*</span></label>
+    <span class="help">(Ex: Ed. Dias Velho)</span>
+    <div class="">
+        <input type="text" class="form-control" name="responsible[complement]" id="responsible_defaultAddress_complement" value="{{ app.request.get('responsible')['complement'] ?: responsible.complement }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">{{ 'shoppingstore.form.responsible_address_district'|trans({},'FlexyFtwoAdminBundle') }}<span class="text-error">*</span></label>
+    <span class="help">(Ex: Centro, Morumbi, Ipanema)</span>
+    <div class="">
+        <input type="text" class="form-control" required="required" name="responsible[district]" id="responsible_defaultAddress_district" value="{{ app.request.get('responsible')['district'] ?: responsible.district }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">{{ 'shoppingstore.form.responsible_address_city'|trans({},'FlexyFtwoAdminBundle') }}<span class="text-error">*</span></label>
+    <span class="help">(Ex: Florianópolis, São Paulo, Rio de janeiro)</span>
+    <div class="">
+        <input type="text" class="form-control" required="required" name="responsible[city]" id="responsible_defaultAddress_city" value="{{ app.request.get('responsible')['city'] ?: responsible.city }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">{{ 'shoppingstore.form.responsible_address_state'|trans({},'FlexyFtwoAdminBundle') }}<span class="text-error">*</span></label>
+    <span class="help">(Ex: SC, SP, RS)</span>
+    <div class="">
+        {{ flexy_ftwo_address_state_list_html_select({'id': 'responsible_defaultAddress_state_selector','name' : 'responsible[state]','required' : 1,'selectedValue' : app.request.get('responsible')['state'] ?: responsible.state}) }}
+    </div>
+</div>
+<input type="hidden" name="responsible[country]" value="Brasil"/>

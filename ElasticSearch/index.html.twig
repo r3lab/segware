@@ -1,0 +1,43 @@
+{% block content %}
+    <html>
+        <head>
+            <meta charset="utf-8" />
+            <title>Elastic Search</title>
+        </head>
+
+        <body>
+        Buscando por: {{ searchTerm }} <br /><br />
+
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Variant presentation</th>
+                </tr>
+            </thead>
+            <tbody>
+        {% for product in products  %}
+                <tr>
+                    <td>{{ product.id }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>
+                        {% for variant in product.variants %}
+                            {{ variant.id }} - {{ variant.presentation }}
+                        {% endfor %}
+                    </td>
+                </tr>
+            {#% for category in product.categories %}
+                {#{ category.name }#}
+            {#% endfor %#}
+
+            {#{ description.descriptionOne|raw }}
+            {{ description.descriptionTwo|raw }}
+            {{ description.descriptionThree|raw }}
+            {{ description.descriptionFour|raw }#}
+        {% endfor %}
+        </tbody>
+        </table>
+        </body>
+    </html>
+{% endblock %}

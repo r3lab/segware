@@ -1,0 +1,396 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+
+{% set activeOnSupplyLink = 'https://fretebrasil.activecorp.com.br/SITE/AcompanhamentoEntrega/' %}
+{% set aliquotsTotal = 0 %}
+
+{% block content %}
+
+    <div style="{{ style.header }}">
+        <h1>{{ title|raw }}</h1>
+    </div>
+
+    <div style="{{ style.inner }}">
+        {{ message|raw }}
+    </div>
+
+    {% if order.paymentMethods.first.isBoleto and order.status.isWaitingPayment %}
+        <div style="{{ style.inner }}">
+            Para imprimir seu boleto, clique no botão abaixo:<br /><br />
+
+            <a href="{{ url('flexy_ftwo_store_checkout_print_boleto', {'paymentId' : order.paymentMethods.first.id}) }}">
+                <img src="{{ flexy_ftwo_resource_url_img('img/visualizar-boleto.gif') }}" style="display:block; border: 0;" />
+            </a>
+        </div>
+    {% endif %}
+
+    <div style="{{ style.inner }}">
+        <div style="{{ style.title }}">Dados do cliente</div>
+
+        <div>
+            <strong>Nome</strong>: {{ order.customer.fullName }}<br />
+            <strong>E-mail</strong>: {{ order.customer.user.email }}<br />
+            <strong>Telefone</strong>: {{ flexy_ftwo_mask_number(order.customer.primaryPhone, ((order.customer.primaryPhone|length == 14) ? '(99) 9999-9999' : '(99) 99999-9999')) }}<br/>
+            <strong>Endereço</strong>: {{ order.customer.defaultBillingAddress }}
+        </div>
+    </div>
+
+    <div style="{{ style.inner }}">
+        <div style="{{ style.title }}">Dados de entrega</div>
+
+        <div>
+            {% set shippingMethod = order.shippingMethods.first %}
+            <p>
+                {% set stringFromDays = shippingMethod.pickupOnPlace ? "a partir de" : "até" %}
+                {% if not order.status.isWaitingPayment and not order.status.isCanceled and not order.status.isDelivered and not order.status.isWaitingPickUp %}
+                    {% if shippingMethod.scheduledDeliveryMethod and not shippingMethod.pickupOnPlace %}
+                        <b>Frete:</b> {{ shippingMethod.presentation }} ({{ shippingMethod.deliveryTimePresentation }}).<br>
+                        <b>Endereço:</b> {{ shippingMethod.address }}<br />
+                    {% else %}
+                        <b>Forma de entrega:</b> {{ shippingMethod.presentation }}<br />
+                        <b>Endereço:</b>
+                        {% if shippingMethod.pickupOnPlace %}
+                            {% if order.shoppingStore %}
+                                {% set shoppingDistributionCenter = order.shoppingStore.distributionCenter %}
+                                {{ shoppingDistributionCenter.street|trim }}, {{ shoppingDistributionCenter.number }}, {% if shoppingDistributionCenter.complement == true %}{{ shoppingDistributionCenter.complement }}, {% endif %}{{ shoppingDistributionCenter.district }}, {{ shoppingDistributionCenter.city }}, {{ shoppingDistributionCenter.state }}, {{ shoppingDistributionCenter.postcode[:5] }}-{{ shoppingDistributionCenter.postcode[5:] }}, {{ shoppingDistributionCenter.country }}
+                            {% else %}
+                                {% set b2bDistributionCenter = order.allItems.first.stock.distributionCenter %}
+                                {{ b2bDistributionCenter.street|trim }}, {{ b2bDistributionCenter.number }}, {% if b2bDistributionCenter.complement == true %}{{ b2bDistributionCenter.complement }}, {% endif %}{{ b2bDistributionCenter.district }}, {{ b2bDistributionCenter.city }}, {{ b2bDistributionCenter.state }}, {{ b2bDistributionCenter.postcode[:5] }}-{{ b2bDistributionCenter.postcode[5:] }}, {{ b2bDistributionCenter.country }}
+                            {% endif %}
+                        {% else %}
+                            {{ order.shippingMethods.first.address }}
+                        {% endif %}
+                        <br />
+                        <b>Estimativa:</b>
+                        {% if shippingMethod.deliveryTimePresentation and shippingMethod.pickupOnPlace %}
+                            {{ shippingMethod.deliveryTimePresentation|trim }}
+                        {% else %}
+                            {{ stringFromDays|capitalize }} {{ shippingMethod.estimatedDeliveryTo|number_format }} dias{{ shippingMethod.pickupOnPlace ? "" : " úteis" }}<br />
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    <b>Forma de entrega:</b> {{ shippingMethod.presentation }}<br />
+                    <b>Endereço:</b>
+                    {% if shippingMethod.pickupOnPlace %}
+                        {% if order.shoppingStore %}
+                            {% set shoppingDistributionCenter = order.shoppingStore.distributionCenter %}
+                            {{ shoppingDistributionCenter.street|trim }}, {{ shoppingDistributionCenter.number }}, {% if shoppingDistributionCenter.complement == true %}{{ shoppingDistributionCenter.complement }},{% endif %} {{ shoppingDistributionCenter.district }}, {{ shoppingDistributionCenter.city }}, {{ shoppingDistributionCenter.state }}, {{ shoppingDistributionCenter.postcode[:5] }}-{{ shoppingDistributionCenter.postcode[5:] }}, {{ shoppingDistributionCenter.country }}
+                        {% else %}
+                            {% set b2bDistributionCenter = order.allItems.first.stock.distributionCenter %}
+                            {{ b2bDistributionCenter.street|trim }}, {{ b2bDistributionCenter.number }}, {% if b2bDistributionCenter.complement == true %}{{ b2bDistributionCenter.complement }},{% endif %} {{ b2bDistributionCenter.district }}, {{ b2bDistributionCenter.city }}, {{ b2bDistributionCenter.state }}, {{ b2bDistributionCenter.postcode[:5] }}-{{ b2bDistributionCenter.postcode[5:] }}, {{ b2bDistributionCenter.country }}
+                        {% endif %}
+                    {% else %}
+                        {{ order.shippingMethods.first.address }}
+                    {% endif %}<br />
+
+                    {% if shippingMethod.deliveryTimePresentation %}
+                        <b>Estimativa:</b> {{ shippingMethod.deliveryTimePresentation|trim|capitalize }}<br />
+                    {% endif %}
+                {% endif %}
+
+                {% if shippingMethod.observations %}
+                    <b>Observações:</b> {{ shippingMethod.observations }}
+                {% endif %}
+            </p>
+
+            {% if tracking and not shippingMethod.isActiveOnSupply %}
+                <p>
+                    <b>Código de rastreamento:</b>
+                    {% if order.trackingCode %}
+                        <b>{{ order.trackingCode }}</b>
+                    {% else %}
+                        Não disponível
+                    {% endif %}
+                </p>
+            {% endif %}
+            {% if shippingMethod.isActiveOnSupply and order.status.isShipped %}
+                <p>
+                    <b>Rastreamento:</b>
+                    <a href={{ activeOnSupplyLink }} target="_blank">{{ activeOnSupplyLink }}</a>
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div style="{{ style.inner }}">
+        <div style="{{ style.title }}">Forma de pagamento</div>
+
+        <div>
+            <p>
+                {{ order.firstPaymentMethod.presentation }}
+
+                {% if order.firstPaymentMethod.boletoRule %}
+                    ({{ order.firstPaymentMethod.boletoRule.label }})
+                {% endif %}
+            </p>
+        </div>
+
+        {% if order.firstPaymentMethod.isPix and flexy_ftwo_payment_method_pix_get_copy_and_paste(order) %}
+            <div style="text-align: center; width: 100%;">
+                <p>
+                    <strong>QrCode:</strong>
+                    <div>
+                        <a target='_blank' href="{{ absolute_url(path('flexy_ftwo_store_checkout_success', {'orderNumber': order.number})) }}" >
+                            <img style="height: 320px; width: 320px;" src="{{ flexy_ftwo_resource_url_img('img/pix.png') }}" />
+                        </a>
+                    </div>
+                </p>
+            </div>
+            <p style="text-align: center;">Para visualizar o QR Code basta clicar na imagem acima para ser redirecionado para a loja e acessar sua conta.</p>
+            <p style="text-align: center;">Ou</p>
+            <div style="text-align: center; width: 100%;">
+                <strong>Copia e cola:</strong>
+                <div  style="display: flex">
+                    <p style="font-size: 10px;" id="text-to-copy">{{ flexy_ftwo_payment_method_pix_get_copy_and_paste(order)|raw }}</p>
+                    <img id="copy-icon" src="{{ flexy_ftwo_resource_url_img('img/con-copy-paste.png') }}"  alt="Copiar" width="20" height="20" />
+                </div>
+            </div>
+        {% endif %}
+        {% if order.masterSale %}
+            {% set paymentMethodRedeOrderPaymentMethod = order.masterSale.firstPaymentMethod.redeOrderPaymentMethod %}
+        {% else %}
+            {% set paymentMethodRedeOrderPaymentMethod = order.firstPaymentMethod.redeOrderPaymentMethod %}
+        {% endif %}
+
+        {% if paymentMethodRedeOrderPaymentMethod and paymentMethodRedeOrderPaymentMethod.authorizedValue %}
+            <p>
+                <b>{{ 'rede.admin.capture.authorization-value'|trans }}:</b> R$ {{ paymentMethodRedeOrderPaymentMethod.authorizedValue|number_format(2, ',', '.') }}
+            </p>
+
+            {% if paymentMethodRedeOrderPaymentMethod.totalCapturedValue %}
+                <p>
+                    <b>{{ 'rede.admin.capture.captured-value'|trans }}:</b>
+                    R$ {{ paymentMethodRedeOrderPaymentMethod.totalCapturedValue|number_format(2, ',', '.') }}
+                </p>
+            {% endif %}
+        {% endif %}
+
+
+    </div>
+
+    {% for index, paymentMethod in order.paymentMethods %}
+        {% if paymentMethod.creditCard %}
+            <div style="{{ style.inner }}">
+                <div style="{{ style.title }}">Parcelas</div>
+                <div>
+                    <p>
+                        {{ paymentMethod.creditCard.installments }}x
+                        {% if paymentMethod.creditCard.installmentsValue %}
+                            de R$ {{ paymentMethod.creditCard.installmentsValue|number_format(2, ',', '.') }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+
+    <div style="{{ style.inner }}">
+        <div style="{{ style.title }}">
+            Produtos
+        </div>
+
+        {% for item in order.items %}
+            {{ item.variant }}
+
+            {% if item.attributeValues.count %}
+                <dl>
+                    <dt>
+                        <p>Campos adicionais de produto:<p>
+                    </dt>
+
+                    {% for attributeValue in item.attributeValues %}
+                        {% if attributeValue.value is not empty %}
+                            {% set attributeOption = attributeValue.option %}
+                            {% set attribute = attributeOption.attribute %}
+
+                            {% if attribute.type.isImage %}
+                                <dd><small>{{ attribute.name }}:</small> <img class="img-thumbnail" src="{{ attributeValue.value }}" alt="{{ attribute.name }}" width="100%"/></dd>
+                            {% else %}
+                                <dd><small>{{ attribute.name }}: {{ attributeValue.value }}</small></dd>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </dl>
+            {% endif %}
+
+            <dl>
+                <dd style="display: flex;">
+                    <span style="text-align: left; width: 50%;">Preço unitário:</span>
+
+                    <span style="text-align: right; width: 50%;">R$ {{ item.getUnitPrice|number_format(2, ',', '.') }}</span>
+                </dd>
+            </dl>
+
+            <dl>
+                <dd style="display: flex;">
+                    <span style="text-align: left; width: 50%;">Quantidade:</span>
+
+                    <span style="text-align: right; width: 50%;">
+                        {% if item.variant.isFractionalStock %}
+                            {{ item.quantity|number_format(3, ',', '.') }}
+                        {% else %}
+                            {{ item.quantity }}
+                        {% endif %}
+                    </span>
+                </dd>
+            </dl>
+
+            <dl>
+                <dd style="display: flex;">
+                    <span style="text-align: left; width: 50%;">Subtotal:</span>
+
+                    <span style="text-align: right; width: 50%;">
+                        R$ {{ item.getTotal|number_format(2, ',', '.') }}
+                    </span>
+                </dd>
+            </dl>
+
+            {% if item.getBillingDiscountTotal %}
+                <dl>
+                    <dd style="display: flex;">
+                        <span style="text-align: left; width: 50%;">Descontos promocionais:</span>
+
+                        <span style="text-align: right; width: 50%;">
+                            - R$ {{ item.getBillingDiscountTotal|number_format(2, ',', '.') }}
+                        </span>
+                    </dd>
+                </dl>
+            {% endif %}
+
+            {% for aliquotOrderItem in item.aliquotOrderItems %}
+                {% set aliquotsTotal = aliquotsTotal + aliquotOrderItem.value %}
+                <dl>
+                    <dd style="display: flex;">
+                        <span style="text-align: left; width: 50%;">{{ aliquotOrderItem.aliquot.name }}:</span>
+
+                        <span style="text-align: right; width: 50%;">
+                            R$ {{ aliquotOrderItem.value|number_format(2, ',', '.') }}
+                        </span>
+                    </dd>
+                </dl>
+            {% endfor %}
+
+            {% if item.shippingIpi %}
+                <dl>
+                    <dd style="display: flex;">
+                        <span style="text-align: left; width: 50%;">IPI do frete:</span>
+
+                        <span style="text-align: right; width: 50%;">
+                            R$ {{ item.shippingIpi|number_format(2, ',', '.') }}
+                        </span>
+                    </dd>
+                </dl>
+            {% endif %}
+
+            {% if item.getPaymentMethodDiscount %}
+                <dl>
+                    <dd style="display: flex;">
+                        <span style="text-align: left; width: 50%;">Descontos de pagamento:</span>
+
+                        <span style="text-align: right; width: 50%;">
+                            - R$ {{ item.getPaymentMethodDiscount|number_format(2, ',', '.') }}
+                        </span>
+                    </dd>
+                </dl>
+            {% endif %}
+
+            {% if item.getPaymentMethodAddition %}
+                <dl>
+                    <dd style="display: flex;">
+                        <span style="text-align: left; width: 50%;">Acréscimos de pagamento:</span>
+
+                        <span style="text-align: right; width: 50%;">
+                            R$ {{ item.getPaymentMethodAddition|number_format(2, ',', '.') }}
+                        </span>
+                    </dd>
+                </dl>
+            {% endif %}
+
+            <dl>
+                <dd style="display: flex;">
+                    <span style="text-align: left; width: 50%;">Total:</span>
+
+                    <span style="text-align: right; width: 50%;">R$ {{ item.getBillingTotal|number_format(2, ',', '.') }}</span>
+                </dd>
+            </dl>
+        {% endfor %}
+
+        <table class="table-striped" border="0" cellspacing="0" cellpadding="10" style="{{ style.font }} margin-top: 5px; margin-left: -5px; margin-right: -5px; width: calc(100% + 15px);">
+            <tbody>
+                <tr>
+                    <td width="50%" align="left">Valor dos itens sem desconto</td>
+                    <td width="50%" align="right">R$ {{ order.getItemsTotalWithoutDiscount|number_format(2, ',', '.') }}</td>
+                </tr>
+
+                <tr>
+                    <td width="50%" align="left">Frete</td>
+                    <td width="50%" align="right">R$ {{ order.firstShippingMethod.originalPrice|number_format(2, ',', '.') }}</td>
+                </tr>
+
+                {% if order.getBillingDiscountTotal > 0 %}
+                    <tr>
+                        <td width="50%" align="left">Descontos promocionais</td>
+                        <td width="50%" align="right">- R$ {{ order.getBillingDiscountTotal|number_format(2, ',', '.') }}</td>
+                    </tr>
+                {% endif %}
+
+                {% if aliquotsTotal > 0 %}
+                    <tr>
+                        <td width="50%" align="left">Total de impostos cobrados</td>
+                        <td width="50%" align="right">R$ {{ aliquotsTotal|number_format(2, ',', '.') }}</td>
+                    </tr>
+                {% endif %}
+
+                {% if order.shippingIpi > 0 %}
+                    <tr>
+                        <td width="50%" align="left">IPI do frete</td>
+                        <td width="50%" align="right">R$ {{ order.shippingIpi|number_format(2, ',', '.') }}</td>
+                    </tr>
+                {% endif %}
+
+                {% if order.taxSubstitutionBilled > 0 %}
+                    <tr>
+                        <td width="50%" align="left">ICMS ST</td>
+                        <td width="50%" align="right">R$ {{ order.taxSubstitutionBilled|number_format(2, ',', '.') }}</td>
+                    </tr>
+                {% endif %}
+
+                {% if order.firstPaymentMethod.discountApplied > 0 %}
+                    <tr>
+                        <td width="50%" align="left">Desconto de pagamento</td>
+                        <td width="50%" align="right">- R$ {{ order.getFirstPaymentMethod.discountApplied|number_format(2, ',', '.') }}</td>
+                    </tr>
+                {% endif %}
+
+                <tr style="background-color: #608DC9;">
+                    <td width="50%" align="left" style="color:#FFF;">TOTAL</td>
+                    <td width="50%" align="right" style="color:#FFF;">R$ {{ order.getTotal|number_format(2, ',', '.') }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% if order.getAttributeValues.length %}
+        <div style="background:#ffffff; padding:20px 40px; margin-bottom:5px;">
+            <div style="color:#428bca; padding: 0 0 10px 0;">Informações adicionais</div>
+            <p>
+                {% for orderAttributeValue in order.getAttributeValues if orderAttributeValue.value %}
+                    <li>
+                        <strong>{{ orderAttributeValue.option.attribute.name }}</strong>
+                        {% if orderAttributeValue.option.attribute.type.isDocument %}
+                            Clique <a href="{{ asset(orderAttributeValue.value, 'cloudfront') }}" target="_blank">aqui</a> para visualizar o documento
+                        {% elseif orderAttributeValue.option.attribute.type.isImage %}
+                            <img src="{{ orderAttributeValue.value }}" title="Visualizar imagem">
+                        {% else %}
+                            {{ orderAttributeValue.value }}
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </p>
+        </div>
+    {% endif %}
+
+    <div style="{{ style.inner }}">
+        <p>Qualquer dúvida ou necessidade estamos a disposição para atendê-lo através de nossa <a href="{{ url('flexy_ftwo_store_contact') }}" style="{{ style.link }}">Central de Atendimento</a>.</p>
+        {{ mailSignature|raw }}
+    </div>
+{% endblock %}

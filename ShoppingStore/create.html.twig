@@ -1,0 +1,74 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+{% set title = 'admin.shoppingStore.create.title'|trans %}
+{% set isLightHeader = true %}
+{% block content %}
+    {% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-shoppingStore-create-error'), 'error' : true } %}
+    <section>
+        <div class="second-page-container">
+            <div class="container">
+                {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [
+                {'title' : 'Entrar', 'url' : path("flexy_ftwo_store_shoppingStore_create") },
+                {'title' : title }
+                ]} %}
+
+                <div class="header-for-light">
+                    <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                        <span>Criar nova Loja</span>
+                    </h1>
+                </div>
+                <form action="{{ path("flexy_ftwo_store_shoppingStore_create") }}" class="password-requirement" role="form" method="post" enctype="multipart/form-data">
+                    {% include 'FlexyFtwoStoreBundle:ShoppingStore:_form.html.twig' %}
+                </form>
+            </div>
+        </div>
+    </section>
+{%  endblock %}
+{% block javascript %}
+    <script>
+        $(document).ready(function() {
+            $("#checkfullform").on("change click", function() {
+                var $this = $(this).is(":checked");
+                if ($this == false) {
+                    window.location = window.location.href+"?form=full";
+                }
+                if ($this == true) {
+                    window.location =window.location.href.replace( window.location.search,'');
+                }
+            });
+
+            $('.btn-default-1').click(function (e) {
+                $('#apiToken').val(generateToken());
+            });
+
+            if ($('#apiToken').val() == '') {
+                $('#apiToken').val(generateToken());
+            }
+
+
+            $("#responsible_defaultAddress_state").on('change keyup',function(e){
+                $(this).val($(this).val().toUpperCase());
+            });
+        });
+
+        $("[name=name]").keyup(function() {
+            var storeName = $(this).val().toLowerCase();
+
+            var from = "ãàáäâẽèéëêìíïîõòóöôùúüûñç·/_,:;";
+            var to   = "aaaaaeeeeeiiiiooooouuuunc------";
+
+            for ( var i = 0, l = from.length; i<l; i++ ) {
+                storeName = storeName.replace(new RegExp(from.charAt( i ), 'g'), to.charAt(i));
+            }
+
+            storeName = storeName.replace( /[^a-z0-9 -]/g, '' ).replace( /\s+/g, '-' ).replace( /-+/g, '-' );
+
+            $("[name=referenceCode]").val(storeName);
+        });
+
+        function generateToken()
+        {
+            return Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
+        }
+
+    </script>
+{% endblock %}

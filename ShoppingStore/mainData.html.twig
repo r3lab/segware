@@ -1,0 +1,105 @@
+<div class="form-group" xmlns="http://www.w3.org/1999/html">
+    <label class="form-label">Nome da loja<span class="text-error">*</span></label>
+    <div class="controls">
+        <input type="text" class="form-control" required="required" name="tradingName" id="tradingName" value="{{ app.request.get('tradingName', store.name) }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label"> URL de acesso<span class="text-error">*</span></label>
+    <div class="controls">
+        <span class="text-left "> {{ app.request.uriForPath('/loja/') }}</span>
+        <span class="text-right"> <input type="text" class="form-control flexy-input-code" style="width: 61%; display: inline;" required="required" name="referenceCode" id="referenceCode" value="{{ app.request.get('referenceCode', store.referenceCode) }}"></span>
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">CNPJ</label>
+    <div class="controls">
+        <input type="text" class="form-control flexy-input-cnpj" name="cnpj" id="cnpj" value="{{ app.request.get('cnpj', store.cnpj) }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">Razão Social</label>
+    <div class="controls">
+        <input type="text" class="form-control" name="companyName" id="companyName" value="{{ app.request.get('companyName', store.name) }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">{{ 'generic.email.label'|trans }}<span class="text-error">*</span></label>
+    <div class="controls">
+        <input type="email" class="form-control" required="required" name="email" id="email" value="{{ app.request.get('email', store.email) }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">{{ 'generic.primaryPhone.label'|trans }}<span class="text-error">*</span></label>
+    <div class="controls">
+        <input type="text" class="form-control flexy-input-phone" required="required" name="primaryPhone" id="primaryPhone" value="{{ app.request.get('primaryPhone', store.primaryPhone) }}">
+    </div>
+</div>
+{% if not fullForm %}
+<div class="form-group">
+    <label class="form-label">{{ 'admin.customer.form.responsible.label'|trans }}<span class="text-error">*</span></label>
+    <div class="controls">
+        <input type="text" class="form-control " required="required" name="responsible" id="responsible" value="{{ app.request.get('responsible', store.responsible) }}">
+    </div>
+</div>
+{% endif %}
+<div class="row">
+    <div class="form-group">
+        <div class="col-md-12 col-xs-12">
+        <label class="form-label">
+            {{ 'admin.shoppingStore.edit.logo'|trans }}
+        </label>
+        </div>
+    </div>
+</div>
+<div class="row display-flex">
+    <div class="col-md-10 col-xs-10">
+        <div class="controls">
+            <input type="file" accept="image/*" name="logo" alt="logo" class="form-control" id="store-creation-logo-uploader" />
+        </div>
+    </div>
+    <div class="col-md-2 col-xs-2">
+        <div class="display-flex align-items-center justify-content-end height-100" >
+            <button class="clear-button">Limpar</button>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 col-xs-12">
+        <img class="img-thumbnail logo-help" alt="Preview do Logo" id="store-creation-image-preview" />
+    </div>
+</div>
+{% if termOfUse %}
+<div class="checkbox">
+    <input type="checkbox" required="required">
+        {{ "Li e aceito os " }} <a href="{{ path('flexy_ftwo_store_terms_of_use_read_shoppingStore') }}" target="_blank">termos de uso</a>
+    <span class="text-error">*</span>
+</div>
+{% endif %}
+
+<script>
+    const storeLogoPreview = document.querySelector('#store-creation-image-preview');
+    const storeLogoUploader = document.querySelector('#store-creation-logo-uploader');
+
+    storeLogoPreview.style.display = 'none';
+
+    storeLogoUploader.onchange = function(e) {
+        if ((this.files[0].size/1024 > 512)) {
+            clearLogo();
+            return alert('O tamanho máximo permitido para o logotipo é 500kb');
+        }
+        storeLogoPreview.src = window.URL.createObjectURL(this.files[0]);
+        storeLogoPreview.style.display = 'block';
+    }
+
+    document.querySelector('.clear-button').onclick = function(e) {
+        e.preventDefault();
+        clearLogo();
+    }
+
+    function clearLogo() {
+        storeLogoPreview.style.display = 'none';
+        storeLogoPreview.src = '';
+        storeLogoUploader.value = '';
+    }
+</script>

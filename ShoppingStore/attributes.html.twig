@@ -1,0 +1,24 @@
+<div class="col-md-12">
+{% for shoppingStoreAttribute in shoppingStoreAttributes %}
+    {% for shoppingStoreAttributeOption in shoppingStoreAttribute.options %}
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="form-label">
+                {{ shoppingStoreAttribute.name }}
+                {{ shoppingStoreAttributeOption.attribute.required ? requiredHtml : '' }}
+            </label>
+            <div class="controls">
+                <input
+                    type="text"
+                    id="attributeValues{{ shoppingStoreAttributeOption.id }}"
+                    name="attributeValues[{{ shoppingStoreAttributeOption.id }}]"
+                    value="{{ app.request.get('attributeValues')[shoppingStoreAttributeOption.attribute.id] ?: store.getAttributeValue(shoppingStoreAttributeOption.attribute.id).value }}"
+                    class="form-control"
+                    {{ shoppingStoreAttributeOption.attribute.required ? 'required' : '' }}
+                />
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endfor %}
+</div>

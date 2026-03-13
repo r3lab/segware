@@ -1,0 +1,69 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% set title = 'Comparação de produtos' %}
+
+{% set path = [
+    {'url': '', 'title' : 'Comparação de produtos'}
+] %}
+
+{% block content %}
+    {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with { path : path } %}
+
+    <div class="container">
+        <div class="table-responsive text-center">
+            <div class="pull-right" style="margin-bottom: 20px;">
+                <button class="flexy-product-compare-clear le-button">Fazer Nova Comparação</button>
+            </div>
+            <table class="table table-striped table-bordered">
+                <tbody>
+                    {% for group in compareGroup if group.items|length > 0 %}
+                        <tr>
+                            <td>
+                                <b>{{ group.label }}: </b>
+                            </td>
+                            {% for item in group.items %}
+                            <td>
+                                {% if group.isPrice %}
+                                    {% if item.value.priceDiscount %}
+                                        <del>de R$ {{ item.value.priceDefault }}</del> <br/>
+                                        por R$ {{ item.value.priceDiscount }}
+                                    {% else %}
+                                        R$ {{ item.value.priceDefault }}
+                                    {% endif %}
+                                {% elseif group.isDescription %}
+                                    {{ item.value|raw }}
+                                {% elseif group.isCategory %}
+                                    {% for category in item.value %}
+                                        <a href="{{ path('flexy_ftwo_store_product_list', {'categoryReferenceCode' : category.referenceCode}) }}">- {{ category.name }}</a><br/>
+                                    {% endfor %}
+                                {% elseif group.isImage %}
+                                    <div class="text-center">
+                                        <a href="{{ path('flexy_ftwo_store_product_details', {'slug' : item.variant.slug, 'masterVariantReferenceCode' : item.variant.referenceCode}) }}">
+                                            <img src="{{ flexy_ftwo_image_placeholder_small(item.value, 'img/product-placeholder.gif') }}" style="max-height: 200px;"/>
+                                        </a>
+                                    </div>
+                                {% elseif group.isId %}
+                                    <button type="button" class="flexy-product-compare-remove" data-variant-id="{{ item.value }}">
+                                        <i class="fa fa-times"></i>
+                                    </button>
+                                {% else %}
+                                    {% if item.value == null %}
+                                        <p> --- </p>
+                                    {% else %}
+                                        {{ item.value }}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <h3>Sem produtos de comparação!</h3>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            e
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% set isPixPayment = false %}
+
+{% if order.hasSales %}
+    {% set orderchild = order.sales|first %}
+    {% set paymentMethods = orderchild.paymentMethods %}
+{% else %}
+    {% set paymentMethods = order.paymentMethods %}
+{% endif %}
+
+{% for paymentMethod in paymentMethods if paymentMethod.isPix %}
+    {% set isPixPayment = true %}
+{% endfor %}
+
+{% block javascript %}
+    <script>
+        function getPixQrCode() {
+            fetch('{{ path("flexy_ftwo_store_checkout_pix_qrcode_copy_and_paste", {orderNumber: order.number}) }}')
+                .then(response => response.json())
+                .then(responseParsed => {
+                    if (responseParsed.error) {
+                        return;
+                    }
+
+                    $("#pix-qrcode-payment").prop('src', `data:image/svg+xml;base64,${btoa(responseParsed.qrCodeImage)}`);
+                    $("#pix-qrcode-payment-loading").addClass('hidden');
+                    $("#pix-qrcode-payment").removeClass('hidden');
+
+                    $("#pix-copy-and-paste-payment").attr('data-text', responseParsed.copyAndPaste);
+                    $("#pix-copy-and-paste-payment-loading").addClass('hidden');
+                    $("#pix-copy-and-paste-payment").removeClass('hidden');
+                });
+        }
+
+        const isPixPayment = "{{ isPixPayment ? '1' : '' }}";
+        if (isPixPayment) {
+            getPixQrCode();
+        }
+
+        {# The code above is in vanillaJS because jquery can undefined here #}
+        const showPixQrcode = document.getElementById('show-pix-qrcode');
+        if (showPixQrcode) {
+            showPixQrcode.onclick = function() {
+                document.getElementById('pix-qrcode-payment-container').classList.toggle('hidden');
+            }
+        }
+    </script>
+{% endblock %}

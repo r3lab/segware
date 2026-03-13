@@ -1,0 +1,95 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% set title = "Adicionar endereço" %}
+
+{% block content %}
+    {% for flashMessage in app.session.flashbag.get('store-customer-address-success') %}
+        <div class="alerts container">
+            <div class="alert alert-success">
+                {{ flashMessage|trans }} <button class="close" data-dismiss="alert"><i class="fa fa-times"></i></button>
+            </div>
+        </div>
+    {% endfor %}
+    {% for flashMessage in app.session.flashbag.get('store-customer-address-error') %}
+        <div class="alerts container">
+            <div class="alert alert-danger">
+                {{ flashMessage|trans }} <button class="close" data-dismiss="alert"><i class="fa fa-times"></i></button>
+            </div>
+        </div>
+    {% endfor %}
+    <section>
+        <div class="second-page-container">
+            <div class="container">
+                {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [
+                {'title' : 'Novo Endereço' }
+                ]} %}
+                <div class="header-for-light">
+                    <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                        Novo endereço
+                    </h1>
+                </div>
+                <form action="" method="post" novalidate>
+                    <div class="address-form">
+                        <div class="form-group">
+                            {{ form_label(form.postcode) }}
+                            {{ form_widget(form.postcode, {'attr': {'class': 'form-control flexy-input-postcode', 'data-prefix' : 'address_'}}) }}
+                            <a href="http://www.buscacep.correios.com.br/sistemas/buscacep/">Esqueceu seu CEP?</a>
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.street) }}
+                            {{ form_widget(form.street, {'attr': {'class' : 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.number) }}
+                            {{ form_widget(form.number, {'attr': {'class' : 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.complement) }}
+                            {{ form_widget(form.complement, {'attr': {'class' : 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.district) }}
+                            {{ form_widget(form.district, {'attr': {'class' : 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.city) }}
+                            {{ form_widget(form.city, {'attr': {'class' : 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.state) }}
+                            {{ form_widget(form.state, {'attr': {'class' : 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.country) }}
+                            {{ form_widget(form.country, {'attr': {'class' : 'form-control'}}) }}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">{{ 'store.customer.address.add'|trans }}</button>
+                    <a href="{{ path('flexy_ftwo_store_customer_address_list') }}" class="btn btn-default" id="back">{{ 'store.customer.address.back'|trans }}</a>
+                </form>
+            </div>
+        </div>
+    </section>
+{%  endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript">
+        $('#cnpj').hide();
+        $("#customer_type").change(function (e) {
+            e.preventDefault();
+            if ($(this).val() == 'cpf') {
+                $('#cpf').show();
+                $('#cnpj').hide();
+            } else {
+                $('#cpf').hide();
+                $('#cnpj').show();
+            }
+        });
+
+        $(document).ready( function () {
+            $("#customer_cnpj_cnpj").mask("99.999.999/9999-99");
+        });
+
+    </script>
+{% endblock %}

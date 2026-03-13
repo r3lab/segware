@@ -1,0 +1,27 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+{% block title %}Quote{% endblock %}
+{% set quoteVariables = flexy_ftwo_quote_list() %}
+{% set quoteUrl = flexy_ftwo_current_user_exists() ? path('flexy_ftwo_store_quote_close') : path('flexy_ftwo_store_customer_login') ~ '?redirect=/quote/' %}
+{% block content %}
+<section>
+    <div class="second-page-container">
+        <div class="block">
+            <div class="container">
+                <div class="header-for-light">
+                    <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                        Orçamento realizado com sucesso!
+                    </h1>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <h3>Seu orçamento{{ quote.hasSales ? ' ' : (', <strong>nº ' ~ quote.number ~ '</strong>, ')|raw }} foi realizado com sucesso.</h3>
+                        <p>
+                            <a href="{{ path("flexy_ftwo_store_customer_profile") }}">Acesse sua conta</a> para acompanhar seus orçamentos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

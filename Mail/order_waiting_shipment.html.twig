@@ -1,0 +1,8 @@
+{% include 'FlexyFtwoStoreBundle:Mail:order.html.twig' with {
+    'order' : order,
+    'title': 'Aguardando envio!',
+    'message' : "<p>Olá, " ~ order.customer.fullName ~ "!</p>
+                <p>Seu pedido, número <b>" ~  order.number ~ "</b>, já esta pronto e aguardando para ser enviado.</p>
+                <p>Assim que o envio ocorrer, outro e-mail será enviado para seu acompanhamento.</p>
+                <p>Segue abaixo um resumo de seu pedido.</p>"
+} %}

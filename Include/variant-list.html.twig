@@ -1,0 +1,102 @@
+{% set bannerReferenceCode = (category ? category.referenceCode : 'search') ~ '-banner' %}
+
+<section id="variant-list">
+    <div class="second-page-container">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' %}
+                </div>
+
+                <div class="col-md-12">
+                    {% set gallery = flexy_ftwo_banner_image_list(bannerReferenceCode) %}
+                    {% if gallery.images|length > 0 %}
+                        <div class="banner">
+                            {% for image in gallery.images %}
+                                <a {{ (image.target ? 'href="' ~ image.target ~ '"' : '')|raw }}>
+                                    <img src="{{ image.path }}" class="img-responsive" alt="{{ image.alt }}" title="{{ image.title }}">
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% elseif category and category.description %}
+                        <div class="banner">
+                            {{ category.description|raw }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-3 sidebar-menu">
+                    {% include 'FlexyFtwoStoreBundle:Include:sidebar.html.twig' with {withFilter : true} %}
+                </div>
+                <div class="filter-menu-modal-close hidden-lg hidden-md"></div>
+
+                <div class="col-md-9" >
+
+                    <div class="block-products-modes color-scheme-2">
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                <a href="#" class="filter-menu-btn hidden-lg hidden-md">Filtrar</a>
+                                <h3>{{ category ? category.name : (query ? query : 'Todos os produtos') }}</h3>
+                            </div>
+                            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 text-right hidden-xs hidden-sm">
+                                {% if totalResults is defined %}<span>{{ totalResults }} item(s) &nbsp;&nbsp;</span>{% endif %}
+                                <span class="flexy-list-grid-options">| <a href="javascript:void(0);" class="flexy-grid-btn flexy-display-mode-btn"><i class="fa fa-th"></i></a> <a href="javascript:void(0);" class="flexy-list-btn flexy-display-mode-btn"><i class="fa fa-list"></i></a></span>
+                                <select id="list-order" class="flexy-product-list-order">
+                                    <option disabled{% if order is empty or order == 'category-asc' %} selected{% endif %}>Ordenar</option>
+                                    <option value="createdAt-desc"{% if order == 'createdAt-desc' %} selected{% endif %}>Lançamentos</option>
+                                    <option value="sales-desc"{% if order == 'sales-desc' %} selected{% endif %}>Mais vendidos</option>
+                                    <option value="price-asc"{% if order == 'price-asc' %} selected{% endif %}>Menor preço</option>
+                                    <option value="price-desc"{% if order == 'price-desc' %} selected{% endif %}>Maior preço</option>
+                                    <option value="name-asc"{% if order == 'name-asc' %} selected{% endif %}>Nome A-Z</option>
+                                    <option value="name-desc"{% if order == 'name-desc' %} selected{% endif %}>Nome Z-A</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="variant-list">
+                        <div class="row flexy-display-mode">
+                            {% if variants|length > 0 %}
+                                {% for variant in variants %}
+                                    <div class="col-xs-12 col-sm-6 col-md-4 text-center mb-25">
+                                        {% include 'FlexyFtwoStoreBundle:Include:variant.html.twig' with {variant : variant} %}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="col-md-12 text-center">
+                                    <p class="nothing-found">Nenhum produto encontrado.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if variants|length > 0 %}
+                             {{ knp_pagination_render(variants, 'FlexyFtwoStoreBundle:Paginator:pagination.html.twig', [], { 'filters': filters }) }}
+                        {% endif %}
+                    </div>
+
+                    {% set gallery = flexy_ftwo_banner_image_list(bannerReferenceCode ~ '-bottom') %}
+                    {% if gallery.images|length > 0 %}
+                        <div class="banner-bottom">
+                            <div class="row">
+                                {% for image in gallery.images %}
+                                    <div class="col-md-6">
+                                        <a href="{{ image.target ?: '#' }}">
+                                            <img src="{{ image.path }}" class="img-responsive" alt="">
+                                        </a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.banner img{
+ height: 100%;
+ width: 100%;
+ object-fit: cover;
+}
+</style>

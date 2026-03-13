@@ -1,0 +1,94 @@
+{% set shoppingStore = f2_store_shoppingStore_current() %}
+{% set marketPlace = store.info.usesMultipleSales and not store.shoppingStore %}
+<footer>
+    <div class="container-fluid sombra-footer"></div>
+
+    <div class="container-fluid full-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-4 box-links">
+                            <p class="title-box">INSTITUCIONAL</p>
+                            <ul>
+                                <li><a href="{{ path("flexy_ftwo_store_static", {page : "quem-somos"}) }}">Quem Somos</a></li>
+                                <li><a href="{{ path("flexy_ftwo_store_static", {page : "historia"}) }}">História</a></li>
+                                <li><a href="{{ path('flexy_ftwo_store_article_list') }}">Notícias</a></li>
+                                {% if marketPlace %}
+                                    <li><a href="{{ path("flexy_ftwo_store_shoppingStore_create") }}">Crie sua loja</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="col-md-4 box-links">
+                            <p class="title-box">POLÍTICAS</p>
+                            <ul>
+                                <li><a href="{{ path("flexy_ftwo_store_static", {page : "formas-de-pagamento"}) }}">Formas de Pagamento</a></li>
+                                <li><a href="{{ path("flexy_ftwo_store_static", {page : "trocas-e-devolucoes"}) }}">Trocas e Devoluções</a></li>
+                                <li><a href="{{ path("flexy_ftwo_store_static", {page : "prazos-e-entrega"}) }}">Prazos e Entrega</a></li>
+                                {% if marketPlace %}
+                                    <li><a href="{{ path("flexy_ftwo_store_static", {page : "termos/cliente"}) }}">Termos de Uso</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="col-md-4 box-links">
+                            <p class="title-box">AJUDA</p>
+                            <ul>
+                                <li><a href="{{ path("flexy_ftwo_store_static", {page : "perguntas-frequentes"}) }}">Perguntas Frequentes</a></li>
+                                <li><a href="{{ path("flexy_ftwo_store_static", {page : "como-comprar"}) }}">Como Comprar</a></li>
+                                <li><a href="{{ path("flexy_ftwo_store_contact") }}">Fale Conosco</a></li>
+                                <li><a href="{{ path("flexy_ftwo_store_giftList_search") }}">Lista de Presentes</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-12 newsletter-box">
+                            <p>Receba ofertas e novidades:</p>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <input class="form-control flexy-newsletter-email" name="newsletter[email]" placeholder="E-mail">
+                                    <button type="submit" class="flexy-newsletter-sigin btn-blue" title="Assinar">>></button>
+                                </div>
+                                <div class="col-sm-6">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-10 top-negative {{ store.info.socialMedia.facebookUrl ? '' : 'facebook-off' }}">
+                            <img src="{{ flexy_ftwo_resource_url_img('img/curva-sup.png') }}" class="curva-sup">
+                            <div class="box-socialmedia">
+                                <p class="title-socialmedia">SIGA-NOS NAS REDES SOCIAIS:</p>
+                                <ul class="list-inline socialmedia">
+                                    {% if store.info.socialMedia.facebookUrl %}
+                                    <li><a href="{{ store.info.socialMedia.facebookUrl }}" title="Facebook" target="_blank"><img src="{{ flexy_ftwo_resource_url_img('img/icon-facebook.png') }}"></a></li>
+                                    {% endif %}
+                                    {% if store.info.socialMedia.twitterUrl %}
+                                    <li><a href="{{ store.info.socialMedia.twitterUrl }}" title="Twitter" target="_blank"><img src="{{ flexy_ftwo_resource_url_img('img/icon-twitter.png') }}"></a></li>
+                                    {% endif %}
+                                    {% if store.info.socialMedia.instagramUrl %}
+                                    <li><a href="{{ store.info.socialMedia.instagramUrl }}" title="Instagram" target="_blank"><img src="{{ flexy_ftwo_resource_url_img('img/icon-insta.png') }}"></a></li>
+                                    {% endif %}
+                                    {% if store.info.socialMedia.youtubeUrl %}
+                                        <li><a href="{{ store.info.socialMedia.youtubeUrl }}" title="Youtube" target="_blank"><img src="{{ flexy_ftwo_resource_url_img('img/icon-youtube.png') }}"></a></li>
+                                    {% endif %}
+                                </ul>
+                                {% if store.info.socialMedia.facebookUrl %}
+                                    {% set facebookUrlEncoded = store.info.socialMedia.facebookUrl|url_encode %}
+                                    <div id="facebook" class="widget widget_facebook_likebox"><iframe src="https://www.facebook.com/plugins/likebox.php?href={{ facebookUrlEncoded }}&amp;width=260&amp;height=240&amp;colorscheme=light&amp;show_faces=true&amp;stream=false&amp;show_border=false&amp;header=false&amp;force_wall=false" scrolling="no" frameborder="0" style="border: none; overflow: hidden; width: 260px;  height: 225px; background: #fff"></iframe></div>
+                                {% endif %}
+                            </div>
+                            <img src="{{ flexy_ftwo_resource_url_img('img/curva-inf.png') }}" class="curva-inf">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row {{ store.info.socialMedia.facebookUrl ? '' : 'facebook-off' }}">
+            <img src="{{ flexy_ftwo_resource_url_img('img/sombra-socialmedia.png') }}" class="sb-scm">
+        </div>
+    </div>
+
+    {% include 'FlexyFtwoStoreBundle:Include/Base:payment-flags.html.twig' %}
+    {% include 'FlexyFtwoStoreBundle:Include/Base:footer-about.html.twig' with {ecommerceInformation : true} %}
+</footer>

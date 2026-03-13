@@ -1,0 +1,67 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% set title = "Novo Usuário" %}
+{% set isLightHeader = true %}
+
+{% block content %}
+    <section>
+        <div class="second-page-container">
+            <div class="container">
+                {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [
+                {'title' : title }
+                ]} %}
+
+                <div class="header-for-light">
+                    <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                        Novo Usuário
+                    </h1>
+                </div>
+                <form action="{{ path("flexy_ftwo_store_customer_user_add") }}" class="" role="form" method="post">
+                    <div class="col-xs-12 col-lg-4">
+                        <div class="user-form">
+                            <div class="form-group">
+                                <label>Nome <span class="text-error">*</span></label>
+                                <div class="">
+                                    {{ form_widget(userForm.name, {'attr': {'class': 'form-control','required' : 'required', 'value' : app.request.get('name')}}) }}
+                                    <div class="error-created">{{ form_errors(userForm.name) }}</div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>E-mail <span class="text-error">*</span></label>
+                                <div class="">
+                                    {{ form_widget(userForm.email.first, {'attr': {'class': 'form-control emailInput', 'value' : app.request.get('email.first')}}) }}
+                                    <div class="error-created">{{ form_errors(userForm.email.first) }}</div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Repita seu e-mail <span class="text-error">*</span></label>
+                                <div class="">
+                                    {{ form_widget(userForm.email.second, {'attr': {'class': 'form-control', 'value' : app.request.get('email.second')}}) }}
+                                    <div class="error-created">{{ form_errors(userForm.email.second) }}</div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Senha <span class="text-error">*</span></label>
+                                <div class="">
+                                    {{ form_widget(userForm.password.first, {'attr': {'class': 'form-control'}}) }}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Repita sua senha <span class="text-error">*</span></label>
+                                <div class="">
+                                    {{ form_widget(userForm.password.second, {'attr': {'class': 'form-control'}}) }}
+
+                                    <div class="error-created">{{ form_errors(userForm.password.first) }}</div>
+                                    <div class="error-created">{{ form_errors(userForm.password.second) }}</div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">{{ 'store.customer.user.add.button'|trans }}</button>
+                            <a href="{{ path('flexy_ftwo_store_customer_users_list') }}" class="btn btn-default" id="back">{{ 'store.customer.address.back'|trans }}</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{%  endblock %}

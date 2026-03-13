@@ -1,0 +1,78 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% block title %}Atualização de representante{% endblock %}
+
+{% block content %}
+    {% block alerts %}
+        <div class="messages">
+            {% for flashMessage in app.session.flashbag.get('store-agent-update-success') %}
+                <div class="alert alert-success">
+                    {{ flashMessage|trans }}
+                </div>
+            {% endfor %}
+            {% for flashMessage in app.session.flashbag.get('store-agent-update-error') %}
+                <div class="alert alert-error">
+                    {{ flashMessage|trans }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endblock %}
+
+    <form
+        action="{{ path('flexy_ftwo_store_agent_update') }}"
+        method="post"
+        class="form-horizontal"
+        role="form"
+        style="padding: 10px">
+
+        <div id="cpf" class="hide-type">
+            <div class="form-group">
+                <label for="agent_name" class="required">{{ 'generic.navigation.name.label'|trans }}</label>
+                {{ form_errors(form.name) }}
+                {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="agent_phone" class="required">{{ 'generic.navigation.phone.label'|trans }}</label>
+            {{ form_errors(form.phone) }}
+            {{ form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}
+        </div>
+<!--
+        <div class="form-group">
+            <label for="agent_user_password_first" class="required">{{ 'store.customer.create.form.label.password'|trans }}</label>
+            {#{{ form_errors(form.user.password.first) }}#}
+            {#{{ form_widget(form.user.password.first, {'attr': {'class': 'form-control'}}) }}#}
+        </div>
+
+        <div class="form-group">
+            <label for="agent_user_password_second" class="required">{{ 'store.customer.create.form.label.passwordConfirm'|trans }}</label>
+            {#{{ form_errors(form.user.password.second) }}#}
+            {#{{ form_widget(form.user.password.second, {'attr': {'class': 'form-control'}}) }}#}
+        </div>
+-->
+<!--
+        <div class="form-group">
+            <label for="agent_user_email_first" class="required">{{ 'generic.navigation.email.label'|trans }}</label>
+                {#{{ form_errors(form.user.email.first) }}#}
+                {#{{ form_widget(form.user.email.first, {'attr': {'class': 'form-control'}}) }}#}
+        </div>
+
+        <div class="form-group">
+            <label for="agent_user_email_second" class="required">{{ 'generic.navigation.emailConfirm.label'|trans }}</label>
+            {#{{ form_errors(form.user.email.second) }}#}
+            {#{{ form_widget(form.user.email.second, {'attr': {'class': 'form-control'}}) }}#}
+        </div>
+-->
+        <hr>
+        <div class="form-group">
+            <input
+                    type="submit"
+                    id="submit"
+                    name="submit"
+                    class="btn btn-success btn-lg"
+                    value="Atualizar"
+                    />
+        </div>
+    </form>
+{%  endblock %}

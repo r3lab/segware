@@ -1,0 +1,41 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+
+{% block content %}
+    <div style="text-align: center; {{ style.header }}">
+        <h1>
+            {% if contact.quote %}
+                <p>Enviaram uma mensagem no orçamento</p> <p>#{{ contact.quote.number }}</p>
+            {% elseif contact.order %}
+                <p>Enviaram uma mensagem no pedido</p> <p>#{{ contact.order.number }}</p>
+            {% else %}
+                Obrigado por sua mensagem!
+            {% endif %}
+        </h1>
+    </div>
+    <div style="text-align: center;{{ style.inner }}">
+        {% if contact.quote %}
+            <a target="_blank" style="{{ style.whiteButton }}" href="{{ url('flexy_ftwo_store_customer_quote_detail', {
+                'quoteId' : contact.quote.id
+            })}}#message-list">Visualizar mensagem</a>
+        {% elseif contact.order %}
+            <a target="_blank" style="{{ style.whiteButton }}" href="{{ url('flexy_ftwo_store_customer_order_detail', {
+                'orderId' : contact.order.id
+            })}}#message-list">Visualizar mensagem</a>
+        {% else %}
+            <h3>Olá, {{ contact.name }}!</h3>
+            <p>Recebemos sua mensagem e logo entraremos em contato.</p>
+            <p>
+                Nome: {{ contact.name }}<br />
+                E-mail: {{ contact.email }}<br />
+                Telefone: {{ flexy_ftwo_mask_number(contact.phone, ((contact.phone|length == 14) ? '(99) 9999-9999' : '(99) 99999-9999')) }}<br />
+                Assunto: {{ contact.subject }}<br />
+                <br />
+                Mensagem: 
+                <br/>
+                <br/>
+                {{ contact.message|nl2br }}
+            </p>
+        {% endif %}
+
+    </div>
+{% endblock %}

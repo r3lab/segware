@@ -1,0 +1,29 @@
+{% if flexy_ftwo_admin_anti_fraud_configuration_is_clearsale_configurated() %}
+    <script type="text/javascript">
+            {% set clear_sale = flexy_ftwo_admin_anti_fraud_clearsale_configuration()|first %}
+            {% set clear_sale_app = clear_sale.clearSaleApp %}
+            (function (a, b, c, d, e, f, g) {
+                a['CsdmObject'] = e; a[e] = a[e] || function () {
+                    (a[e].q = a[e].q || []).push(arguments)
+                }, a[e].l = 1 * new Date(); f = b.createElement(c),
+                        g = b.getElementsByTagName(c)[0]; f.async = 1; f.src = d; g.parentNode.insertBefore(f, g)
+            })(window, document, 'script', '//device.clearsale.com.br/m/cs.js', 'csdm');
+            csdm('app', '{{ clear_sale_app }}');
+    </script>
+{% endif %}
+
+{% if flexy_ftwo_admin_anti_fraud_configuration_is_total_clearsale_configurated() %}
+    <script>
+        {% set clear_sale = flexy_ftwo_admin_anti_fraud_total_clearsale_configuration()|first %}
+        {% set clear_sale_app = clear_sale.totalClearSaleApp %}
+        {% set session_id = app.session.id %}
+        (function (a, b, c, d, e, f, g) {
+            a['CsdpObject'] = e; a[e] = a[e] || function () {
+                (a[e].q = a[e].q || []).push(arguments)
+            }, a[e].l = 1 * new Date(); f = b.createElement(c),
+                    g = b.getElementsByTagName(c)[0]; f.async = 1; f.src = d; g.parentNode.insertBefore(f, g)
+        })(window, document, 'script', '//device.clearsale.com.br/p/fp.js', 'csdp');
+        csdp('app', '{{ clear_sale_app }}');
+        csdp('sessionid', '{{ session_id }}');
+    </script>
+{% endif %}

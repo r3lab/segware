@@ -1,0 +1,7 @@
+{% for shippingMethodGroup in shippingMethodGroups %}
+    {% if shippingMethodGroup.shoppingStoreDto.name %}
+        <strong>Frete para <i>{{ shippingMethodGroup.shoppingStoreDto.name }}</i></strong>
+        <br/>
+    {% endif %}
+    {% include 'FlexyFtwoStoreBundle:ShippingMethod:estimate.html.twig' with { 'shippingMethods' : shippingMethodGroup.shippingMethodDto, 'errorMessages' : shippingMethodGroup.errorMessages } %}
+{% endfor %}

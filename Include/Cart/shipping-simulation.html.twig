@@ -1,0 +1,121 @@
+{% set showStoreAddress = true %}
+{% if app.request.get("zipCode") %}
+    <div class="shipping-estimate">
+        {% if cart.shoppingStore %}
+            <div class="store"><strong>{{ cart.shoppingStore.name }}</strong></div>
+        {% endif %}
+        {% set shippingGroup = shipmentGroups[cart.shoppingStore ? cart.shoppingStore.id : 0] %}
+        {% set shippingObservations = [] %}
+        {% if shippingGroup.shippingMethodDto|length > 0 and shippingGroup.shippingMethodDto|length != shippingGroup.errorMessages|length %}
+            {% for key,ship in shippingGroup.shippingMethodDto %}
+                {% if ship.presentation %}
+                    {% set dayOrDays = 'dias' %}
+                    {% if (ship.deliveryTimeFrom == 1) or (ship.deliveryTimeTo == 1) %}
+                        {% set dayOrDays = 'dia' %}
+                    {% endif %}
+                <div class="estimation">
+                    <strong>{{ ship.presentation }}</strong>:
+
+                    {% if ship.price > 0 %}
+                        R$ {{ ship.price|number_format(2, ',', '.') }} -
+                    {% endif %}
+
+                    {% if ship.isShippify %}
+                        De {{ ship.deliveryTimeFrom }} até {{ ship.deliveryTimeTo }}
+                    {% elseif ship.isPickupOnPlace and showStoreAddress %}
+                        {% if store.info.usesMultipleSales %}
+                            {% if ship.deliveryTimeFrom == ship.deliveryTimeTo %}
+                                A partir de {{ ship.deliveryTimeFrom + ship.withdrawalTimeFrom }} {{ dayOrDays }}
+                                <small>({{ cart.shoppingStore.distributionCenter.street|trim }}
+                                    , {{ cart.shoppingStore.distributionCenter.number }}
+                                    , {% if cart.shoppingStore.distributionCenter.complement == true %}{{ cart.shoppingStore.distributionCenter.complement }},{% endif %} {{ cart.shoppingStore.distributionCenter.district }}
+                                    , {{ cart.shoppingStore.distributionCenter.city }}
+                                    , {{ cart.shoppingStore.distributionCenter.state }}
+                                    , {{ cart.shoppingStore.distributionCenter.postcode[:5] }}
+                                    -{{ cart.shoppingStore.distributionCenter.postcode[5:] }}
+                                    , {{ cart.shoppingStore.distributionCenter.country }})</small>
+                            {% else %}
+                                De {{ ship.deliveryTimeFrom }} a {{ ship.deliveryTimeTo }} {{ dayOrDays }}
+                                <small>({{ cart.shoppingStore.distributionCenter.street }}
+                                    , {{ cart.shoppingStore.distributionCenter.number }}
+                                    , {% if cart.shoppingStore.distributionCenter.complement == true %}{{ cart.shoppingStore.distributionCenter.complement }},{% endif %} {{ cart.shoppingStore.distributionCenter.district }}
+                                    , {{ cart.shoppingStore.distributionCenter.city }}
+                                    , {{ cart.shoppingStore.distributionCenter.state }}
+                                    , {{ cart.shoppingStore.distributionCenter.postcode[:5] }}
+                                    -{{ cart.shoppingStore.distributionCenter.postcode[5:] }}
+                                    , {{ cart.shoppingStore.distributionCenter.country }})</small>
+                            {% endif %}
+                        {% else %}
+                            {% if ship.deliveryTimeFrom == ship.deliveryTimeTo %}
+                                A partir de {{ ship.deliveryTimeFrom + ship.withdrawalTimeFrom }} {{ dayOrDays }}
+                                {% if store.info.distributionCenter.street|trim %}
+                                    <small>({{ store.info.distributionCenter.street ? store.info.distributionCenter.street|trim ~ ', ' : '' }}
+                                        {{ store.info.distributionCenter.number ? store.info.distributionCenter.number  ~ ', ' : '' }}
+                                        {% if store.info.distributionCenter.complement == true %}{{ store.info.distributionCenter.complement }}, {% endif %}
+                                        {{ store.info.distributionCenter.district ? store.info.distributionCenter.district ~ ', ' : '' }}
+                                        {{ store.info.distributionCenter.city ? store.info.distributionCenter.city ~ ', ' : '' }}
+                                        {{ store.info.distributionCenter.state ? store.info.distributionCenter.state ~ ', ' : '' }}
+                                        {% if store.info.distributionCenter.postcode %}{{ store.info.distributionCenter.postcode[:5] }}-{{ store.info.distributionCenter.postcode[5:] }}, {% endif %}
+                                        {{ store.info.distributionCenter.country ? store.info.distributionCenter.country : '' }}
+                                        )
+                                    </small>
+                                {% endif %}
+                            {% else %}
+                                A partir de {{ ship.deliveryTimeFrom }} à {{ ship.deliveryTimeTo }} {{ dayOrDays }}
+                                {% if store.info.distributionCenter.street|trim %}
+                                    <small>({{ store.info.distributionCenter.street ? store.info.distributionCenter.street|trim ~ ', ' : '' }}
+                                        {{ store.info.distributionCenter.number ? store.info.distributionCenter.number  ~ ', ' : '' }}
+                                        {% if store.info.distributionCenter.complement == true %}{{ store.info.distributionCenter.complement }}, {% endif %}
+                                        {{ store.info.distributionCenter.district ? store.info.distributionCenter.district ~ ', ' : '' }}
+                                        {{ store.info.distributionCenter.city ? store.info.distributionCenter.city ~ ', ' : '' }}
+                                        {{ store.info.distributionCenter.state ? store.info.distributionCenter.state ~ ', ' : '' }}
+                                        {% if store.info.distributionCenter.postcode %}{{ store.info.distributionCenter.postcode[:5] }}-{{ store.info.distributionCenter.postcode[5:] }}, {% endif %}
+                                        {{ store.info.distributionCenter.country ? store.info.distributionCenter.country : '' }}
+                                        )
+                                    </small>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        Estimativa de produção e entrega de
+                        {% if ship.deliveryTimeFrom == ship.deliveryTimeTo %}
+                            {{ ship.deliveryTimeFrom }} {{ dayOrDays }}
+                        {% else %}
+                            {{ ship.deliveryTimeFrom }} a {{ ship.deliveryTimeTo }} {{ dayOrDays }}
+                        {% endif %}
+                    {% endif %}
+
+                {% if ship.observations is not empty %}
+                    {% set shippingObservations = shippingObservations|merge([{ 'presentation': ship.presentation, 'observations': ship.observations }]) %}
+                {% endif %}
+                </div>
+                {% else %}
+                    <script>
+                        console.log(`{{ key|capitalize }}: {{ ship }}`);
+                    </script>
+                {% endif %}
+            {% endfor %}
+            {% if shippingObservations|length > 0 %}
+                <div class="shipping-alerts">
+                    <h5><small>Observações:</small></h5>
+                    {% for ob in shippingObservations %}
+                        <p><small><cite><strong>{{ ob.presentation }}</strong>: {{ ob.observations }}</cite></small></p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% elseif shippingGroup.errorMessages|length > 0 %}
+            <div class="shipping-alerts">
+                <p>Os seguintes erros ocorreram ao calcular o frete:</p>
+                <ul>
+                    {% for error in shippingGroup.errorMessages %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% else %}
+            <div class="shipping-alerts">
+            Não existem formas de entrega desta loja para o seu endereço.
+            </div>
+        {% endif %}
+    </div>
+{% endif %}

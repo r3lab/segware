@@ -1,0 +1,13 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+
+{% block content %}
+    <div style="{{ style.header }}">
+        <h1>Produto reprovado!</h1>
+    </div>
+    <div style="{{ style.inner }}">
+        <h3>Olá, {{ variant.product.shoppingStore.name }}.</h3>
+        <p>O produto <b>{{ variant.product.name }}</b>, foi reprovado pelo administrador.</p>
+        <p>Motivo da reprovação: </p>
+        <p>{{ variant.product.lastProductStatusHistory.note }}</p>
+    </div>
+{% endblock %}

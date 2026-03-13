@@ -1,0 +1,73 @@
+{% set categoryPresentation = "" %}
+{% set subCategories = null %}
+
+{% set shoppingStoreDto = f2_store_shoppingStore_current() %}
+{% set storeReferenceCode = shoppingStoreDto?shoppingStoreDto.referenceCode:null %}
+{% if storeReferenceCode %}
+    {% set subCategories = flexy_ftwo_shopping_store_category_list(storeReferenceCode, category, 'sortOrder-desc').categories %}
+    {% set categoryPresentation = category ? category.name : 'Categorias' %}
+
+    {% if subCategories|length == 0 and category and category.parent %}
+        {% set subCategories = flexy_ftwo_category_list(category.parent, 'sortOrder-desc').categories %}
+        {% set categoryPresentation = category.parent.name %}
+    {% endif %}
+
+    {% if subCategories|length == 0 %}
+        {% set subCategories = flexy_ftwo_shopping_store_category_list(storeReferenceCode, null, 'sortOrder-desc').categories %}
+        {% set categoryPresentation = category ? category.name : 'Categorias' %}
+    {% endif %}
+{% else %}
+    {% if not category %}
+        {% set category = flexy_ftwo_category_list_by_parent_reference_code('departamentos') %}
+        {% set categoryPresentation = category.name %}
+    {% endif %}
+
+    {% set subCategories = flexy_ftwo_category_list(category, 'sortOrder-desc').categories %}
+    {% set categoryPresentation = category.name %}
+
+    {% if subCategories|length == 0 and category and category.parent %}
+        {% set subCategories = flexy_ftwo_category_list(category.parent, 'sortOrder-desc').categories %}
+        {% set categoryPresentation = category.parent.name %}
+    {% endif %}
+
+    {% if subCategories|length == 0 %}
+        {% set subCategories = flexy_ftwo_category_list(null, 'sortOrder-desc').categories %}
+    {% endif %}
+{% endif %}
+
+<div class="main-category-block">
+    <div class="main-category-title">
+        <i class="fa fa-list"></i>
+        {{ categoryPresentation }}
+    </div>
+
+    <div class="widget-block">
+        <ul class="list-unstyled ul-side-category">
+            {% for subCategory in subCategories %}
+                <li>
+                    <a href="{{ storeReferenceCode ? f2_store_shoppingStore_url('productList', {shoppingStoreReferenceCode: storeReferenceCode, categoryReferenceCode: subCategory.referenceCode}) : path("flexy_ftwo_store_product_list", {categoryReferenceCode : subCategory.referenceCode}) }}">
+                        <i class="fa fa-angle-right"></i>
+                        {{ subCategory.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{% if withFilter and result.propertyFilter is defined and result.propertyFilter.all|length > 0 %}
+    <div class="widget-title">
+        <i class="fa fa-filter"></i> Filtros
+    </div>
+    {% for variantFilter in result.propertyFilter.all %}
+        <div class="widget-subtitle">{{ variantFilter.name }}</div>
+        <div class="widget-block">
+            {% for filterValue in variantFilter.values %}
+                <a href="{{ filterValue.url }}" class="property-filter {{ filterValue.isUsed ? "active" : "" }}">
+                    {{ filterValue.isUsed ? '<span class="remove-filter"><i class="fa fa-check-square-o"></i></span>': '<span><i class="fa fa-square-o"></i></span>' }}
+                    {{ filterValue.value }} <span class="badge badge-filter">{{ filterValue.totalResults }}</span>
+                </a>
+            {% endfor %}
+        </div>
+    {% endfor %}
+{% endif %}

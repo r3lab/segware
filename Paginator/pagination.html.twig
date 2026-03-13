@@ -1,0 +1,39 @@
+{% if filters and filters.useSearchParameters %}
+    {% if not filters.categoryReferenceCode %}
+        {% set filters = filters|merge({categoryReferenceCode: filters.category.referenceCode}) %}
+    {% endif %}
+    {% set query = filters %}
+    {% set ajaxPagination = true %}
+{% endif %}
+
+{% if totalCount > 0 %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-4 pagination-resume">
+                {{ firstItemNumber }} a {{ lastItemNumber }} de {{ totalCount }} item(s)
+            </div>
+            <div class="col-md-8 pagination-pages">
+                <ul class="pagination pull-right">
+                    {% if previous is defined %}
+                        <li class="">
+                            <a {{ ajaxPagination ? 'class="ajax-pagination" ' }}href="{{ path(route, query|merge({(pageParameterName): previous})) }}">«</a>
+                        </li>
+                    {% endif %}
+
+                    {% for page in pagesInRange %}
+                        <li class="{{ page == current ? "active" : "" }}">
+                            <a {{ ajaxPagination ? 'class="ajax-pagination" ' }}href="{{ path(route, query|merge({(pageParameterName): page})) }}">{{ page }}</a>
+                        </li>
+                    {% endfor %}
+
+                    {% if next is defined %}
+                        <li class="">
+                            <a {{ ajaxPagination ? 'class="ajax-pagination" ' }}href="{{ path(route, query|merge({(pageParameterName): next})) }}">»</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+{% endif %}

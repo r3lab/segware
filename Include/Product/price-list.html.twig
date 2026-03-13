@@ -1,0 +1,105 @@
+<style>
+	.price-list-box {
+		border: solid 1px #ccc;
+	}
+
+	.price-list-box-header div {
+		background-color: #bbbbba;
+	}
+
+	.price-list-box-header-div {
+		float: left;
+		width: 25%;
+		border: solid 1px #ccc
+	}
+
+	.price-list-box-row {
+		height: 50px;
+		float: left;
+		width: 25%;
+		border: solid 1px #ccc;
+	}
+</style>
+<div class="price-list-box col-xs-12 col-sm-12 col-md-12">
+
+	{% set variantsByDistributionCenters = flexy_ftwo_variant_distribution_center_list(variant.referenceCode, {'orderBy' : 'price'}) %}
+	<div class="col-xs-12 col-sm-12 col-md-12 price-list-box-header">
+		<div class="price-list-box-header-div">
+			Vendido Por
+		</div>
+		<div class="price-list-box-header-div">
+			Preço
+		</div>
+		<div class="price-list-box-header-div">
+			Quantidade
+		</div>
+		<div class="price-list-box-header-div">
+			&nbsp;
+		</div>
+	</div>
+	{%  set showPriceList = 1 %}
+	{% for variantPriceList in  variantsByDistributionCenters|slice(0,showPriceList) %}
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<input type="hidden" name="id" value="{{ variantPriceList.variantId }}">
+			<input type="hidden" name="distributionCenterReferenceCode" value="{{ variantPriceList.distributionCenterReferenceCode }}">
+			<div class="price-list-box-row" style="">
+				{{ variantPriceList.shoppingStoreCenterName }}
+			</div>
+			<div class="price-list-box-row">
+				R$
+				{{ variantPriceList.actualPrice|number_format(2, ',', '.') }}
+			</div>
+			<div class="price-list-box-row">
+				<input type="number" id="quantity_{{ variantPriceList.shoppingStoreReferenceCode }}" name="quantity" class="quantity f2-shipping-estimate-quantity product-quantity number" min="1" value="1" data-maximum-quantity="{{ variant.stock.hasStockControl ? variant.stock.quantity : '' }}">
+			</div>
+			<div class="price-list-box-row">
+				<button type="button" class="btn flexy-add-to-cart flexy-add-to-booking" data-variant-id="{{ variantPriceList.variantId }}" data-product-quantity="#quantity_{{ variantPriceList.shoppingStoreReferenceCode }}" data-distributioncenter="{{ variantPriceList.shoppingStoreReferenceCode }}">
+					<i class="fa fa-shopping-cart d_inline_m m_right_9"></i>
+					&nbsp;Comprar
+				</button>
+			</div>
+		</div>
+	{% endfor %}
+
+	<div id="hidden-price-lists" class="hide">
+		{% for variantPriceList in  variantsByDistributionCenters|slice(showPriceList) %}
+			<div class=" col-xs-12 col-sm-12 col-md-12">
+				<input type="hidden" name="id" value="{{ variantPriceList.variantId }}">
+				<input type="hidden" name="distributionCenterReferenceCode" value="{{ variantPriceList.distributionCenterReferenceCode }}">
+				<div class="price-list-box-row" style="">
+					{{ variantPriceList.shoppingStoreCenterName }}
+				</div>
+				<div class="price-list-box-row">
+					R$
+					{{ variantPriceList.actualPrice|number_format(2, ',', '.') }}
+				</div>
+				<div class="price-list-box-row">
+					<input type="number" id="quantity_{{ variantPriceList.shoppingStoreReferenceCode }}" name="quantity" class="quantity f2-shipping-estimate-quantity product-quantity number" min="1" value="1" data-maximum-quantity="{{ variant.stock.hasStockControl ? variant.stock.quantity : '' }}">
+				</div>
+				<div class="price-list-box-row">
+					<button type="button" class="btn flexy-add-to-cart flexy-add-to-booking" data-variant-id="{{ variantPriceList.variantId }}" data-product-quantity="#quantity_{{ variantPriceList.shoppingStoreReferenceCode }}" data-distributioncenter="{{ variantPriceList.shoppingStoreReferenceCode }}">
+						<i class="fa fa-shopping-cart d_inline_m m_right_9"></i>
+						&nbsp;Comprar
+					</button>
+				</div>
+			</div>
+		{% endfor %}
+	</div>
+	<div id="show-all-price-lists" class="col-xs-12 col-sm-12 col-md-12">
+		<div class="">
+			<button type="button" class="wishlist-btn" onclick="showPriceLists()" id="link-show-all-price-lists">
+				Mostrar todos
+				<i class="fa fa-plus d_inline_m m_right_9"></i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<script>
+	function showPriceLists() {
+		$('#hidden-price-lists').removeClass('hide');
+		$('#show-all-price-lists').hide();
+	}
+
+	function sendAjaxBuy() {}
+</script>

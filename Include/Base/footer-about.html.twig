@@ -1,0 +1,55 @@
+<div class="container-fluid bottom-footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="row">
+                    <div class="col-md-12">
+                        <p>{{ store.info.companyName }}</p>
+                        <p>CNPJ: {{ store.info.cnpj }}</p>
+                        <p>
+                            {#{{ store.info.address }}#}
+
+                            {{ store.info.distributionCenter.street }},
+                            {{ store.info.distributionCenter.number }},
+                            {% if store.info.distributionCenter.complement == true %}
+                                {{ store.info.distributionCenter.complement }},
+                            {% endif %}
+                            {{ store.info.distributionCenter.district }},
+                            {{ store.info.distributionCenter.city }},
+                            {{ store.info.distributionCenter.state }},
+                            {{ store.info.distributionCenter.postcode[:5] }}-{{ store.info.distributionCenter.postcode[5:] }}
+                            {{ store.info.distributionCenter.country }}.
+
+
+                            <br>
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-8">
+                <div class="row xs-top20">
+                    <div class="col-xs-4">
+                        {% set paymentMethodIcons = store.paymentMethod.icons %}
+                        {% if paymentMethodIcons|length > 0 %}
+                            <p class="title-copyright">Pagamento</p>
+                            {% for paymentMethodIcon in paymentMethodIcons %}
+                                <img src="{{ paymentMethodIcon.iconUrl }}" title="{{ paymentMethodIcon.name }}" style="display: inline-block; width: 20% " />
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="col-xs-4">
+                        <p class="title-copyright">Segurança</p>
+                        <a href="https://www.comodo.com/" target="_blank"><img src="{{ flexy_ftwo_resource_url_img('img/comodo.png') }}" class="comodo img-responsive" /></a>
+                    </div>
+                    <div class="col-xs-4">
+                        <p class="title-copyright">Plataforma</p>
+                        <a href="https://www.flexy.com.br" target="_blank">
+                        	<img src="{{ flexy_ftwo_resource_url_img('img/flexy.png') }}" class="img-responsive" />
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

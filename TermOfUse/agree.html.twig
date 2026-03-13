@@ -1,0 +1,26 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% set title = "Termos de Uso" %}
+
+{% block content %}
+    <section>
+        <div class="second-page-container">
+            <div class="block">
+                <div class="container">
+                    <div class="header-for-light">
+                        <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">Termos de Uso</h1>
+                    </div>
+                    {% if termOfUsePlatform %}
+                        <div class="row">
+                            <div class="col-md-12">
+                                {{ termOfUsePlatform.content|raw }}
+                            </div>
+                        </div>
+                    {% else %}
+                        <h3>Nenhum termo de uso encontrado.</h3>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

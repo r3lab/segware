@@ -1,0 +1,26 @@
+{% extends "FlexyFtwoStoreBundle:Layout:base.html.twig" %}
+
+{% set images = flexy_ftwo_banner_image_list('home-banner').images %}
+
+{% set variants = f2_store_variant_list('destaques', {'shoppingStoreReferenceCode' : shoppingStore.referenceCode, 'itemsPerPage' : 9}).variants %}
+{% if variants|length == 0 %}
+    {% set variants = f2_store_variant_list(null, {'shoppingStoreReferenceCode' : shoppingStore.referenceCode, 'itemsPerPage' : 9}).variants %}
+{% endif %}
+
+{% block content %}
+    {% include 'FlexyFtwoStoreBundle:Include/Common:main-banner.html.twig' with {images: images} %}
+
+    <section class="{{ images|length == 0 ? "first-page-container" : "" }}">
+        <div class="container">
+            <div class="row">
+                <aside class="col-md-3">
+                    {% include 'FlexyFtwoStoreBundle:Include:sidebar.html.twig' with {withFilter : false, withProducts: true, listAll: true} %}
+                </aside>
+
+                <div class="col-md-9">
+                    {% include 'FlexyFtwoStoreBundle:Include:variant-list-block.html.twig' with {title : 'Destaques', variants: variants} %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

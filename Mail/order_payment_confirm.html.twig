@@ -1,0 +1,19 @@
+{% if order.shippingMethods.first.scheduledDeliveryMethod %}
+    {% include 'FlexyFtwoStoreBundle:Mail:order.html.twig' with {
+    'order' : order,
+    'title': 'Pagamento confirmado!',
+    'message' : "<p>Olá, " ~ order.customer.fullName ~ "!</p>
+                <p>Confirmamos que o pagamento de seu pedido, número <b>" ~  order.number ~ "</b>, foi identificado com sucesso.</p>
+                <p>Seu pedido agora será encaminhado para nossa equipe e será entregue nessa data: <b>" ~ order.shippingMethods.first.deliveryTimePresentation ~ "</b>.</p>
+                <p>Segue abaixo um resumo de seu pedido.</p>"
+    } %}
+{% else %}
+    {% include 'FlexyFtwoStoreBundle:Mail:order.html.twig' with {
+    'order' : order,
+    'title': 'Pagamento confirmado!',
+    'message' : "<p>Olá, " ~ order.customer.fullName ~ "!</p>
+                <p>Confirmamos que o pagamento de seu pedido, número <b>" ~  order.number ~ "</b>, foi identificado com sucesso.</p>
+                <p>Seu pedido agora será encaminhado para nossa equipe e será entregue em até <b>" ~ order.shippingMethods.first.estimatedDeliveryTo|number_format ~ "</b> dias úteis.</p>
+                <p>Segue abaixo um resumo de seu pedido.</p>"
+    } %}
+{% endif %}

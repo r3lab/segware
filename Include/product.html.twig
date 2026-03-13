@@ -1,0 +1,72 @@
+{% set price = flexy_ftwo_product_variant_price(variant) %}
+{% set promotion = flexy_ftwo_variant_promotion_catalog_details(variant) %}
+{% set installments = flexy_ftwo_installment_maximum_calculator(promotion ? promotion.finalPrice : price, {'variantReferenceCode': variant.referenceCode}) %}
+{% set hasStock = flexy_ftwo_product_has_stock(variant.product) %}
+{% set variantUrl = additional ? 'javascript:void(0);' : flexy_ftwo_product_url(variant) %}
+{% set productRelated = variant.productsRelated.first.product %}
+
+<article class="product light">
+	<figure class="figure-hover-overlay">
+		<a class="flexy-product-image-container" href="{{ variantUrl }}" title="">
+			<span class="flexy-product-image-vertical-align-helper"></span>
+			<img src="{{ flexy_ftwo_image_placeholder_small(variant.product.masterImage, 'img/product-placeholder.gif') }}" title="{{ variant.product.name }}" alt="{{ variant.product.name }}" class="flexy-product-image"/>
+		</a>
+		<div class="product-options">
+			{% if additional %}
+				{% if variantSalable and hasStock and variant.product.isAvailableForSale %}
+					<a href="javascript:void(0);" class="btn additional-to-cart flexy-add-to-cart main_cart_add" title="Adicionar ao carrinho" data-addition-id="{{ variant.id }}" data-variant-id="{{ mainVariantId }}" data-additional-variant-ids="[{{ variant.id }}]" data-distributioncenter="{{ (shoppingStore)?shoppingStore.referenceCode:null }}" data-product-quantity="#quantity">
+						<i class="fa fa-shopping-cart"></i>
+					</a>
+				{% endif %}
+
+				{% if variantQuotable and hasStock and variant.product.isAvailableForQuote %}
+					<a href="javascript:void(0);" class="additional-to-cart flexy-add-to-quote main_cart_add" title="Adicionar ao orçamento" data-addition-id="{{ variant.id }}" data-variant-id="{{ mainVariantId }}" data-additional-variant-ids="[{{ variant.id }}]" data-distributioncenter="{{ (shoppingStore)?shoppingStore.referenceCode:null }}" data-product-quantity="#quantity">
+						<i class="fa fa-file"></i>
+					</a>
+				{% endif %}
+			{% else %}
+				{% if variantSalable and productRelated.isAvailableForSale %}
+					<a href="javascript:void(0);" class="btn flexy-add-to-cart" title="Adicionar ao carrinho" data-variant-id="{{ variant.id }}">
+						<i class="fa fa-shopping-cart"></i>
+					</a>
+				{% endif %}
+
+				<a href="{{ variantUrl }}" title="Mais informações">
+					<i class="fa fa-plus"></i>
+				</a>
+			{% endif %}
+		</div>
+	</figure>
+
+	<div class="product-caption">
+		<div class="block-name">
+			<a href="{{ variantUrl }}" class="product-name">{{ variant.product.name }}</a>
+
+			{% if store.config.displayPrice %}
+				<p class="product-price">
+					{% if hasStock %}
+						{% if promotion %}
+							<span class="full-price">de R$
+								{{ price|number_format(2, ',', '.') }}
+								por</span>
+							<br>
+						{% endif %}
+
+						<span class="final-price">R$
+							{{ (promotion ? promotion.finalPrice : price)|number_format(2, ',', '.') }}</span>
+						{% if installments.installmentNumber > 0 %}
+							<div class="installment">{{ installments.installmentNumber }}x de R$
+								{{ installments.installmentValue|number_format(2, ',', '.') }}</div>
+						{% endif %}
+						{% if store.paymentMethod.boleto and store.paymentMethod.boleto.discount %}
+							<div class="one-time-payment">à vista por
+								{{ ((promotion ? promotion.finalPrice : variant.finalPrice)*((100-store.paymentMethod.boleto.discount)/100))|number_format(2, ',', '.') }}</div>
+						{% endif %}
+					{% else %}
+						<span class="product-unavailable">Indisponível</span>
+					{% endif %}
+				</p>
+			{% endif %}
+		</div>
+	</div>
+</article>

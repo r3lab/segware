@@ -1,0 +1,12 @@
+{% for customer in customerList.pagination %}
+    <strong>{{ customer.companyName }} {{ customer.firstName }}</strong>
+    <br/>
+    {{ customer.address }}
+    <br/>
+    {{ customer.primaryPhone }} {{ customer.secondaryPhone }}
+    <br/>
+    {{ customer.email }}
+    {% if not loop.last %}
+    <hr/>
+    {% endif %}
+{% endfor %}

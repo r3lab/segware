@@ -1,0 +1,33 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% set title = "Entrar" %}
+
+{% block content %}
+    {% include 'FlexyFtwoStoreBundle:Include/Page:login.html.twig' %}
+{% endblock %}
+
+{% block javascript %}
+<script>
+	$('.emailInput').on('change', function() {
+	var mail = $('.emailInput').val();
+	var person = '{"email":'+'"'+mail+'"'+'}';
+	$.ajax({
+	url: '{{ path('flexy_ftwo_store_customerValidation_validate_email') }}',
+	type: 'post',
+	dataType: 'json',
+		data: person,
+		success: function (data) { },
+		error: function (data) { alert(data.responseJSON.message); }
+	   });
+	});
+	</script>
+
+{% endblock %}
+
+{% block css %}
+    <style type="text/css">
+      .g-signin2 > div {
+        width: 100% !important;
+      }
+    </style>
+{% endblock %}

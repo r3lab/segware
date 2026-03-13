@@ -1,0 +1,107 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% block javascriptHead %}
+    {{ store.googleReCaptcha.scriptTagHeadV3|raw }}
+{% endblock %}
+
+{% block javascript %}
+    {% if store.googleReCaptcha.isActive %}
+        {{ store.googleReCaptcha.scriptTagFooterV3|raw }}
+    {% endif %}
+{% endblock %}
+
+{% set title = "Contato" %}
+{% set form = shoppingStore ? form : form.createView %}
+
+{% block content %}
+    {% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-contact-success')} %}
+    {% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-contact-error'), 'error' : true} %}
+
+    <section class="{{ shoppingStore ? 'first-page-container' : 'second-page-container' }}">
+        <div class="container">
+            {% if not shoppingStore %}
+                {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [{'title' : 'Contato' }]} %}
+
+                <div class="header-for-light">
+                    <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">Fale conosco</h1>
+                </div>
+            {% endif %}
+
+            <div class="row">
+                <div class="col-md-6 col-sm-6">
+                    <div class="block-form box-border wow fadeInLeft animated" data-wow-duration="1s">
+                        <h3><i class="fa fa-envelope-o"></i> Enviar mensagem</h3>
+                        <div id="form-wrapper">
+                            <div id="form-inner">
+                                <form action="{{ shoppingStore ? f2_store_shoppingStore_url('contact', {shoppingStoreReferenceCode : shoppingStore.referenceCode}) : path('flexy_ftwo_store_contact') }}" method="post" class="f2-form">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Nome: <span class="text-error">*</span></label>
+                                                <div>
+                                                    {{ form_widget(form.name, {'attr' : {'class' : 'form-control', 'placeholder' : 'Seu nome'}}) }}
+                                                    {{ form_errors(form.name) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="control-label">E-mail: <span class="text-error">*</span></label>
+                                                <div>
+                                                    {{ form_widget(form.email, {'attr' : {'class' : 'form-control', 'placeholder' : 'Seu e-mail'}}) }}
+                                                    {{ form_errors(form.email) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label class="control-label">Telefone: <span class="text-error">*</span></label><div id="phone-error" class="text-error" style="font-size: 15px"></div>
+                                                {{ form_widget(form.phone, {'attr' : {'class' : 'flexy-input-phone form-control', 'placeholder' : 'Seu telefone'}}) }}
+                                                {{ form_errors(form.phone) }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label class="control-label">Assunto: <span class="text-error">*</span></label>
+                                                {{ form_widget(form.subject, {'attr' : {'class' : 'form-control', 'placeholder' : 'Seu assunto'}}) }}
+                                                {{ form_errors(form.subject) }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="inputText" class="control-label">Mensagem: <span class="text-error">*</span></label>
+                                                <div>
+                                                    {{ form_widget(form.message, {'attr' : {'class' : 'form-control', 'placeholder' : 'Sua mensagem', 'rows' : 8}}) }}
+                                                    {{ form_errors(form.message) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% if store.googleReCaptcha.isActive %}
+                                            {{ store.googleReCaptcha.tokenV3|raw }}
+                                        {% endif %}
+                                    </div>
+                                    <hr>
+                                    <input type="submit" class="btn-default-1" value="Enviar">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-md-6 col-sm-6">
+
+                    <div class="block-form box-border wow fadeInRight animated" data-wow-duration="1s">
+                        <h3><i class="fa fa-phone"></i>Telefone:</h3>
+                        <p>{{ shoppingStore ? shoppingStore.primaryPhone : store.info.primaryPhone }}</p>
+                        <hr>
+                        <h3><i class="fa fa-thumb-tack"></i>Endereço:</h3>
+                        <p>{{ shoppingStore ? shoppingStore.distributionCenter : store.info.address }}</p>
+                        <div class="google-map">
+                            <iframe src="https://www.google.com.br/maps?q={{ shoppingStore ? shoppingStore.distributionCenter.street : store.info.address }}, {{ store.info.distributionCenter.number }}, {{ store.info.distributionCenter.district }}, {{ store.info.distributionCenter.city }}, {{ store.info.distributionCenter.state }}, {{ store.info.distributionCenter.postcode }},%20Brasil&output=embed" style="height:350px;width:100%;border:0" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

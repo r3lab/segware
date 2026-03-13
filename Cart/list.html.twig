@@ -1,0 +1,344 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+{% set title = "Carrinho" %}
+{% set details = flexy_ftwo_cart_list() %}
+{% block content %}
+    {% include 'FlexyFtwoStoreBundle:Include/Modal:term-of-use-client-modal.html.twig' %}
+    {% set addItems = app.session.flashbag.get('promotion-buy-x-get-y-add-variant') %}
+    {% if addItems|length > 0 %}
+        <div class="alerts container">
+            {% for items in addItems %}
+                {% for item in items %}
+                    <div class="alert alert-info">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                    aria-hidden="true">×</span></button>
+                        <span class="fa fa-gift fa-lg"></span> Com a promoção <strong>{{ item.promotion }}</strong> você
+                        tem direito a {{ item.quantity }} unidade(s) de graça dos produtos:
+                        <ul>
+                            {% for variant in item.variants %}
+                                <li><strong>{{ variant.product.name }}
+                                        {{ variant.product.isCustom ? "- " ~ variant.presentation : "" }}
+                                        {{ isAdditional ? ' (Adicional)' : '' }} ({{ variant.referenceCode }})</strong>
+                                    <button class="add-free-to-cart btn btn-default" title="Adicionar ao carrinho"
+                                            data-product-quantity="{{ item.quantitiesToAdd[variant.id] }}"
+                                            data-variant-id="{{ variant.id }}"
+                                            data-distributioncenter="{{ item.distributionsCenters[variant.id].referenceCode }}">
+                                        Adicionar ao carrinho <i class="fa fa-shopping-cart"></i>
+                                    </button>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+
+    <section>
+        <div class="second-page-container">
+            <div class="container">
+                {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [{'title' : 'Carrinho' }]} %}
+                {% if flexy_ftwo_current_cart_totals().countTotalItems == 0 %}
+                    <div class="header-for-light">
+                        <h2 class="wow fadeInRight animated animated emptyCart" data-wow-duration="1s"
+                            style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                            Nenhum produto em seu carrinho.
+                        </h2>
+                        <a href="/">&larr; Voltar às compras</a>
+                    </div>
+                {% else %}
+                    {% include 'FlexyFtwoStoreBundle:Include/Cart:cart-list.html.twig' with {carts : details.carts, changeQuantity : true, remove: true} %}
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4">
+                            <div class="row">
+                                {% if details.carts[0].isBooking == false %}
+                                <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div class="block-form box-border wow fadeInLeft" data-wow-duration="1s">
+                                        <h3><i class="fa fa-truck"></i> Frete e prazo</h3>
+                                        <hr/>
+                                        <form action="{{ path("flexy_ftwo_store_cart_list") }}" method="get">
+                                            <div class="input-group">
+                                                <input type="text" class="flexy-postcode-mask form-control"
+                                                       name="zipCode" id="zipCodeCart" placeholder="Digite seu cep"
+                                                       required pattern="\d{5}-\d{3}"
+                                                       value="{{ app.request.get('zipCode') }}">
+                                                <span class="input-group-btn">
+                                                    <input type="submit" id="calculation_cep" class="btn btn-default-1"
+                                                           disabled value="Calcular"/>
+                                                </span>
+                                            </div>
+                                            <div class="cep_validate"></div>
+                                        </form>
+
+                                        {% for cart in details.carts if cart.items|length > 0 %}
+                                            {% include 'FlexyFtwoStoreBundle:Include/Cart:shipping-simulation.html.twig' with {cart : cart, shipmentGroups : details.shipmentGroups} %}
+                                        {% endfor %}
+                                    </div>
+                                </article>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4">
+                            <div class="row">
+                                {% if details.carts[0].isBooking == false %}
+                                    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                        <div class="block-form box-border wow fadeInLeft" data-wow-duration="1s">
+                                            <h3><i class="fa fa-tag"></i> Cupom de desconto</h3>
+                                            <hr>
+                                            <form action="#" id="disable-submit" method="post">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control coupon-validate"
+                                                                   id="coupon-code" name="coupon-code"
+                                                                   placeholder="Digite o código do cupom">
+                                                            <span class="input-group-btn">
+                                                            <input type="button" value="Aplicar"
+                                                                   class="btn btn-default-1 flexy-cart-coupom-submit"
+                                                                   data-coupom-code="#coupon-code">
+                                                        </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    {% if details.masterCart.coupon %}
+                                                        {% set coupon = details.masterCart.coupon %}
+                                                        {% set promotion = coupon.promotion %}
+                                                        {% set discountValueText = promotion.discountType.isMoney ? promotion.discountType ~ ' ' %}
+                                                        {% set discountValueText = discountValueText ~ promotion.discountValue|number_format(2, ',', '.') ~ (promotion.discountType.isPercent ? promotion.discountType) %}
+                                                        {% set shippingDiscountCoupon = promotion.isShippingDiscount %}
+                                                        {% set freeShippingCoupon = promotion.isFreeDelivery %}
+
+                                                        <div class="media media-items">
+                                                            <div class="media-body items">
+                                                                <div class="list-group mb-0">
+                                                                    <div class="list-group-item items-list text-center">
+                                                                        <small>
+                                                                            <strong>Cupom aplicado</strong>
+                                                                        </small>
+                                                                    </div>
+
+                                                                    <div class="list-group-item items-list">
+                                                                        <small>Código:</small>
+
+                                                                        <small>{{ coupon.code }}</small>
+                                                                    </div>
+
+                                                                    <div class="list-group-item items-list">
+                                                                        <small>Desconto:</small>
+
+                                                                        <small>{{ discountValueText }}</small>
+                                                                    </div>
+
+                                                                    {% if shippingDiscountCoupon %}
+                                                                        <div class="list-group-item items-list">
+                                                                            <small>Aplica desconto ao frete:</small>
+
+                                                                            <small><span
+                                                                                        class="fa fa-check"></span></small>
+                                                                        </div>
+                                                                    {% endif %}
+
+                                                                    {% if freeShippingCoupon %}
+                                                                        <div class="list-group-item items-list">
+                                                                            <small>Frete grátis:</small>
+
+                                                                            <small><span
+                                                                                        class="fa fa-check"></span></small>
+                                                                        </div>
+                                                                    {% endif %}
+
+                                                                    <div class="list-group-item items-list">
+                                                                        <button class="flexy-cart-coupom-remove btn btn-block btn-default-1
+                                                                            data-cart-id="{{ details.masterCart.id }}"
+                                                                        title="Remover cupom">
+                                                                        <span class="fa fa-lg fa-trash-o"></span>
+                                                                        Remover
+                                                                        cupom
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+
+                                                    {% for subSale in details.masterCart.sales if subSale.coupon and subSale.coupon.promotion.shoppingStore %}
+                                                        {% set coupon = subSale.coupon %}
+                                                        {% set promotion = coupon.promotion %}
+                                                        {% set discountValueText = promotion.discountType.isMoney ? promotion.discountType ~ ' ' %}
+                                                        {% set discountValueText = discountValueText ~ promotion.discountValue|number_format(2, ',', '.') ~ (promotion.discountType.isPercent ? promotion.discountType) %}
+                                                        {% set shippingDiscountCoupon = promotion.isShippingDiscount %}
+                                                        {% set freeShippingCoupon = promotion.isFreeDelivery %}
+
+                                                        <div class="media media-items">
+                                                            <div class="media-body items">
+                                                                <div class="list-group mb-0">
+                                                                    <div class="list-group-item items-list">
+                                                                        <small>Código:</small>
+
+                                                                        <small>{{ coupon.code }}</small>
+                                                                    </div>
+
+                                                                    <div class="list-group-item items-list">
+                                                                        <small>Desconto:</small>
+
+                                                                        <small>{{ discountValueText }}</small>
+                                                                    </div>
+
+                                                                    {% if shippingDiscountCoupon %}
+                                                                        <div class="list-group-item items-list">
+                                                                            <small>Aplica desconto ao frete:</small>
+
+                                                                            <small><span
+                                                                                        class="fa fa-check"></span></small>
+                                                                        </div>
+                                                                    {% endif %}
+
+                                                                    {% if freeShippingCoupon %}
+                                                                        <div class="list-group-item items-list">
+                                                                            <small>Frete grátis:</small>
+
+                                                                            <small><span
+                                                                                        class="fa fa-check"></span></small>
+                                                                        </div>
+                                                                    {% endif %}
+
+                                                                    <div class="list-group-item items-list">
+                                                                        <button class="flexy-cart-coupom-remove btn btn-block btn-default-1"
+                                                                                data-cart-id="{{ subSale.id }}"
+                                                                                title="Remover cupom">
+                                                                            <span class="fa fa-lg fa-trash-o"></span>
+                                                                            Remover cupom
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </article>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4">
+                            <div class="row">
+                                <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div class="block-form block-order-total box-border wow fadeInRight"
+                                         data-wow-duration="1s">
+                                        <h3><i class="fa fa-dollar"></i> Totais</h3>
+                                        <hr>
+                                        {% include 'FlexyFtwoStoreBundle:Include/Cart:cart-totals.html.twig' with {cart : details.masterCart} %}
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <hr/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-8 hidden-xs hidden-sm">
+                            <a href="/">&larr; Voltar às compras</a>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            {% if termOfUse and not accepted %}
+                                <a href="javascript:void(0);"
+                                class="btn btn-checkout btn-light-blue col-xs-12 form-use-client-modal" data-toggle="modal" data-target="#form-use-client-modal">
+                                    <i class="fa fa-chevron-right"></i>
+                                    Finalizar compra
+                                </a>
+                            {% else %}
+                                <a href="{{ path("flexy_ftwo_store_checkout") }}" class="btn btn-checkout btn-light-blue col-xs-12">
+                                    Finalizar compra
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            {% include 'FlexyFtwoStoreBundle:Include/Cart:cart-buyx-gety-details.html.twig' with {cart : details.masterCart} %}
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+    (function() {
+    $('.add-free-to-cart').click(function () {
+        var $this = $(this);
+        $.ajax({
+            url: '{{ path('flexy_ftwo_store_cart_add') }}',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        id: $this.data('variant-id'),
+                        quantity: $.isNumeric($this.data('product-quantity'))
+                            ? $this.data('product-quantity')
+                            : $this.data('product-quantity').val(),
+
+                        additionalVariantId: $this.data("additional-variant-ids") || [],
+
+                        distributionCenter: $this.data("distributioncenter") || []
+                    },
+                    beforeSend: function () {
+                        $this.parent().html('<div id=\"adding-to-cart\"><i class=\"fa fa-spinner fa-spin\"></i> Adicionando...</div>');
+                    },
+                    success: function () {
+                        $this.parent().alert('close');
+                        window.location.replace('{{ path('flexy_ftwo_store_cart_list') }}');
+                    },
+                    error: function (data) {
+                        $('#adding-to-cart').html('<i class=\"fa fa-exclamation-circle fa-lg\"></i> '+data.responseJSON.error);
+                    }
+                });
+            });
+
+            function updateCart($this, quantity){
+                $.ajax({
+                    url: '{{ path('flexy_ftwo_store_cart_update') }}',
+                    data: {
+                        id: $this.data('cart-item-id'),
+                        customization_item_id: $this.data('customization-item-id'),
+                        quantity: quantity
+                    },
+                    type: 'POST',
+                    beforeSend: function (data) {
+                        $('.loading').html('<div class="alert alert-info"><i class="fa fa-spin fa-refresh"></i> Alterando quantidade do produto...</div>');
+                    },
+                    success: function (data) {
+                        if(data.error != null) {
+                            alert(data.error);
+                        }
+
+                        window.location.reload();
+                    },
+                    error: function (data) {
+                        $this.trigger("change-quantity-error");
+                    }
+                });
+            }
+
+            $('.flexy-cart-cloned-product-quantity').on("blur", function() {
+                var $this = $(this);
+                var quantity = $this.data('original-quantity') + ($this.val() - $this.data('quantity'));
+                updateCart($this, quantity);
+            });
+
+            $('.flexy-cart-delete-cloned').on("click", function() {
+                var $this = $(this);
+                var quantity = $this.data('original-quantity') - $this.data('quantity');
+                updateCart($this, quantity);
+            });
+        })();
+    </script>
+    {# Antifraude #}
+    {% include 'FlexyFtwoStoreBundle:AntiFraud:antiFraudCartSnippetCode.html.twig' %}
+{% endblock %}

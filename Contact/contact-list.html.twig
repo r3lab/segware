@@ -1,0 +1,46 @@
+<ul class="flexy-contact-list">
+    {% for contact in contacts %}
+        <li class="flexy-contact {{ contact.platformUser ? 'flexy-contact-answer' : 'flexy-contact-question' }}">
+            {% if not detailed %}
+                <p class="contact-details">
+                    <span class="contact-user">{{ contact.platformUser.name ?: contact.customer.firstName }} </span> - <span class="contact-time">{{ contact.createdAt|date('d/m/Y H:i') }}</span>
+                </p>
+                <p class="message">
+                    {{ contact.message|nl2br }}
+                </p>
+            {% else %}
+                {{ contact.createdAt|date('d/m/Y H:i') }} |
+                {{ contact.subject|slice(0, 50) }} |
+                {{ contact.message|slice(0, 50) }}
+
+                <a href="{{ path('flexy_ftwo_store_contact_details', { id : contact.id }) }}">
+                    + Mais
+                </a>
+
+                {% if contact.orderId %}
+                    - <a href="{{ path('flexy_ftwo_store_customer_order_detail', { 'orderId' : contact.orderId }) }}">
+                        Pedido: {{ contact.orderNumber }}
+                    </a>
+                {% endif %}
+
+                {% if contact.quote %}
+                    - <a href="{{ path('flexy_ftwo_store_customer_quote_detail', { 'quote' : contact.quote.id }) }}">
+                        Orçamento: {{ contact.orderNumber }}
+                    </a>
+                {% endif %}
+            {% endif %}
+            
+            {% if contact.attachs.count %}
+                <div>
+                    {% for attach in contact.attachs %}
+                        {% set name = attach.path|split("/")|last %}
+                        <a class="btn btn-default" target="_blank" href="{{ asset(attach.path, 'cloudfront') }}">
+                            <i class="fa fa-paperclip" aria-hidden="true"></i>&nbsp;
+                            {{ name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>

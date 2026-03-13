@@ -1,0 +1,370 @@
+{% set loginUser = app.user %}
+{% set showMultipleUsers = not store.info.usesMultipleSales and loginUser.master and customer.cnpj %}
+{% set orders = f2_customer_order_list(
+    {
+        'customerId' : customer.id ,
+        'agentId' : (agent is defined)?agent.id:null,
+        'shoppingStoreReferenceCode' : (shoppingStoreReferenceCode is defined)?shoppingStoreReferenceCode:null
+    }
+)
+%}
+{% set pagination = f2_customer_order_list_pagination(
+    {
+        'customerId' : customer.id,
+        'agentId' : (agent is defined)?agent.id:null,
+        'shoppingStoreReferenceCode' : (shoppingStoreReferenceCode is defined)?shoppingStoreReferenceCode:null,
+    }
+)
+%}
+{% set ordersWithSubscriptionPlans = f2_customer_order_list(
+{
+'customerId' : customer.id ,
+'agentId' : (agent is defined)?agent.id:null,
+'onlyOriginalSubscriptions': true
+}
+)
+%}
+
+{% set ordersWithBookings = f2_customer_order_list(
+        {
+            'customerId' : customer.id ,
+            'agentId' : (agent is defined)?agent.id:null,
+            'hasBooking': true,
+        }
+    )
+%}
+
+<div class="customer-profile">
+	<article>
+		<ul class="nav nav-pills nav-justified">
+			<li class="active">
+				<a href="#orders" data-toggle="tab">Pedidos</a>
+			</li>
+			{% if customer.quotes|length %}
+				<li>
+					<a href="#quotes" data-toggle="tab">Orçamentos</a>
+				</li>
+			{% endif %}
+			<li>
+				<a href="#subscriptionsplans" data-toggle="tab">Assinaturas</a>
+			</li>
+			<li>
+				<a href="#bookings" data-toggle="tab">Aluguéis</a>
+			</li>
+			<li>
+				<a href="#coupons" data-toggle="tab">Cupons</a>
+			</li>
+		</ul>
+	</article>
+	<div class="tab-content">
+		<div class="row tab-pane active" id="orders">
+			<article class="col-xs-12 col-sm-12">
+				<div class="box-border wow fadeInLeft" data-wow-duration="1s">
+					<div class="table-responsive">
+						<table class="table table-hover">
+							<thead>
+								<tr>
+									<th>Número</th>
+									{% if store.info.usesMultipleSales %}
+										<th>Loja</th>
+									{% endif %}
+									<th>Realizado em</th>
+									{% if showMultipleUsers %}
+										<th>Usuário</th>
+									{% endif %}
+									<th>Itens</th>
+									<th>Andamento</th>
+									<th>Total</th>
+									{% if agent is defined %}
+										<th>Comissão</th>
+									{% endif %}
+									<th>&nbsp;</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for order in pagination if ((order.user)?order.user.id == loginUser.id:false) or loginUser.master %}
+									<tr>
+										<td>
+											<a href="{{ path("flexy_ftwo_store_customer_order_detail", {orderId : order.id}) }}">{{ order.number }}</a>
+										</td>
+										{% if store.info.usesMultipleSales %}
+											<td>{{ order.shoppingStore.name }}</td>
+										{% endif %}
+										<td>{{ order.createdAt|date("d/m/Y") }}</td>
+										{% if showMultipleUsers %}
+											<td>{{ order.user and not order.user.master ? order.user.name : order.customer.responsible }}</td>
+										{% endif %}
+										<td>{{ order.items|length }}
+											<span>item(ns)</span>
+										</td>
+										<td>
+											<span class="label">{{ orderPresentations[order.status.name] is defined ?: order.status.presentation }}</span>
+										</td>
+										<td>R$
+											{{ order.total|number_format(2, ',', '.') }}</td>
+										{% if agent is defined %}
+											<td>{{ order.agentCommissionValueByAgent(agent)|number_format(2, ',', '.') }}</td>
+										{% endif %}
+										<td class="text-right">
+											{% if not order.orderSubscriptionPlan and order.cart %}
+												{#<a href="{{ path('flexy_ftwo_store_customer_order_redo', {'orderId': order.id}) }}" title="Refazer pedido"><i class="fa fa-files-o"></i></a> by OrderId #}
+												<a href="{{ path('flexy_ftwo_store_customer_reorder', {'orderNumber': order.number}) }}" class="remake-order" title="Refazer pedido">
+													<i class="fa fa-files-o"></i>
+												</a>
+												{# by OrderNumber #}
+											{% endif %}
+											<a class="btn btn-mini" href="{{ path("flexy_ftwo_store_customer_order_detail", {orderId : order.id}) }}" title="Ver detalhes">
+												<i class="fa fa-plus-circle"></i>
+											</a>
+										</td>
+									</tr>
+								{% else %}
+									<tr>
+										<td colspan="6">
+											<h3>Nenhum pedido realizado.</h3>
+										</td>
+									</tr>
+								{% endfor %}
+								{% if agent is defined %}
+									<tr>
+										<td colspan="8">
+											<p style="text-align:center">
+												* exibindo os resultados dos últimos 30 dias. Para acessar pedidos de datas anteriores use o filtro de data do
+												<a href="{{ path("flexy_ftwo_store_dashboard_agent_commission_dashboard") }}">
+													Painel de Vendas.
+												</a>
+											</p>
+										</td>
+									</tr>
+								{% endif %}
+							</tbody>
+						</table>
+					</div>
+					<div class="row">
+						{{ knp_pagination_render(pagination) }}
+					</div>
+				</div>
+			</article>
+		</div>
+		<div class="row tab-pane" id="quotes">
+			<article class="col-md-12">
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Número</th>
+								{% if store.info.usesMultipleSales %}
+									<th>Loja</th>
+								{% endif %}
+								<th>Realizado em</th>
+								{% if showMultipleUsers %}
+									<th>Usuário</th>
+								{% endif %}
+								<th>Itens</th>
+								<th>Total</th>
+								<th>&nbsp;</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for quote in flexy_ftwo_quotes_current_customer() if quote.user.id == loginUser.id or loginUser.master %}
+								<tr>
+									<td>
+										<a href="{{ path("flexy_ftwo_store_customer_quote_detail", {quoteId : quote.id}) }}">{{ quote.number }}</a>
+									</td>
+									{% if store.info.usesMultipleSales %}
+										<td>{{ quote.shoppingStore.name }}</td>
+									{% endif %}
+									<td>{{ quote.createdAt|date("d/m/Y") }}</td>
+									{% if showMultipleUsers %}
+										<td>{{ quote.user and not quote.user.master ? quote.user.name : quote.customer.responsible }}</td>
+									{% endif %}
+									<td>{{ quote.items|length }}
+										<span>item(ns)</span>
+									</td>
+									<td>R$
+										{{ quote.itemsTotalWithDiscount|number_format(2, ',', '.') }}</td>
+									<td class="text-right">
+										<a href="{{ path('flexy_ftwo_store_quote_recovery', {'id': quote.id}) }}" title="Modificar">
+											<i class="fa fa-edit"></i>
+										</a>
+										<a class="btn btn-mini" href="{{ path("flexy_ftwo_store_customer_quote_detail", { quoteId : quote.id }) }}" title="Ver detalhes">
+											<i class="fa fa-plus-circle"></i>
+										</a>
+									</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="6">
+										<h3>Nenhum orçamento realizado.</h3>
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</article>
+		</div>
+		<div class="row tab-pane" id="subscriptionsplans">
+			<article class="col-md-12">
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Número</th>
+								<th>Realizado em</th>
+								{% if showMultipleUsers %}
+									<th>Usuário</th>
+								{% endif %}
+								<th>Itens</th>
+								<th>Intervalo</th>
+								<th>Total</th>
+								{% if agent is defined %}
+									<th>Comissão</th>
+								{% endif %}
+								<th>&nbsp;</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for order in ordersWithSubscriptionPlans if order.user.id == loginUser.id or loginUser.master %}
+								<tr>
+									<td>
+										<a href="{{ path("flexy_ftwo_store_customer_order_detail", {orderId : order.id}) }}">{{ order.number }}</a>
+									</td>
+									<td>{{ order.createdAt|date("d/m/Y") }}</td>
+									{% if showMultipleUsers %}
+										<td>{{ order.user and not order.user.master ? order.user.name : order.customer.responsible }}</td>
+									{% endif %}
+									<td>{{ order.items|length }}
+										<span>item(ns)</span>
+									</td>
+									<td>{{ order.orderSubscriptionPlan.intervalLabel }}</td>
+									<td>R$
+										{{ order.billingTotal|number_format(2, ',', '.') }}</td>
+									{% if agent is defined %}
+										<td>{{ order.agentCommissionValueByAgent(agent)|number_format(2, ',', '.') }}</td>
+									{% endif %}
+									<td class="text-right">
+										<a class="btn btn-mini" href="{{ path("flexy_ftwo_store_customer_order_detail", {orderId : order.id}) }}" title="Ver detalhes">
+											<i class="fa fa-plus-circle"></i>
+										</a>
+									</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="6">
+										<h3>Nenhum pedido realizado.</h3>
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</article>
+		</div>
+		<div class="row tab-pane" id="bookings">
+			<article class="col-md-12">
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Número</th>
+								{% if store.info.usesMultipleSales %}
+									<th>Loja</th>
+								{% endif %}
+								<th>Realizado em</th>
+								{% if showMultipleUsers %}
+									<th>Usuário</th>
+								{% endif %}
+								<th>Itens</th>
+								<th>Período do Aluguel</th>
+								<th>Total</th>
+								<th>&nbsp;</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for booking in ordersWithBookings if order.user.id == loginUser.id or loginUser.master %}
+								<tr>
+									<td>
+										<a href="{{ path("flexy_ftwo_store_customer_order_detail", {orderId : booking.id}) }}">{{ booking.number }}</a>
+									</td>
+									{% if store.info.usesMultipleSales %}
+										<td>{{ booking.shoppingStore.name }}</td>
+									{% endif %}
+									<td>{{ booking.createdAt|date("d/m/Y") }}</td>
+									{% if showMultipleUsers %}
+										<td>{{ booking.user and not booking.user.master ? booking.user.name : booking.customer.responsible }}</td>
+									{% endif %}
+									<td>{{ booking.items|length }}
+										<span>item(ns)</span>
+									</td>
+									<td>{{ booking.items.first.booking.start|date('d/m/Y') }}
+										até
+										{{ booking.items.first.booking.end|date('d/m/Y') }}</td>
+									<td>R$
+										{{ booking.billingTotal|number_format(2, ',', '.') }}</td>
+									{% if agent is defined %}
+										<td>{{ booking.agentCommissionValueByAgent(agent)|number_format(2, ',', '.') }}</td>
+									{% endif %}
+									<td class="text-right">
+										<a class="btn btn-mini" href="{{ path("flexy_ftwo_store_customer_order_detail", {orderId : booking.id}) }}" title="Ver detalhes">
+											<i class="fa fa-plus-circle"></i>
+										</a>
+									</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="6">
+										<h3>Nenhum pedido realizado.</h3>
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</article>
+		</div>
+		<div class="row tab-pane" id="coupons">
+			<article class="col-md-12">
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Código do Cupom</th>
+								<th>Desconto</th>
+								<th>Válido até</th>
+								{% if store.info.usesMultipleSales %}
+									<th>Aplicado em</th>
+								{% endif %}
+								<th>Quantidade Disponível</th>
+							</tr>
+						</thead>
+						<tbody>
+							{# TODO : add availabe promotion service extention to bring usable pormotions as dto with details on condition of used #}
+							{% for promotion in customer.availableCoupons %}
+								<tr>
+									<td>{{ promotion.coupons.first.code }}</td>
+									<td>{{ promotion.isDiscountMoney ? promotion.discountType ~ promotion.discountValue : promotion.discountValue ~ promotion.discountType }}</td>
+									<td>{{ promotion.endDate|date("d/m/Y") }}</td>
+									{% if store.info.usesMultipleSales %}
+										<td>{{ promotion.shoppingStore ? 'loja: '~ promotion.shoppingStore.name : "todas as lojas"}}</td>
+									{% endif %}
+									{% if promotion.usePerCustomer %}
+										<td>{{ couponsCounter[promotion.id] }}</td>
+									{% else %}
+										<td>Ilimitado</td>
+									{% endif %}
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="6">
+										<h3>Nenhum cupom encontrado.</h3>
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</article>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,88 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% block javascriptHead %}
+    {% if store.googleReCaptcha.isActive %}
+        {{ store.googleReCaptcha.scriptTagHeadV3|raw }}
+    {% endif %}
+{% endblock %}
+
+{% set title = "Cadastro" %}
+{% set isLightHeader = true %}
+{% block content %}
+    {% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-customer-create-error'), 'error' : true } %}
+    {% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-customer-create-success'), 'error' : false } %}
+    <section>
+        <div class="second-page-container">
+            <div class="container">
+                {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [
+                    {'title' : 'Entrar', 'url' : path("flexy_ftwo_store_customer_login") },
+                    {'title' : title }
+                ]} %}
+
+                <div class="header-for-light">
+                    <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                        Criar nova <span>conta</span>
+                    </h1>
+                </div>
+                <form action="{{ path("flexy_ftwo_store_customer_create") }}" enctype="multipart/form-data" class="" role="form" method="post">
+                    {% include 'FlexyFtwoStoreBundle:Include/Form:customer.html.twig' with {'form' : customerForm} %}
+                </form>
+            </div>
+        </div>
+    </section>
+{%  endblock %}
+
+{% block javascript %}
+    {% if store.googleReCaptcha.isActive %}
+        {{ store.googleReCaptcha.scriptTagFooterV3|raw }}
+    {% endif %}
+    <script>
+        $(".emailInput").on("change", function(){
+            var mail = $(".emailInput").val();
+            var person = '{"email":'+'"'+mail+'"'+'}';
+            $.ajax({
+                url: '{{ path('flexy_ftwo_store_customerValidation_validate_email') }}',
+                type: 'post',
+                dataType: 'json',
+                data: person,
+                success: function (data) {
+                },
+                error: function (data) {
+                    alert(data.responseJSON.message);
+                }
+            });
+        });
+
+        $(".flexy-input-cpf").on("change", function(){
+            var cpf = $(".flexy-input-cpf").val();
+            var person = '{"cpf":'+'"'+cpf+'"'+'}';
+            $.ajax({
+                url: '{{ path('flexy_ftwo_store_customerValidation_validate_cpf') }}',
+                type: 'post',
+                dataType: 'json',
+                data: person,
+                success: function (data) {
+                },
+                error: function (data) {
+                    alert(data.responseJSON.message);
+                }
+            });
+        });
+
+        $(".flexy-input-cnpj").on("change", function(){
+            var cnpj = $(".flexy-input-cnpj").val();
+            var person = '{"cnpj":'+'"'+cnpj+'"'+'}';
+            $.ajax({
+                url: '{{ path('flexy_ftwo_store_customerValidation_validate_cnpj') }}',
+                type: 'post',
+                dataType: 'json',
+                data: person,
+                success: function (data) {
+                },
+                error: function (data) {
+                    alert(data.responseJSON.message);
+                }
+            });
+        });
+    </script>
+{% endblock %}

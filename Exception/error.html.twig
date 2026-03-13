@@ -1,0 +1,15 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+{% block title %}Um erro ocorreu: {{ status_text }}{% endblock %}
+{% block content %}
+    <div style="padding: 40px; margin: 0 auto; width: 960px; text-align: center;">
+        <h1>Oops! Um erro ocorreu!</h1>
+        <p>"{{ status_code }} {{ status_text }}".</p>
+
+        {% set traceMessage = {} %}
+        {% for trace in exception.getTrace() %}
+            {% set traceMessage = traceMessage|merge([{'file': trace.file, 'line': trace.line, 'function': trace.function}]) %}
+        {% endfor %}
+
+        <!-- {{ exception.id ? exception.id : "now"|date("Y-m-d-H-i-s-") }} -->
+    </div>
+{% endblock %}

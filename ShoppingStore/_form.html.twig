@@ -1,0 +1,47 @@
+{% set fullForm = app.request.get('form') ? true : false %}
+<div class="row">
+    <div class="col-xs-12 col-lg-{{ fullForm ? '3' : '6' }}">
+        <div class="block-form box-border wow fadeInLeft animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+            <h3><i class="fa fa-users"></i> Dados da loja</h3>
+            {{ include('FlexyFtwoStoreBundle:ShoppingStore:mainData.html.twig',{'store' : store ,'fullForm' : fullForm}) }}
+        </div>
+    </div>
+    {% if fullForm %}
+        <div class="col-xs-12 col-lg-{{ fullForm ? '3' : '6' }}">
+            <div class="block-form box-border wow fadeInLeft animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                <h3><i class="fa fa-user"></i> Responsável</h3>
+
+                {{ include('FlexyFtwoStoreBundle:ShoppingStore:responsible.html.twig',{'responsible' : store.responsible}) }}
+            </div>
+        </div>
+        <div class="col-xs-12 col-lg-{{ fullForm ? '3' : '6' }}">
+            <div class="block-form box-border wow fadeInLeft animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                <h3><i class="fa fa-truck"></i> Centro de Distribuicao</h3>
+                {{ include('FlexyFtwoStoreBundle:ShoppingStore:address.html.twig',{'store' : store}) }}
+            </div>
+        </div>
+    {% endif %}
+    <div class="col-xs-12 col-lg-{{ fullForm ? '3' : '6' }}">
+        <div class="block-form box-border wow fadeInLeft animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+            <h3><i class="fa fa-lock"></i> Dados do Administrador</h3>
+
+            {{ include('FlexyFtwoStoreBundle:ShoppingStore:user.html.twig',{'shoppingStore' : store}) }}
+            {#activate full form, remove hidden attr#}
+            <div class="form-group" hidden="hidden" style="border: thin dotted">
+                <div class="">
+                    <div class="radio">
+                        <label class="control-label">
+                            <input type="checkbox" id="checkfullform" {{ fullForm ? '' : 'checked' }}>
+                            Quero adicionar os detalhes do responsável da loja e as informações do centro de distribuição mais tarde!
+                        </label>
+                    </div>
+                </div>
+            </div>
+            {##}
+            <input type="hidden" name="apiToken" id="apiToken" value="{{ app.request.get('apiToken', store.apiToken) }}">
+            <div class="text-right">
+                <button type="submit" class="btn-default-1">Cadastrar</button>
+            </div>
+        </div>
+    </div>
+</div>

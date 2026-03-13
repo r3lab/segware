@@ -1,0 +1,10 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+{% block title %}Um erro ocorreu: {{ status_text }}{% endblock %}
+{% block content %}
+    <div class="error error-403" id="error-403" style="padding: 40px auto; margin: 0 auto; width: 960px auto; text-align: center;">
+        <h1>Oops! Um erro ocorreu!</h1>
+        <h2>Você não tem acesso à esta página.</h2>
+        <p>"{{ status_code }} {{ status_text }}".</p>
+        <!-- {{ encodedMessage }} -->
+    </div>
+{% endblock %}

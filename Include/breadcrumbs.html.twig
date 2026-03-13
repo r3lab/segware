@@ -1,0 +1,40 @@
+{% set realPath = [
+{
+    'title' : 'Início',
+    'url' : path('flexy_ftwo_store_index')
+}
+] %}
+
+{% if shoppingStore %}
+    {% set updatedPath = [] %}
+    {% for step in path %}
+        {% if step.url is defined %}
+            {% set newUrl = '/loja/' ~ shoppingStore.referenceCode ~ step.url %}
+            {% set updatedStep = step|merge({'url': newUrl}) %}
+            {% set updatedPath = updatedPath|merge([updatedStep]) %}
+        {% else %}
+            {% set updatedPath = updatedPath|merge([step]) %}
+        {% endif %}
+    {% endfor %}
+    {% set path = updatedPath %}
+{% endif %}
+
+{% set shoppingStore = f2_store_shoppingStore_current() %}
+{% if shoppingStore %}
+    {% set realPath = realPath|merge([
+        {'title' : shoppingStore.name, url: path("flexy_ftwo_store_shoppingStore_index", {shoppingStoreReferenceCode: shoppingStore.referenceCode})}
+    ]) %}
+{% endif %}
+
+{% set pages = realPath|merge(path) %}
+
+<div class="breadcrumbs">
+    <p>
+        {% for page in pages %}
+            <a href="{{ page.url is defined ? page.url : 'javascript:void(0)'}}" >
+                {{ page.title }}
+            </a>
+            {% if not loop.last %} &rsaquo; {% endif %}
+        {% endfor %}
+    </p>
+</div>

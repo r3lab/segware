@@ -1,0 +1,98 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+{% set title = "Meus pedidos" %}
+{% set agent = flexy_ftwo_current_agent() %}
+{% set shoppingStoreReferenceCode = app.request.get('shoppingStoreReferenceCode') %}
+{% block content %}
+    <section>
+        <div class="second-page-container">
+            <div class="container">
+                {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [{'title' : title }] } %}
+                <div>
+                    <div class="row agent-welcome">
+                        <div class="col-sm-6">
+                            <h3>Olá, {{ agent.name }}.</h3>
+                        </div>
+                        <div class="col-sm-6 hidden-xs">
+                            <div class="actions text-right">
+                                <a href="{{ path("flexy_ftwo_store_dashboard_agent_commission_dashboard") }}"><i class="fa fa-bar-chart-o"></i> Painel de Vendas</a>
+                            </div>
+                        </div>
+                    </div>
+                    <p>Você esta visualizando os dados do cliente:</p>
+
+                    <div class="input-group">
+                        <select class="agent-customer form-control">
+                            <option>-- Todos --</option>
+                            {% for customer in agent.customers %}
+                                <option value="{{ customer.id }}" {{ customer.id == agentCustomer.id ? 'selected' : '' }}>
+                                    {{ customer.fullName }} {{ customer.cnpj ? ' - ' ~ customer.cnpj.companyName : '' }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <span class="input-group-btn">
+                            <a href="{{ path("flexy_ftwo_store_customer_create") }}" class="btn btn-primary">
+                                <i class="fa fa-plus"> Cadastrar novo</i>
+                            </a>
+                        </span>
+                    </div>
+                    {% set agentStores = f2_store_agent_eventual_related_shoppingStores({'agentId' : agent.id }) %}
+                    {% if store.info.usesMultipleSales and agentStores|length > 0 %}
+                        <br/>
+                        <p>Você esta visualizando os pedidos da loja:</p>
+                        <select id="selectShoppingStores" name="selectShoppingStores" class="form-control">
+                            <option value="">-- Todas --</option>
+                            {% for shoppingSttore in agentStores %}
+                                <option {{ shoppingStoreReferenceCode == shoppingSttore.referenceCode ? 'selected' : '' }} value="{{ shoppingSttore.referenceCode }}">{{ shoppingSttore.name }}</option>
+                            {% endfor %}
+                        </select>
+                    {% endif %}
+                </div>
+                <br/>
+                <div class="agent-customer-data">
+                    {% include 'FlexyFtwoStoreBundle:Include/Profile:customer.html.twig' with {
+                        customer : agentCustomer,
+                        agent : agent,
+                        shoppingStoreReferenceCode : shoppingStoreReferenceCode
+                    }
+                    %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block javascript %}
+    <script>
+        $('#selectShoppingStores').change(
+            function (e) {
+                e.preventDefault();
+
+                window.location = '?shoppingStoreReferenceCode=' + $(this).val();
+            }
+        );
+
+        (function() {
+            $(".agent-customer").change(function() {
+                $.ajax({
+                    url : '{{ path('flexy_ftwo_store_user_customer_choose') }}',
+                    data : {
+                        customerId : $(this).val()
+                    },
+                    success : function() {
+                        window.location.reload();
+                    },
+                    error : function() {
+                        alert("{{ 'store.customerSelectError'|trans }}");
+                    }
+                });
+            });
+        })();
+        $("a.remake-order").click(function (event) {
+            if ($(this).hasClass("disabled")) {
+                event.preventDefault()
+                return
+            }
+
+            $(this).addClass("disabled")
+        });
+    </script>
+{% endblock %}

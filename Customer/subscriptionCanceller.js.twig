@@ -1,0 +1,33 @@
+{% block javascript %}
+    <script>
+            let btnCancellerSubscription = document.querySelector("#js-canceller-subscription");
+            let divLoadingCancelled = document.querySelector("#cancelled-subscription-loading");
+
+            btnCancellerSubscription.addEventListener("click", async function(e) {
+                e.preventDefault();
+
+                let isToCancel = confirm('Você tem certeza que deseja cancelar a assinatura?');
+                if (!isToCancel) {
+                    return;
+                }
+                
+                btnCancellerSubscription.setAttribute('disabled', 'disabled');
+                divLoadingCancelled.innerHTML = `<img src="{{ asset('bundles/flexyftwoadmin/ftwo/img/loader.gif') }}" title="Carregando..."/>`;
+
+                await fetch('{{ path("flexy_ftwo_store_customer_subscription_cancel", {orderNumber: order.number}) }}')
+                .then(response => response.json())
+                .then(responseParsed => {
+                    if (responseParsed.error) {
+                        alert(responseParsed.error);
+                        return;
+                    }
+
+                    window.location.reload();
+                })
+                .finally(() => {
+                    divLoadingCancelled.innerHTML = '';
+                    btnCancellerSubscription.removeAttribute('disabled');
+                });
+            });
+    </script>
+{% endblock %}

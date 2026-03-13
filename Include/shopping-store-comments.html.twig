@@ -1,0 +1,65 @@
+ {% set comments = flexy_ftwo_shopping_store_rating_comment_list(shoppingStore.id) %}
+
+ <div class="block2">
+        <div class="main-category-block ">
+            <div class="main-category-title gray">
+                <i class="fa fa-star"></i> Avaliações da loja:
+            </div>
+        </div>
+    </div>
+    <div class="tab-content">
+        <div class="tab-pane active" id="review">
+            <div class="comments">
+                {% for shoppingStoreComment in comments %}
+                    <div class="comment">
+                        <div class="review-header">
+                            <h5>{{ shoppingStoreComment.customer.firstName is defined ? shoppingStoreComment.customer.firstName : shoppingStoreComment.customer.tradeName }}</h5>
+                            <div class="product-rating">
+                                <div class="stars">
+                                    {% for i in 1..5 %}
+                                        <span class="star {{ i <= shoppingStoreComment.rating.rating ? 'active' : '' }}"></span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <small class="text-muted">{{ shoppingStoreComment.createdAt }}</small>
+                        </div>
+                        <div class="review-body">
+                            <p>{{ shoppingStoreComment.content }}</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-center"><br>Nenhuma avaliação realizada.</p>
+                {% endfor %}
+            </div>
+
+            <div class="product-rating-block">
+                {% if flexy_ftwo_current_user_exists() %}
+                    <h4>Faça sua avaliação:</h4>
+                    <div class="form-group">
+                        <textarea rows="8" class="flexy-shopping-store-review-comment form-control"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <div class="shopping-store-rating">
+                            <label class="control-label">Sua nota:</label>
+                            <select class="flexy-shopping-store-review-rating form-control">
+                                {% for i in 1..5 %}
+                                    <option value="{{ i }}">{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="button" class="flexy-shopping-store-review-send btn btn-primary" data-shopping-store-id="{{ shoppingStore.id }}">Enviar</button>
+                {% else %}
+                    <p>
+                        <a href="{{ path("flexy_ftwo_store_customer_login") }}">Acesse sua conta</a>, ou
+                        <a href="{{ path("flexy_ftwo_store_customer_create") }}">cadastre-se</a>, e conte-nos sobre sua experiência na compra desta loja.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <br>
+    <br>

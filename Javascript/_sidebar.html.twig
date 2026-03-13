@@ -1,0 +1,49 @@
+<script type="text/javascript">
+    /**
+     * Manipule notify me when product unavailable
+     * @author Marlon Hemkemaier
+     */
+
+    function filterToggle(){
+        $(".sidebar-menu").animate({
+            opacity: "toggle"
+        }, 500, function() {
+            // Animation complete.
+        });
+
+        $(".filter-menu-modal-close").animate({
+            opacity: "toggle"
+        }, 500, function() {
+            // Animation complete.
+        });
+    }
+
+    (function ($) {
+
+        $( ".filter-menu-btn" ).click(function() {
+            $("html").addClass("mobile-html-fix");
+            $("body").addClass("mobile-body-fix");
+            $(".top-page").css("display", "block");
+            filterToggle();
+        });
+
+        $( ".filter-menu-modal-close" ).click(function() {
+            $("html").removeClass("mobile-html-fix");
+            $("body").removeClass("mobile-body-fix");
+            $(".top-page").css("display", "none");
+            filterToggle();
+        });
+
+    })(jQuery);
+
+    $( window ).resize(function() {
+        if($( window ).width() > 992){
+            $(".sidebar-menu").css("display", "block");
+            $(".filter-menu-modal-close").css("display", "none");
+        }else{
+            $(".sidebar-menu").css("display", "none");
+            $(".filter-menu-modal-close").css("display", "none");
+        }
+    });
+
+</script>

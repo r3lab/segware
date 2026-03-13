@@ -1,0 +1,9 @@
+{% include 'FlexyFtwoStoreBundle:Mail:order.html.twig' with {
+    'order' : order,
+    'title': 'Pedido em transporte!',
+    'tracking' : true,
+    'message' : "<p>Olá, " ~ order.customer.fullName ~ "!</p>
+                <p>Seu pedido, número <b>" ~  order.number ~ "</b>, já esta a caminho.</p>
+                <p>Logo você receberá sua compra.</p>
+                <p>Segue abaixo um resumo de seu pedido.</p>"
+} %}

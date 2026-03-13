@@ -1,0 +1,15 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+
+{% block content %}
+    <div style="{{ style.header }}">
+        <h1>Seja bem vindo!</h1>
+    </div>
+    <div style="{{ style.inner }}">
+        <p>Olá{{ newsletter.name ? ' ' ~ newsletter.name : '' }}!</p>
+        <p>Seu e-mail, <b>{{ newsletter.email }}</b>, foi cadastrado com sucesso em nossa newsletter.</p>
+        <p>Agora você passará a receber novidades e ofertas criadas exclusivamente para você.</p>
+        <p>Fique tranquilo, pois também não gostamos de spam e por isto não compartilhamos seus dados com ninguém, além de respeitarmos totalmente as políticas de envio amigável de newsletter.</p>
+        <p>Caso você não tenha solicitado a inscrição em nossa newsletter, por favor, responda a este e-mail, solicitando a exclusão de seu e-mail de nossa base de clientes.</p>
+        {{ mailSignature|raw }}
+    </div>
+{% endblock %}

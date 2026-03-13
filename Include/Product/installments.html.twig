@@ -1,0 +1,20 @@
+{% set installments = flexy_ftwo_installment_calculator(value)|first %}
+<div class="installments">
+    <p class="title-installments-details">
+        Cartão de Crédito (Opções de Parcelamento)
+    </p>
+    <table class="installments-details">
+        <tbody>
+        <tr>
+            <th>Parcelas</th>
+            <th>Valor</th>
+        </tr>
+        {% for key, installment in installments.no_tax %}
+            <tr {% if loop.index == 1 %}class="first-installments"{% endif %} >
+                <td class="installments-quantity">{{ key }} x sem juros</td>
+                <td class="installments-value">R$ {{ installment|number_format(2, ',', '.') }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

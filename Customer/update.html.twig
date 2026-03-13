@@ -1,0 +1,51 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% set title = "Meus dados" %}
+{% set isLightHeader = true %}
+
+{% block content %}
+    {% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {
+        'alerts' : app.session.flashbag.get('store-customer-update-success'),
+        'error' : false
+    } %}
+
+    <section>
+        <div class="second-page-container">
+            <div class="container">
+                {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [
+                    {'title' : title }
+                ]} %}
+                {% include 'FlexyFtwoStoreBundle:Customer:header.html.twig' with {customer: customer} %}
+                <div class="header-for-light">
+                    <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                        Atualizar <span>dados</span>
+                    </h1>
+                </div>
+
+                <form action="{{ path("flexy_ftwo_store_customer_update") }}" class="" role="form" method="post" enctype="multipart/form-data">
+                    {% set redirectTo = app.request.get('redirect') %}
+                    {% if redirectTo %}
+                        <input type="hidden" name="redirectTo" value="{{ redirectTo }}" />
+                    {% endif %}
+                    {% include 'FlexyFtwoStoreBundle:Include/Form:customer.html.twig' %}
+                </form>
+            </div>
+        </div>
+    </section>
+{%  endblock %}
+
+{% block javascript %}
+    <script>
+        Array.from(document.querySelectorAll('.delete-customer-button')).forEach(item => {
+            item.onclick = event => {
+                event.preventDefault();
+                event.stopPropagation();
+                let isToDelete = confirm('Você tem certeza que deseja excluir a sua conta? Se desejar excluir, terá que criar uma nova conta para fazer novos pedidos. Informações pessoais também serão apagadas, com excessão daquelas que devemos legalmente manter por determinado período e as necessárias para garantir sua segurança. \nATENÇÃO: Se você tiver algum pedido em andamento você ainda poderá receber e-mails sobre o status desse pedido.');
+                if (!isToDelete) {
+                    return;
+                }
+                window.location.href = item.dataset.href;
+            }
+        });
+    </script>
+{% endblock %}

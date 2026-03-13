@@ -1,0 +1,47 @@
+<div class="">
+    {% if shoppingStore is defined and shoppingStore %}
+        <input type="hidden" class="flexy-customer-contact-shopping-store" value="{{ shoppingStore.referenceCode }}"/>
+    {% endif %}
+
+    {% if order is defined and order %}
+        <input type="hidden" class="flexy-customer-contact-order" value="{{ order.number }}"/>
+    {% endif %}
+
+    {% if quote is defined and quote %}
+        <input type="hidden" class="flexy-customer-contact-quote" value="{{ quote.number }}"/>
+    {% endif %}
+    
+
+    {% if contact is not defined or not contact %}
+        {% if subject is defined and subject %}
+            <input type="hidden" class="flexy-customer-contact-subject" value="{{ subject }}"/>
+        {% else %}
+            <div class="form-group">
+                <label>Assunto:</label>
+                <input type="text" class="flexy-customer-contact-subject form-control" value=""/>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <hr/>
+
+    <div class="form-group col-md-6">
+        <label>Envie uma mensagem:</label>
+        <textarea id="{{ contact ? 'flexy-answer-contact-' ~ contact.id : "" }}" class="flexy-customer-contact-message form-control" rows="5"></textarea>
+
+        {{ store.googleReCaptcha.tokenV3|raw }}
+        <div class="row">
+            <div class="col-md-8">
+                <div class="files-container add-attach-customer btn-toolbar pull-left" role="toolbar"></div>
+            </div>
+            <div class="col-md-4">
+                <button type="button" class="add-attach add-attach-customer btn btn-default">
+                    <i class="fa fa-paperclip" aria-hidden="true"></i>&nbsp;
+                    Adicionar anexo
+                </button>
+            </div>
+        </div>
+
+        <button type="submit" class="flexy-customer-contact-submit btn btn-primary" data-contact-id="{{ contact.id }}">Enviar</button>
+    </div>
+</div>

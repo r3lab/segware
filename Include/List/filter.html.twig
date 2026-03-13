@@ -1,0 +1,26 @@
+{% set filterKeys = {} %}
+{% set filterValues = {} %}
+
+{% for filter in flexy_ftwo_product_filter_list(filterReferenceCode, {category: category, filterEmpty : true, reset : false}) %}
+    {% set filterKeys = filterKeys|merge([filter.name]) %}
+    {% set filterValues = filterValues|merge({(filter.name) : filter}) %}
+{% endfor %}
+
+{% if filterKeys|length > 0 %}
+    <div class="main-category-block ">
+        <div class="main-category-title">
+            <i class="fa fa-list"></i> {{ title }}
+        </div>
+
+        {% for filterKey in filterKeys|sort if filterKey %}
+            {% set filter = filterValues[filterKey] %}
+
+            <div class="radio">
+                <label data-url="{{ filter.url }}">
+                    <input type="radio" {{ filter.used ? "checked" : "" }}>
+                    {{ filter.name|capitalize }}
+                </label>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

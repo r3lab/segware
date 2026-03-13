@@ -1,0 +1,82 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% set title = "Endereços" %}
+
+{% block content %}
+    {% for flashMessage in app.session.flashbag.get('store-customer-address-success') %}
+        <div class="alerts container">
+            <div class="alert alert-success">
+                {{ flashMessage|trans }}
+            </div>
+        </div>
+    {% endfor %}
+    {% for flashMessage in app.session.flashbag.get('store-customer-address-error') %}
+        <div class="alerts container">
+            <div class="alert alert-danger">
+                {{ flashMessage|trans }}
+            </div>
+        </div>
+    {% endfor %}
+    <section>
+        <div class="second-page-container">
+            <div class="container">
+                {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [
+                {'title' : title }
+                ]} %}
+                {% include 'FlexyFtwoStoreBundle:Customer:header.html.twig' with {path : [{'title' : title }] } %}
+                <article class="">
+                        <ul class="nav nav-pills nav-justified">
+                            <li class="active">
+                                <a href="#address" data-toggle="tab">Meus endereços</a>
+                            </li>
+                        </ul>
+                    </article>
+                    <div class="tab-content">
+                        <div class="row tab-pane active" id="address">
+                            <article class="col-xs-12 col-sm-12">
+                                <div class="box-border wow fadeInLeft" data-wow-duration="1s">
+                                    <div class="text-right">
+                                        <a href="{{ path('flexy_ftwo_store_customer_addresses_add') }}" class="btn btn-primary text-right">Adicionar novo endereço</a>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                            <tr>
+                                                <th>Endereço</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for address in addresses %}
+                                                <tr {{ (address.defaultShipping == 1) ? 'class="address-default-shipping"' : ''}}>
+                                                    <td>{{ address.street }}, {{ address.number }}, {{ address.complement }}, {{ address.district }}, {{ address.city }}, {{ address.state }}, {{ address.postcode }}, {{ address.country }}.</td>
+                                                    <td class="text-right">
+                                                        {% if address.defaultShipping == 1 %}
+                                                            <a class="btn btn-mini"><i class="fa fa-star" style="color: #cccc00;"></i></a>
+                                                            <a class="btn btn-mini" href="{{ path("flexy_ftwo_store_customer_address_edit", {id : address.id}) }}" title="Editar endereço"><i class="fa fa-edit"></i></a>
+                                                            <a class="btn btn-mini" title="Você não pode excluir seu endereço principal"><i class="fa fa-ban"></i></a>
+                                                        {% else %}
+                                                            <a class="btn btn-mini" href="{{ path("flexy_ftwo_store_customer_address_mark_master", {id : address.id}) }}" title="Tornar endereço principal"><i class="fa fa-star"></i></a>
+                                                            <a class="btn btn-mini" href="{{ path("flexy_ftwo_store_customer_address_edit", {id : address.id}) }}" title="Editar endereço"><i class="fa fa-edit"></i></a>
+                                                            <a class="btn btn-mini" href="{{ path("flexy_ftwo_store_customer_address_delete", {id : address.id}) }}" title="Excluir endereço"><i class="fa fa-trash-o"></i></a>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% else %}
+                                                <tr>
+                                                    <td colspan="6">
+                                                        <h3>Nenhum endereço cadastrado.</h3>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{%  endblock %}

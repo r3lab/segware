@@ -1,0 +1,154 @@
+<style type="text/css">
+    .title {
+        font-size: 30px;
+        font-weight: bold;
+    }
+    .table {
+        width: 100%;
+        font-size: 12px;
+    }
+    .line {
+        padding-bottom: 30px;
+        border-bottom: 2px solid #2C3F72;
+        margin-bottom: 8px;
+    }
+    .table .td {
+        float: left;
+        padding: 3px 2px;
+    }
+    .table .tr {
+        border-bottom: 1px dotted #DDDDDD;
+    }
+    .right {
+        text-align: right;
+    }
+    .center {
+        text-align: center;
+    }
+    .c15 {
+        width: 14%;
+    }
+    .c25 {
+        width: 24%;
+    }
+    .c30 {
+        width: 29%;
+    }
+    .c50 {
+        width: 49%;
+    }
+    .c100 {
+        width: 99%;
+    }
+    .th {
+        background-color: #2C3F72;
+        color: #fff;
+        font-weight: bold;
+        padding: 2px;
+    }
+    li {
+        list-style: none;
+    }
+</style>
+<div class="table">
+    <div class="tr line">
+        <div class="td title c50">Orçamento {{ array.number }}</div>
+        <div class="td right c50">Data: {{ array.createdAt|date('d/m/Y') }}</div>
+    </div>
+    {% if array.customer %}
+        <div class="tr">
+            <div class="td c50"><b>Nome do cliente:</b> {{ array.customer.fullName }}</div>
+            <div class="td c50">
+                {% if array.customer.cpf.cpf %}
+                    <b>CPF:</b> {{ array.customer.cpf.cpf }}
+                {% else %}
+                    <b>CNPJ:</b> {{ array.customer.cnpj.cnpj }}
+                {% endif %}
+            </div>
+        </div>
+        <div class="tr">
+            <div class="td c50"><b>Email:</b> {{ array.customer.user.email }}</div>
+            <div class="td c50"><b>Data de nascimento:</b> {{ array.customer.dateOfBirth|date('d/m/Y') }}</div>
+        </div>
+        <div class="tr">
+            <div class="td c50"><b>Telefone principal:</b> {{ array.customer.primaryphone }}</div>
+            <div class="td c50">
+                {% if array.customer.secondaryPhone %}
+                    <b>Telefone alternativo:</b> {{ array.customer.secondaryPhone }}
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+<div class="table"></div>
+<div class="table">
+    {% set hasSales = array.sales.count > 0 %}
+    {% set quotes = hasSales ? array.sales : [array] %}
+    {% for quote in quotes if quote.items.count %}
+        {% if hasSales and quote.shoppingStore %}
+        <strong class="c100">
+            <br/>
+            {{ 'CD: ' ~ quote.shoppingStore.name }}
+        </strong>
+        {% endif %}
+        <div class="th total">
+            <div class="td c25">
+                Cód. de Referência
+            </div>
+            <div class="td c30">
+                Nome (Variação)
+            </div>
+            <div class="td c15 center">
+                Quant.
+            </div>
+            <div class="td c15 center">
+                Preço Un.
+            </div>
+            <div class="td c15 center">
+                Total
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+        {% for item in quote.items %}
+            <div class="tr items">
+                <div class="td c25">{{ item.variant.referenceCode }}</div>
+                <div class="td c30">
+                    {{ item.variant.presentation }}
+                    <ul>
+
+                    {% for attributeValue in item.attributeValues %}
+                        {% if attributeValue.value is not empty %}
+                            {% set attributeOption = attributeValue.option %}
+                            {% set attribute = attributeOption.attribute %}
+                            {% if attribute.type.isImage %}
+                                <li><small>{{ attribute.name }}:</small> <img class="img-thumbnail" src="{{ attributeValue.value }}" alt="{{ attribute.name }}"/></li>
+                            {% else %}
+                                <li><small>{{ attribute.name }}: {{ attributeValue.value }}</small></li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                </div>
+                <div class="td c15 center">{{ item.quantity }}</div>
+                <div class="td c15 center">R$ {{ item.unitPriceWithDiscount|number_format(2, ',', '.') }}</div>
+                <div class="td c15 center">R$ {{ item.totalWithDiscount|number_format(2, ',', '.') }}</div>
+                <div style="clear: both;"></div>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    <div class="th total">
+        <div class="td c100 right"><b>Descontos:</b> R$ {{ array.promotionDiscount|number_format(2, ',', '.') }}</div>
+        <div class="td c100 right"><b>Preço Total:</b> R$ {{ array.totalWithDiscount|number_format(2, ',', '.') }}</div>
+    </div>
+</div>
+{% if array.observation %}
+<div class="table">
+    <div class="tr">
+        <div class="td c100">
+            <strong>Observação: </strong>
+            <br/>
+            {{ array.observation|nl2br }}
+        </div>
+    </div>
+</div>
+{% endif %}

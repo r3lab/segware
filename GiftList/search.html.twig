@@ -1,0 +1,51 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+{% set title = 'Buscar lista de presentes' %}
+{% set eventName = app.request.query.get('event-name') %}
+{% set eventDate = app.request.query.get('event-date') %}
+{% set isSearching = eventName and eventDate %}
+{% block content %}
+    <section class="second-page-container">
+        <div class="container">
+            {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [{'title' : 'Title' }]} %}
+            <div class="header-for-light">
+                <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                    {{ title }}
+                </h1>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-sm-12">
+                    <form action="{{ path("flexy_ftwo_store_giftList_search") }}" method="get">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <input type="text" class="form-control error" name="event-name" placeholder="Nome da lista de presentes..." value="{{ eventName }}" required/>
+                            </div>
+                            <div class="col-md-5">
+                                <input type="text" class="flexy-input-date form-control error" name="event-date" placeholder="Data da lista de presentes. Ex: {{ "now"|date("d/m/Y") }}" value="{{ eventDate }}" required/>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="submit" value="Buscar" class="btn btn-default" />
+                            </div>
+                        </div>
+                    </form>
+                    {% if giftLists|length > 0 %}
+                        <hr/>
+                        {% for giftList in giftLists %}
+                            <a href="{{ path("flexy_ftwo_store_giftList_details", { giftListReferenceCode : giftList.referenceCode }) }}">
+                                <strong>{{ giftList.eventName }}</strong> | {{ giftList.eventDate|date('d/m/Y') }}
+                            </a>
+                            <hr/>
+                        {% endfor %}
+                        </ul>
+                    {% elseif eventName %}
+                        <h2 class="nothing-found">Nenhuma lista encontrada com esses critérios.</h2>
+                    {% endif %}
+                    {% if not flexy_ftwo_current_customer().hasGiftList %}
+                    <p>
+                        <a href="{{ path("flexy_ftwo_store_giftList_create") }}" class="btn btn_laranja_fill full">Crie sua lista de presentes </a>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

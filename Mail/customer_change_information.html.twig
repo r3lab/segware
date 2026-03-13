@@ -1,0 +1,15 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+
+{% block content %}
+    <div style="{{ style.header }}">
+        <h1>Seus dados foram atualizados!</h1>
+    </div>
+    <div style="{{ style.inner }}">
+        <h3>Olá, {{ customer.fullName }}!</h3>
+        <p>Seus dados foram atualizados com sucesso em nosso portal.</p>
+        <p>Você pode conferir e alterar seus dados a qualquer momento através da página de seu perfil:</p>
+        <p><a href="{{ url('flexy_ftwo_store_customer_profile') }}">{{ url('flexy_ftwo_store_customer_profile') }}</a></p>
+        <p>Caso você não tenha alterado seus dados, por favor, responda a este e-mail ou entre em contato conosco através de nossa <a href="{{ url('flexy_ftwo_store_contact') }}" style="{{ style.link }}">Central de Atendimento</a>.</p>
+        {{ mailSignature|raw }}
+    </div>
+{% endblock %}

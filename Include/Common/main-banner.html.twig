@@ -1,0 +1,19 @@
+{% if images|length > 0 %}
+    <section>
+        <div class="second-page-container">
+            <div class="revolution-container">
+                <div class="revolution">
+                    <ul class="list-unstyled">
+                        {% for image in images %}
+                            <li data-transition="fade" data-slotamount="7" data-masterspeed="1000" data-link="{{ image.target ?: 'javascript:void(0);' }}">
+                                <img src="{{ image.path }}"  alt=""  data-bgfit="cover" data-bgposition="center center" data-bgrepeat="no-repeat">
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="revolutiontimer"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endif %}

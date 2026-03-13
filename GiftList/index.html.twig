@@ -1,0 +1,76 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+{% set title = "Minha Lista de Presentes" %}
+{% block content %}
+    <section class="second-page-container">
+        <div class="container">
+            {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [ { 'title' : title } ]} %}
+            {% include 'FlexyFtwoStoreBundle:Customer:header.html.twig' with {customer: customer} %}
+            <div class="header-for-light">
+                <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                    {{ title }}
+                </h1>
+            </div>
+            <div class="row">
+                {#<div class="col-md-12 col-sm-12">#}
+                {% for giftList in giftLists %}
+                    <div class="col-md-12 col-sm-12">
+                            <h4>
+                                {{ giftList.eventDate }} - {{ giftList.eventName }}
+
+                            </h4>
+                    </div>
+
+                    <div class="col-md-12 col-sm-12">
+                        <p>
+                            <a href="{{ path("flexy_ftwo_store_giftList_details", { giftListReferenceCode : giftList.referenceCode } ) }}">
+                                <i class="fa fa-th-large"></i>
+                                Ver todos os presentes da lista
+                            </a>
+                        </p>
+                    </div>
+                    <div class="col-md-12 col-sm-12">
+                        <p>
+                            <a href="{{ path("flexy_ftwo_store_giftList_details_bought", { giftListReferenceCode : giftList.referenceCode } ) }}">
+                                <i class="fa fa-gift"></i>
+                                Ver presentes comprados
+                            </a>
+                        </p>
+                    </div>
+                    <div class="col-md-12 col-sm-12">
+                        <p>
+                            <a id="flexy-whatsapp-link" href="https://web.whatsapp.com/send?text={{ app.request.getSchemeAndHttpHost() }}{{ path("flexy_ftwo_store_giftList_details", { giftListReferenceCode : giftList.referenceCode } ) }}" target="_blank">
+                                <i class="fa fa-share" aria-hidden="true"></i>
+                                Compartilhar link via WhatsApp <!--{{ app.request.headers.get('User-Agent')}}-->
+                            </a>
+
+                        </p>
+                    </div>
+                    <div class="col-md-12 col-sm-12">
+                        <p>
+                            <a href="javascript:void(0)" onclick="copyToClipboard('{{ app.request.getSchemeAndHttpHost() }}{{ path("flexy_ftwo_store_giftList_details", { giftListReferenceCode : giftList.referenceCode } ) }}')">
+                                <i class="fa fa-share" aria-hidden="true"></i>
+                                Compartilhar link
+                            </a>
+                        </p>
+                    </div>
+                    <div class="col-md-12 col-sm-12">
+                        <p>
+                            <a href="{{ path("flexy_ftwo_store_giftList_delete", { giftListReferenceCode : giftList.referenceCode }) }}">
+                                <i class="fa fa-trash-o"></i>
+                                Apagar lista</a>
+                            <hr/>
+                        </p>
+                    </div>
+                    <div class="col-md-12 col-sm-12">
+                {% else %}
+                    <a href="{{ path('flexy_ftwo_store_giftList_create') }}" class="btn btn-primary" id="back" style="margin-left: 15px;">Criar nova lista</a>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascript %}
+<script src="{{ asset('bundles/flexyftwocommon/js/tools.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% set title = "Perfil" %}
+
+{% block content %}
+	{% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-customer-create-success'), 'error' : false } %}
+	{% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-user-update-error'), 'error' : true } %}
+	{% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-user-update-success'), 'error' : false } %}
+	<section>
+		<div class="second-page-container">
+			<div class="container">
+				{% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [{'title' : title }] } %}
+				{% include 'FlexyFtwoStoreBundle:Customer:header.html.twig' with {customer: customer} %}
+				{% include 'FlexyFtwoStoreBundle:Include/Profile:customer.html.twig' with {customer: customer, couponsCounter: couponsCounter} %}
+			</div>
+		</div>
+	</section>
+{% endblock %}
+
+{% block javascript %}
+	<script>
+		$("a.remake-order").click(function (event) {
+if ($(this).hasClass("disabled")) {
+event.preventDefault()
+return
+}
+
+$(this).addClass("disabled")
+});
+	</script>
+{% endblock %}

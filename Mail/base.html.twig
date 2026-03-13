@@ -1,0 +1,42 @@
+{% set style = {
+    font: "font:14px Arial, Helvetica, sans-serif; color:#444;line-height:20px;",
+    title: "color:#428bca; padding: 0 0 10px 0;",
+    size: "width:640px; margin:20px auto; text-align:left; border:20px solid #f5f5f5;",
+    inner: "background:#ffffff; padding:20px 40px; margin-bottom:5px;",
+    header: "background: #428bca;color: #fff;border-top: 30px #fff solid;padding: 20px 40px;",
+    link: "color: #428bca; text-decoration: none;",
+    button: "padding:15px 20px; background:#428bca; color:#fff; font-size:18px; font-weight:bold; border-radius:5px; text-decoration:none;",
+    whiteButton: "font-family:sans-serif,arial;list-style-type:none;box-sizing:border-box;text-decoration:none;transition:all .3s ease;display:inline-block;padding:6px 12px;margin-bottom:0;font-size:14px;font-weight:400;line-height:1.42857143;text-align:center;white-space:nowrap;vertical-align:middle;touch-action:manipulation;cursor:pointer;user-select:none;background-image:none;border:1px solid transparent;border-radius:4px;color:#333;background-color:#fff;border-color:#ccc;"
+} %}
+{% set mailSignature = "
+    <p>Atenciosamente,</p>
+    <p>" ~ store.info.tradingName ~ "</p>"
+%}
+
+<style>
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f5f5f5;
+    }
+</style>
+
+<div style="{{ style.font }} background:#F5F5F5; padding: 0; text-align: center;">
+    <div style="{{ style.size }}">
+        {% block content %}{% endblock %}
+        <div style="padding: 20px 10px 20px 0; text-align: right; border-bottom:20px solid #fff;">
+            <a href="{{ url('flexy_ftwo_store_index') }}" style="color:#666; text-decoration:none;" target="_blank">{{ url('flexy_ftwo_store_index') }}</a>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    document.getElementById("copy-icon").addEventListener("click", function() {
+        var text = document.getElementById("text-to-copy").innerText;
+        var textCopied = document.createElement("textarea");
+        textCopied.value = text;
+        document.body.appendChild(textCopied);
+        textCopied.select();
+        document.execCommand("copy");
+        document.body.removeChild(textCopied);
+        alert("QR Code copiado!");
+    });
+</script>

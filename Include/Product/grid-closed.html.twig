@@ -1,0 +1,22 @@
+{% set productsInKit = flexy_ftwo_product_related_by_kit(variant.product) %}
+{% set variantMaxQuantity = flexy_ftwo_stock_locate_by_parameters({distributionCenterReferenceCode : distributionCenterReferenceCode, variantReferenceCode : variant.referenceCode}).quantity %}
+
+<!-- <div class="grid">
+    <div class="border-new"></div>
+
+    <div class="grid-closed">
+        <div class="clearfix">
+            {% for productRelated in productsInKit %}
+                <div class="grid-product">
+                    <div class="grid-product-title">{{ productRelated.variant.product.name }}</div>
+                    <div class="grid-product-quantity">{{ productRelated.quantity }}</div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="tamanho qtd">
+            <label for="quantity" class="">Quantidade:</label>
+            <input type="number" id="quantity" class="flexy-input-integer stock-verified form-control" data-stock="{{ variant.product.stockControl ? variantMaxQuantity : "" }}" data-price="{{ (promotion ? promotion.finalPrice : price) }}" data-grid-quantity="{{ total }}" min="0" value="1" />
+        </div>
+    </div>
+</div> -->

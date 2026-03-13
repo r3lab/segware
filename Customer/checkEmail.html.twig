@@ -1,0 +1,7 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% block title %}{{ 'store.customer.forgot.title'|trans }}{% endblock %}
+
+{% block content %}
+    <p>{{ 'store.customer.checkEmail'|trans({'%email%': email}) }}</p>
+{% endblock %}

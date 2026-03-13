@@ -1,0 +1,97 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% set title = "Compra realizada com sucesso!" %}
+
+{% block content %}
+    <section>
+        <div class="second-page-container">
+            <div class="block">
+                <div class="container">
+                    <div class="header-for-light">
+                        <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">{{ title }}</h1>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <h3>Seu pedido{{ order.hasSales ? ' ' : (', <strong>nº ' ~ order.number ~ '</strong>, ')|raw }} foi realizado com sucesso.</h3>
+
+                            {% if order.hasSales %}
+                                {% set orderchild = order.sales|first %}
+                                {% set paymentMethods = orderchild.paymentMethods %}
+                            {% else %}
+                                {% set paymentMethods = order.paymentMethods %}
+                            {% endif %}
+
+                            {% for paymentMethod in paymentMethods %}
+                                {% if paymentMethod.isBoleto %}
+                                    <div>
+                                        <br>
+                                        <strong><a href="{{ path('flexy_ftwo_store_checkout_print_boleto', {paymentId : paymentMethod.id}) }}" target="_blank">Clique aqui para imprimir o boleto bancário.</a></strong>
+                                        <p>Assim que identificarmos o pagamento do boleto bancário enviaremos um e-mail confirmando, e encaminharemos o pedido para envio.</p>
+                                    </div>
+                                {% elseif paymentMethod.isPix %}
+                                    <p>O pedido pode ser pago através do QrCode abaixo, seguindo os seguintes passos:<p/>
+                                    <ol>
+                                        <li>Entre no aplicativo do seu banco</li>
+                                        <li>Escolha a opção de pagamento PIX</li>
+                                        <li>
+                                            Escaneie a imagem abaixo para realizar o pagamento ou clique
+                                            <span id="pix-copy-and-paste-payment-loading">
+                                                <span class="fa fa-spin fa-spinner graph-load"></span>
+                                            </span>
+                                            <a id="pix-copy-and-paste-payment"
+                                                class="hidden copy-to-clipboard" data-text="">
+                                                aqui
+                                            </a>
+                                            para copiar a chave de pagamento
+                                        </li>
+                                        <li>Confirme as informações</li>
+                                        <li>Esse QR Code vence em <b>{{ paymentMethod.paymentExpiresAt|date('d/m/Y H:i') }}</b>. Após o vencimento, a compra será cancelada.</li>
+                                    </ol>
+                                    <div id="pix-qrcode-payment-loading">
+                                        <span class="fa fa-spin fa-spinner fa-5x graph-load"></span>
+                                    </div>
+                                    <img id="pix-qrcode-payment" class="hidden" />
+
+                                    <p>Assim que identificarmos o pagamento do PIX enviaremos um e-mail confirmando, e encaminharemos o pedido para envio.
+                                        <b>Pode levar alguns minutos para identificarmos o pagamento do PIX.</b>
+                                    </p>
+                                {% elseif paymentMethod.isApplePay %}
+                                    <p>O pedido pode ser pago através do botão Apple Pay abaixo.<p/>
+                                    <div id="payment-request-button">
+                                        <!-- A Stripe Element will be inserted here if the browser supports this type of payment method. -->
+                                    </div>
+                                    <div id="messages" role="alert" style="display: none;"></div>
+                                    {% include 'FlexyFtwoStoreBundle:Checkout:renderApplePayButton.js.twig' with { paymentMethod: paymentMethod } %}
+                                {% elseif paymentMethod.isPicPay %}
+                                    <p>O pedido pode ser pago através do QrCode abaixo, seguindo os seguintes passos:<p/>
+                                    <ol>
+                                        <li>Entre no aplicativo do seu PicPay;</li>
+                                        <li>Escolha a opção de pagamento QrCode;</li>
+                                        <li>Escaneie a imagem abaixo para realizar o pagamento;</li>
+                                        <li>Confirme as informações.</li>
+                                    </ol>
+                                    <div id="picpay-qrcode-payment-loading">
+                                        <span class="fa fa-spin fa-spinner fa-5x graph-load"></span>
+                                    </div>
+                                    <img id="picpay-qrcode-payment" class="hidden" />
+                                    <p>Assim que identificarmos o pagamento do PicPay enviaremos um e-mail confirmando, e encaminharemos o pedido para envio.
+                                        <b>Pode levar alguns minutos para identificarmos o pagamento do PicPay.</b>
+                                    </p>
+                                {% elseif paymentMethod.isBoletoAFaturar %}
+                                    <div>Em breve enviaremos seu boleto.</div>
+                                {% endif %}
+                            {% endfor %}
+                            <br>
+                            <p><a href="{{ path("flexy_ftwo_store_customer_profile") }}">Acesse sua conta</a> para acompanhar seus pedidos.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% include 'FlexyFtwoStoreBundle:Checkout:renderPixQrCodeAndCopyAndPaste.js.twig' with { order: order } %}
+    {% include 'FlexyFtwoStoreBundle:Checkout:renderPicPayQrCode.js.twig' with { order: order } %}
+
+{% endblock %}

@@ -1,0 +1,35 @@
+{% set isPicPayPayment = false %}
+
+{% if order.hasSales %}
+    {% set orderchild = order.sales|first %}
+    {% set paymentMethods = orderchild.paymentMethods %}
+{% else %}
+    {% set paymentMethods = order.paymentMethods %}
+{% endif %}
+
+{% for paymentMethod in paymentMethods if paymentMethod.isPicPay %}
+    {% set isPicPayPayment = true %}
+{% endfor %}
+
+{% block javascript %}
+    <script>
+        function getPicPayQrCode() {
+            fetch('{{ path("flexy_ftwo_store_checkout_picpay_qrcode", {orderNumber: order.number}) }}')
+                .then(response => response.json())
+                .then(responseParsed => {
+                    if (responseParsed.error) {
+                        return;
+                    }
+
+                    $("#picpay-qrcode-payment").prop('src', `data:image/svg+xml;base64,${btoa(responseParsed.qrCodeImage)}`);
+                    $("#picpay-qrcode-payment-loading").addClass('hidden');
+                    $("#picpay-qrcode-payment").removeClass('hidden');
+                });
+        }
+
+        const isPicPayPayment = "{{ isPicPayPayment ? '1' : '' }}";
+        if (isPicPayPayment) {
+            getPicPayQrCode();
+        }
+    </script>
+{% endblock %}

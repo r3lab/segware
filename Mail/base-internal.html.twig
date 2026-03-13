@@ -1,0 +1,24 @@
+{% set style = {
+    font : "font:14px Arial, Helvetica, sans-serif; color:#444;line-height:20px;",
+    title : "color:#008A45; padding: 0 0 10px 0;",
+    size : "width:640px; margin:20px auto; text-align:left;",
+    inner : "background:#ffffff; padding:20px 40px; margin-bottom:5px;",
+    header : "background: #428bca;color: #fff;border-top: 30px #fff solid;padding: 20px 40px;"
+} %}
+
+
+{% set mailSignature = "
+    <p>Ficamos a sua disposição.</p>
+    <p>Atenciosamente,</p>
+    <p>" ~ store.info.tradingName ~ "</p>"
+%}
+
+<div style="{{ style.font }} background:#F5F5F5; padding: 20px 0 20px 0; text-align: center;">
+    <div style="{{ style.size }}">
+        {% block content %}{% endblock %}
+
+        <div style="padding: 20px 10px 20px 0; text-align: right; border-bottom:20px solid #fff;">
+            <a href="{{ url('flexy_ftwo_store_index') }}" style="color:#666; text-decoration:none;" target="_blank">{{ url('flexy_ftwo_store_index') }}</a>
+        </div>
+    </div>
+</div>

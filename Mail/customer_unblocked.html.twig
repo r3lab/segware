@@ -1,0 +1,13 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+
+{% block content %}
+    <div style="{{ style.header }}">
+        <h1>Acesso liberado!</h1>
+    </div>
+    <div style="{{ style.inner }}">
+        <h3>Olá {{ customer.fullName }},</h3>
+        <p>Seu acesso foi liberado e agora você pode acessar nosso portal com ofertas e promoções exclusivas.</p>
+        <p><a href="{{ url('flexy_ftwo_store_login') }}">Clique aqui</a> para acessar o seu ambiente exclusivo em nosso portal.</p>
+        {{ mailSignature|raw }}
+    </div>
+{% endblock %}

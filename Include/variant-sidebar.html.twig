@@ -1,0 +1,31 @@
+{% set promotion = f2_store_variant_promotion_catalog_details(variant) %}
+
+<div class="widget-block">
+    <div class="row">
+        <div class="col-md-4 col-sm-2 col-xs-4">
+            <img class="img-responsive" src="{{ f2_store_image_placeholder_small(variant.product.masterImage) }}" alt="" title="">
+        </div>
+        <div class="col-md-8 col-sm-10 col-xs-8">
+            <div class="block-name">
+                <a href="{{ variant.url }}" class="product-name">{{ variant.product.name }}</a>
+                {% if store.config.displayPrice %}
+                <p class="product-price">
+                    {% if variant.product.hasStock %}
+                        {% if promotion %}
+                            <span>R$ {{ variant.finalPrice|number_format(2, ',', '.') }}</span>
+                        {% endif %}
+
+                        R$ {{ (promotion ? promotion.finalPrice : variant.finalPrice)|number_format(2, ',', '.') }}
+                    {% else %}
+                        Indisponível
+                    {% endif %}
+                </p>
+                {% endif %}
+            </div>
+
+            <p class="description">
+                {{ variant.product.descriptions.one|raw }}
+            </p>
+        </div>
+    </div>
+</div>

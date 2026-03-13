@@ -1,0 +1,128 @@
+<nav class="navbar yamm  navbar-main" role="navigation">
+    <div class="container">
+        <div class="navbar-header hidden-xs hidden-sm">
+            {% if shoppingStore %}
+                <a href="{{ path("flexy_ftwo_store_shoppingStore_index", {shoppingStoreReferenceCode: shoppingStore.referenceCode}) }}" class="navbar-brand">
+                    {% if shoppingStore.logoUrl %}<img src="{{ shoppingStore.logoUrl }}"/>
+                    {% else %}<i class="fa fa-home"></i>
+                    {% endif %}
+                </a>
+            {% else %}
+                <a href="{{ path("flexy_ftwo_store_index") }}" class="navbar-brand">
+                    <i class="fa fa-home"></i>
+                </a>
+            {% endif %}
+
+            <div class="border"></div>
+        </div>
+
+        <div id="navbar-collapse-1" class="navbar-collapse collapse ">
+            {#{% include 'FlexyFtwoStoreBundle:Include/Agent:share-link.html.twig' %}#}
+            <ul class="nav navbar-nav">
+                {% if flexy_ftwo_current_user_exists() %}
+                    {% if app.user.agent %}
+                        <li class="hidden-md hidden-lg"><a href="{{ path("flexy_ftwo_store_dashboard_agent_commission_dashboard") }}">Painel de Vendas</a></li>
+                        <li class="hidden-md hidden-lg"><a href="{{ path("flexy_ftwo_store_agent_profile") }}">Pedidos</a></li>
+                        <li class="hidden-md hidden-lg"><a href="{{ path("flexy_ftwo_store_user_remember_password_reset") }}">Alterar Senha</a></li>
+                        
+                        {% if currentCartUrl %}
+                        <li class="hidden-md hidden-lg">
+                            <div>
+                                <a class="copy-to-clipboard account-menu-title cursor-pointer" data-text="{{ currentCartUrl }}">
+                                    Copiar link do carrinho atual <span class="fa fa-copy"></span>
+                                </a>
+                            </div>
+                        </li>
+                        {% endif %}
+
+                        <li class="hidden-md hidden-lg agent-customer-select">
+                        <div class="input-group">
+                        <select class="agent-customer form-control">
+                            <option>Selecione um cliente</option>
+                            {% for customer in agent.customers %}
+                                <option value="{{ customer.id }}" {{ customer.id == agentCustomer.id ? 'selected' : '' }}>
+                                    {{ customer.fullName }} {{ customer.cnpj ? ' - ' ~ customer.cnpj.companyName : '' }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <span class="input-group-btn">
+                            <a href="{{ path("flexy_ftwo_store_customer_create") }}" class="btn btn-primary">
+                                <i class="fa fa-plus"> Cadastrar novo</i>
+                            </a>
+                        </span>
+                    </div>
+                    </li>
+
+                    {% else %}
+                        <li class="hidden-md hidden-lg"><a href="{{ path("flexy_ftwo_store_customer_profile") }}">Minha conta</a></li>
+                        <li class="hidden-md hidden-lg"><a href="{{ path("flexy_ftwo_store_customer_profile") }}">Meus pedidos</a></li>
+                        <li class="hidden-md hidden-lg"><a href="{{ path("flexy_ftwo_store_wishlist_my") }}">Meus desejos</a></li>
+                    {% endif %}
+
+                    <li class="hidden-md hidden-lg"><a href="{{ path("flexy_ftwo_store_customer_logout") }}">Sair</a></li>
+                {% else %}
+                    <li class="hidden-md hidden-lg"><a href="{{ path("flexy_ftwo_store_customer_login") }}">Acesse sua conta ou Cadastre-se</a></li>
+                {% endif %}
+            </ul>
+
+            {% if not shoppingStore %}
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden-sm hidden-xs"><a href="{{ path("flexy_ftwo_store_product_list_all") }}">Todos os produtos</a></li>
+                </ul>
+            {% endif %}
+
+            <ul class="nav navbar-nav">
+                {% if shoppingStore %}
+                    <li class="dropdown  yamm-fw"><a href="{{ path("flexy_ftwo_store_shoppingStore_index", {shoppingStoreReferenceCode: shoppingStore.referenceCode}) }}">Home</a></li>
+                    <li class="dropdown  yamm-fw"><a href="{{ f2_store_shoppingStore_url('productListAll', {shoppingStoreReferenceCode : shoppingStore.referenceCode}) }}">Produtos</a></li>
+                    <li class="dropdown  yamm-fw"><a href="{{ f2_store_shoppingStore_url('institutional', {shoppingStoreReferenceCode : shoppingStore.referenceCode}) }}">Quem somos</a></li>
+                    <li class="dropdown  yamm-fw"><a href="{{ f2_store_shoppingStore_url('contact', {shoppingStoreReferenceCode : shoppingStore.referenceCode}) }}">Contato</a></li>
+                {% else %}
+                    {% for category in flexy_ftwo_category_list(flexy_ftwo_category_list_by_parent_reference_code('departamentos'), 'sortOrder-desc').categories|slice(0,6) %}
+                        {% set subCategories = flexy_ftwo_category_list(category).categories %}
+                        <li class="dropdown yamm-fw">
+                            <div>
+                                <a class="p-2" href="{{ path("flexy_ftwo_store_product_list", {categoryReferenceCode : category.referenceCode}) }}" {% if false and subCategories|length > 0 %}data-toggle="dropdown" class="dropdown-toggle"{% endif %}>
+                                    {{ category.name }}
+                                </a>
+
+                                  {% if subCategories|length > 0 %}
+                                      <i class="fa fa-caret-right fa-rotate-45" class="dropdown-toggle"></i>
+                                  {% endif %}
+                            </div>
+
+                            {% if subCategories|length > 0 %}
+                                <ul class="dropdown-menu list-unstyled  fadeInUp  animated">
+                                    <li>
+                                        <div class="yamm-content">
+                                            <div class="row">
+                                                {% for subCategory in flexy_ftwo_category_list(category, 'sortOrder-desc', null).categories %}
+                                                    {% set subSubCategories = flexy_ftwo_category_list(subCategory, 'sortOrder-desc', null).categories  %}
+
+                                                    <div class="col-md-3 col-sm-6">
+                                                        <div class="header-menu">
+                                                            <h4><a href="{{ path("flexy_ftwo_store_product_list", {categoryReferenceCode : subCategory.referenceCode}) }}">{{ subCategory.name }}</a></h4>
+                                                        </div>
+                                                        {% if subSubCategories|length > 0 %}
+                                                            <ul class="list-unstyled">
+                                                                {% for subSubCategory in subSubCategories %}
+                                                                    <li>
+                                                                        <a href="{{ path("flexy_ftwo_store_product_list", {categoryReferenceCode : subSubCategory.referenceCode}) }}"><i class="fa fa-angle-right"></i> {{ subSubCategory.name }}</a>
+                                                                    </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% endif %}
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

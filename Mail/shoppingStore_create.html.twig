@@ -1,0 +1,28 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+
+{% block content %}
+    <div style="{{ style.header }}">
+        <h1>Parabéns por sua nova loja!</h1>
+    </div>
+    <div style="{{ style.inner }}">
+        <h3>Olá, {{ shoppingStore.platformUser.name }}!</h3>
+
+        <p>
+            Parabéns, você criou a loja <strong>{{ shoppingStore.name }} </strong>. Você deve seguir alguns passos para começar a vender, para isto acesse o seu painel administrativo <a href ="{{ url('flexy_ftwo_platform_user_login') }}">clicando aqui </a>.
+        </p>
+
+        <p>
+            Com sua loja online você poderá oferecer mais um canal de vendas para seus clientes.
+            Por isso, recomendamos que você divulgue a sua nova loja online, o endereço web, para todos os seus clientes, prospects, da sua cidade e também das cidades vizinhas.
+            Sugerimos também, divulgar por e-mail ou nas redes sociais, semanalmente, algumas ofertas especiais da sua nova loja online.
+        </p>
+
+        <p>
+            Não esqueça de manter seu estoque sempre atualizado, com descrições bem detalhadas e fotos dos seus produtos.
+        </p>
+
+        <p>
+            Parabéns e boas vendas.
+        </p>
+    </div>
+{% endblock %}

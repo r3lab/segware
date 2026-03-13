@@ -1,0 +1,24 @@
+{% block content %}
+    <script>
+        var productCustomizationUrl = "{{ path('flexy_ftwo_store_customProductAttribute_add') }}";
+    </script>
+
+    <link rel="stylesheet" href="{{ asset('bundles/flexyftwostore/js/vendor/jquery-ui/jquery-ui.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('bundles/flexyftwostore/css/custom-product/customizer.css') }}">
+    <script src="{{ asset('bundles/flexyftwostore/js/vendor/jquery-ui/jquery-ui.min.js') }}" type="text/javascript"></script>
+    <script src="{{ flexy_ftwo_resource_url_js("js/custom-product/customizer.compiled.js") }}"></script>
+
+    <div class="flexy-custom-product-modal hide" title="Personalização">
+        <div class="flexy-original-image-container"></div>
+        <div class="flexy-user-image-container"></div>
+        <div class="flexy-user-image-upload">
+            <input type="file" id="flexy-image-data-upload" />
+            <output id="flexy-image-data-output"></output>
+        </div>
+
+        <input type="hidden" class="flexy-customized-product-id" />
+    </div>
+
+    <div class="flexy-custom-product-canvas-container"></div>
+    <div class="flexy-custom-product-canvas-user-container"></div>
+{% endblock %}

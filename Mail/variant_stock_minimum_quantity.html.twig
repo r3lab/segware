@@ -1,0 +1,30 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+
+{% block content %}
+    <div style="{{ style.header }}">
+        <h1>Estoque baixo!</h1>
+    </div>
+    <div style="{{ style.inner }}">
+        <p>Olá!</p>
+        <p>O produto <b>{{ stock.variant.product.name }}</b> alcançou a quantidade de <b>{{ stock.quantity }}</b> unidade(s) em estoque. O alerta de estoque mínimo configurado é de <b>{{ stock.minimumQuantity }}</b> unidade(s).</p>
+        <br>
+        <table style="border:0; width:100%;" cellspacing="0" cellpadding="20">
+            <tr>
+                <td>
+                    {% for image in stock.variant.product.images if image.isMaster %}
+                        <img src="{{ image.urlSmall }}" style="max-width: 80px; max-height: 80px;"/>
+                    {% endfor %}
+                </td>
+                <td style="border-left:1px solid #ddd;">
+                    <p>
+                        {{ stock.variant.fullName(false) }} <br/>
+                        <span style="font-size: 12px; color: #666;">Ref.: {{ stock.variant.referenceCode  }}</span>
+                    </p>
+                </td>
+            </tr>
+        </table>
+        <br>
+        <p>Atenciosamente,</p>
+        <p>Equipe Flexy</p>
+    </div>
+{% endblock %}

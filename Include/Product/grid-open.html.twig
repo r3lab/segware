@@ -1,0 +1,55 @@
+{% set masterVariantPrice = flexy_ftwo_product_variant_price(variant) %}
+{% set masterVariantPromotion = flexy_ftwo_variant_promotion_catalog_details(variant) %}
+
+<div class="grid-open">
+    <p class="tamanho bd-tamanho">
+        Selecione as quantidades por tamanho:
+    </p>
+    <div class="col-md-1 box-size-new cursor-none">
+        <div>
+            <p>TAMANHO:</p>
+        </div>
+        <div class="box-inf">
+            <p>TOTAL:</p>
+        </div>
+    </div>
+    {% for productVariant in variant.product.variants %}
+        {% set variantPrice = flexy_ftwo_product_variant_price(productVariant) %}
+        {% set variantPromotion = flexy_ftwo_variant_promotion_catalog_details(productVariant) %}
+        {% set variantMaxQuantity = flexy_ftwo_stock_locate_by_parameters({distributionCenterReferenceCode : distributionCenterReferenceCode, variantReferenceCode : productVariant.referenceCode}).quantity %}
+
+        {% set size = productVariant.presentation|split('.')[0] %}
+        {% set quantity = productVariant.presentation|split('.')[1] ?: 0 %}
+        {% set available = variantMaxQuantity > 0 %}
+
+        <div class="col-md-1 box-size inative cursor-none">
+            <div class="box-sup no-border">
+                <p>{{ size }}</p>
+            </div>
+            <div class="box-inf">
+                <input type="number" class="flexy-input-integer stock-verified form-control input-number-inf" min="0" value="{{ available ? 1 : 0 }}" data-price="{{ (variantPromotion ? variantPromotion.finalPrice : variantPrice) }}" data-variant-id="{{ productVariant.id }}" data-stock="{{ productVariant.product.stockControl ? variantMaxQuantity : "" }}" data-distribution-center="{{ distributionCenterReferenceCode }}" {{ not available ? "disabled" : "" }}>
+            </div>
+        </div>
+    {% endfor %}
+
+    <p></p>
+
+    <br clear="both">
+
+    <p class="tamanho qtd"></p>
+    <p class="ti">
+        Total itens: <i class="grid-quantity-total"></i>
+
+        {% if store.config.displayPrice %}
+        <span class="left-spaced">
+            Valor unitário: R$ {{ (masterVariantPromotion ? masterVariantPromotion.finalPrice : masterVariantPrice)|number_format(2, ',', '.') }}
+        </span>
+        {% endif %}
+    </p>
+
+    <p></p>
+
+    <p class="price-new"><span>Valor Total:</span></p>
+    <p class="price">R$ <i class="grid-total-value">0,00</i></p>
+    <p></p>
+</div>

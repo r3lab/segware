@@ -1,0 +1,862 @@
+{% extends "FlexyFtwoStoreBundle:Layout:base.html.twig" %}
+{% set title = variant %}
+{% set dc =  store.shoppingStore ? store.shoppingStore.distributionCenter.referenceCode : null %}
+{% set price = flexy_ftwo_product_variant_price(variant , dc) %}
+{% set hasStock = flexy_ftwo_variant_has_stock(variant, dc) %}
+{% set promotion = flexy_ftwo_variant_promotion_catalog_details(variant, dc) %}
+{% set promotionProgressive = f2_variant_promotion_progressive({'variant.referenceCode' : variant.referenceCode, 'shoppingStore.referenceCode' : (shoppingStore)?shoppingStore.referenceCode:null}).ranges %}
+{% set comments = flexy_ftwo_product_rating_comment_list(variant.product.id) %}
+{% if store.config.displayPrice %}
+    {% set maxInstallments = flexy_ftwo_installment_maximum_calculator(promotion ? promotion.finalPrice : price, {'variantReferenceCode': variant.referenceCode}) %}
+{% endif %}
+{% set installments = flexy_ftwo_installment_calculator(promotion ? promotion.finalPrice : price, {'variantReferenceCode' : variant.referenceCode })|first %}
+{% set boletoDiscount = (store.paymentMethod.boleto)?store.paymentMethod.boleto.discount:null %}
+{% set kitProducts = flexy_ftwo_product_related_by_kit(variant.product) %}
+{% set currentCustomer = flexy_ftwo_current_customer() %}
+{% set subscriptionPlans = variant.product.subscriptionPlans %}
+{% set customerList = f2_customer_list(
+    {
+        'page.limit' : 10,
+        'search.term' : null,
+        'bought.variant.referenceCode' : variant.referenceCode,
+        'bought.variant.shoppingStore.referenceCode' : (shoppingStore)?shoppingStore.referenceCode:null,
+        'customerType.referenceCodes' : [ 'default.customer' ],
+        'customer.attributes' : { 'where-buy' : 'sim' },
+        'sort.order' : 'lastBuyers-desc'
+    }
+) %}
+{% set activated = flexy_ftwo_shoppingStore_is_activated() %}
+
+{% block metatag %}
+    {% if variant.product.masterImage %}
+        <meta property="og:image" content="https:{{ variant.product.masterImage.urlOriginal }}"/>
+    {% endif %}
+{% endblock %}
+{% block content %}
+    <section>
+        <div class="second-page-container">
+            <div class="container">
+                {% set path = [] %}
+                {% for step in f2_store_create_breadcrumbs({ 'product.referenceCode' : variant.product.referenceCode, 'shoppingStore.referenceCode' : (variant.product.shoppingStore)?variant.product.shoppingStore.referenceCode:null }) %}
+                    {% if step.categoryName != "Departamentos" %}
+                        {% set path = path|merge([{'url': step.categoryUrl, 'title' : step.categoryName}]) %}
+                    {% endif %}
+                {% endfor %}
+
+                {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : path|merge([{'title' : variant}])} %}
+
+                <div class="block-product-detail">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                            <div class="product-media">
+                                <div id="gal1">
+                                    {% for image in flexy_ftwo_product_image_list(variant.product.id) %}
+                                        <a href="javascript:void(0);" data-image="{{ image.urlLarge }}"
+                                           data-zoom-image="{{ image.urlOriginal }}">
+                                            <img id="img_{{ loop.index }}" src="{{ image.urlSmall }}" alt="">
+                                        </a>
+                                    {% endfor %}
+
+                                    {% for video in variant.product.videos %}
+                                        <a href="javascript:void(0);" data-video="{{ video.code }}">
+                                            <img src="https://img.youtube.com/vi/{{ video.code }}/0.jpg">
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                                <div class="product-media-details">
+                                    <div class="product-image">
+                                        <img id="{{ variant.product.masterImage ? "product-zoom" : "" }}"
+                                             src="{{ flexy_ftwo_image_placeholder_large(variant.product.masterImage, "img/product-placeholder.gif") }}"
+                                             data-zoom-image="{{ variant.product.masterImage ? variant.product.masterImage.urlOriginal : flexy_ftwo_resource_url_img("img/product-placeholder.gif") }}"
+                                             alt="">
+                                    </div>
+                                    <div class="product-video"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                            <div class="product-detail-section">
+                                <h3>{{ variant.product.name }}</h3>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <p class="product-ref">REF.:
+                                            {{ variant.referenceCode }}</p>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="product-rating">
+                                            <div class="stars">
+                                                {% set rating = flexy_ftwo_product_average_rating(variant.product) %}
+
+                                                {% for i in 5..1 %}
+                                                    <span class="star {{ i > rating ? '' : 'active' }}"></span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% if shoppingStore %}
+                                    {% include 'FlexyFtwoStoreBundle:Include/Product:store-info.html.twig' with {shoppingStore: shoppingStore, variant: variant} %}
+                                {% endif %}
+
+                                <div class="product-information">
+                                    {% if variant.product.descriptionGroup.descriptionOne %}
+                                        <p class="description">{{ variant.product.descriptionGroup.descriptionOne|raw }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if variant.product.customProductAttributes|length > 0 %}
+                                <div class="f2-product-attributes">
+                                    <hr/>
+                                    {% for customProductAttribute in variant.product.customProductAttributes %}
+                                        <div class="f2-product-attribute"
+                                             id="f2-product-attribute-{{ customProductAttribute.referenceCode }}">
+                                            <label class="control-label"
+                                                   for="attributeValues[{{ customProductAttribute.referenceCode }}]">{{ customProductAttribute.name }}
+                                                {% if customProductAttribute.required %}
+                                                <span class="text-error">*</span>
+                                                {% endif %}:</label>
+                                            {{ flexy_ftwo_common_attribute_render(
+                                                customProductAttribute,
+                                                null,
+                                                {
+                                                    "attr" : {
+                                                    "name" : "attributeValues[" ~ customProductAttribute.referenceCode ~ "]",
+                                                    "required" : customProductAttribute.isRequired
+                                                }
+                                                }
+                                            ) }}
+                                            <span id="helpBlock-{{ customProductAttribute.referenceCode }}"
+                                                  class="hidden help-block">{{ 'admin.generic.attribute.form.required'|trans }}</span>
+                                        </div>
+                                    {% endfor %}
+                                    <hr/>
+                                </div>
+                            {% endif %}
+                            <div class="product-detail-section">
+                                <div class="product-information">
+                                    {% if (store.info.usesMultipleSales is empty and hasStock) or (store.info.usesMultipleSales and hasStock) %}
+                                        {% if store.config.displayPrice %}
+                                            <p class="price">
+                                                {% if promotion %}
+                                                    <span class="full-price">de
+														<del>R$
+															{{ price|number_format(2, ',', '.') }}</del>
+														por
+														<br></span>
+                                                {% endif %}
+
+                                                R$
+                                                {{ (promotion ? promotion.finalPrice : price)|number_format(2, ',', '.') }}
+                                            </p>
+                                        {% endif %}
+
+                                        {% if store.config.displayPrice and ((maxInstallments and store.config.displayPrice) or store.paymentMethod.boleto) %}
+                                            <div class="installments">
+                                                <div id="installmentDetails" class="float-left">
+                                                    {% if maxInstallments.installmentNumber > 0 %}
+                                                        {{ maxInstallments.installmentNumber }}x de R$
+                                                        {{ maxInstallments.installmentValue|number_format(2, ',', '.') }}
+                                                        no cartão
+                                                    {% endif %}
+                                                </div>
+
+                                                <div class="beauty-select  hidden-xs">
+                                                    <a href="javascript:void(0);">ver parcelas
+                                                        <i class="fa fa-chevron-down"></i>
+                                                    </a>
+
+                                                    <div class="details">
+
+
+                                                        {% if store.paymentMethod.boleto %}
+
+                                                            <li>
+                                                                <strong>Boleto:</strong>
+                                                            </li>
+                                                            <li id="payment-method-boleto">
+                                                                À vista por R$
+                                                                {{ ((promotion ? promotion.finalPrice : price)*((100-boletoDiscount)/100))|number_format(2, ',', '.') }}
+                                                                {% if boletoDiscount %}
+                                                                    <br>
+                                                                    <span class="boleto-discount">{{ boletoDiscount }}% de desconto</span>
+                                                                {% endif %}
+                                                            </li>
+
+                                                            {% if (maxInstallments and store.config.displayPrice  and maxInstallments.installmentNumber > 0) %}
+                                                                <li>
+                                                                    <hr/>
+                                                                </li>
+                                                            {% endif %}
+                                                        {% endif %}
+
+                                                        {% if (maxInstallments and store.config.displayPrice and maxInstallments.installmentNumber > 0) %}
+
+                                                            <li>
+                                                                <strong>Cartão:</strong>
+                                                            </li>
+
+                                                            {% for key, installment in installments.no_tax %}
+                                                                <li class="number-and-value-installments">{{ key }}
+                                                                    x R$
+                                                                    {{ installment|number_format(2, ',', '.') }}
+                                                                    sem juros
+                                                                </li>
+                                                            {% endfor %}
+                                                            {% for key, installment in installments.tax %}
+                                                                <li class="number-and-value-installments">{{ key }}
+                                                                    x R$
+                                                                    {{ installment|number_format(2, ',', '.') }}
+                                                                    com juros
+                                                                </li>
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+
+                                                {% if promotionProgressive|length > 0 %}
+                                                    <div class="beauty-select">
+                                                        <a href="#">preço para quantidades
+                                                            <i class="fa fa-chevron-down"></i>
+                                                        </a>
+
+                                                        <ul class="details">
+                                                            {% for key, range in promotionProgressive %}
+                                                                <li>De
+                                                                    {{ range.start }}
+                                                                    a
+                                                                    {{ range.end }}
+                                                                    -
+                                                                    R${{ range.finalValue|number_format(2, ',', '.') }}
+                                                                    por un.
+                                                                </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                {% endif %}
+
+                                                {% if subscriptionPlans|length > 0 and not variant.product.isAvailableForBooking %}
+                                                    <div class="beauty-select">
+                                                        <a href="#">planos de assinatura<i
+                                                                    class="fa fa-chevron-down"></i>
+                                                        </a>
+
+                                                        <ul class="details">
+                                                            {% for subscriptionPlan in subscriptionPlans %}
+                                                                <li>
+                                                                    <strong>{{ subscriptionPlan.name }}</strong>
+                                                                    -
+                                                                    {{ subscriptionPlan.numberOfRecurrences }}x
+                                                                    {{ subscriptionPlan.intervalBetweenRecurrencesLabel|lower }}
+                                                                    .
+                                                                </li>
+                                                                <br>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                {% endif %}
+                                                <div class="price-with-boleto-discount">
+                                                    {% if boletoDiscount %}
+                                                        à vista R$
+                                                        {{ ((promotion ? promotion.finalPrice : price)*((100-boletoDiscount)/100))|number_format(2, ',', '.') }}
+                                                        <span class="discount">(-{{ boletoDiscount }}%)</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <p class="price">Indisponível</p>
+                                        <p>Este produto esta indisponível por falta de estoque.</p>
+                                    {% endif %}
+
+                                    {% if not variant.product.isSimple %}
+                                        {% if kitProducts|length > 0 %}
+                                            {% include 'FlexyFtwoStoreBundle:Include/Product:grid-closed.html.twig' with {variant: variant} %}
+                                        {% else %}
+                                            <div class="tamanho">
+                                                Selecione uma opção:
+                                                <ul>
+                                                    {% for productVariant in variant.product.variants %}
+                                                        <li class="box-size {{ productVariant.id == variant.id ? 'active' : '' }} {{ flexy_ftwo_variant_has_stock(productVariant, shoppingStore ? shoppingStore.referenceCode : null) ? '' : 'unavailable' }}"
+                                                            title="{{ flexy_ftwo_variant_has_stock(productVariant, shoppingStore ? shoppingStore.referenceCode : null) ? '' : 'Indisponível' }}">
+                                                            <a href="{{ flexy_ftwo_variant_has_stock(productVariant, shoppingStore ? shoppingStore.referenceCode : null) ? flexy_ftwo_product_url(productVariant, shoppingStore ? shoppingStore.referenceCode : null) : "javascript:void(0);" }}">{{ productVariant.presentation }}</a>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    {% set seeAlso = flexy_ftwo_product_related_by_group(variant.product, 'other-colors') %}
+                                    {% if seeAlso|length > 0 %}
+                                        <div class="opcoes">
+                                            <div>Outras cores:</div>
+                                            <ul>
+                                                {% for productRelated in seeAlso %}
+                                                    <li>
+                                                        <a href="{{ flexy_ftwo_product_url(productRelated.variant) }}">
+                                                            <img src="{{ productRelated.groupImage ? productRelated.groupImage.path : flexy_ftwo_image_placeholder_small(productRelated.variant.product.masterImage, 'img/product-placeholder.gif') }}">
+                                                        </a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+                                    <input type="hidden" name="customer" id="customer"
+                                           value="{{ app.user.customer }}"/>
+                                    {% if app.user.customer %}
+                                        {% if variant.product.isAvailableForBooking %}
+                                            <div class="row">
+                                                <div class="col-sm-12 col-md-6">
+                                                    <label for="initialDateBooking">Dt. Inicio:</label>
+                                                    <input type="text" class="form-control" id="initialDateBooking"
+                                                           onkeydown="return false"/>
+                                                </div>
+
+                                                <div class="col-sm-12 col-md-6">
+                                                    <label for="endDateBooking">Dt. Devolução:</label>
+                                                    <input type="text" class="form-control" id="endDateBooking"
+                                                           onkeydown="return false"/>
+                                                </div>
+                                            </div>
+                                            <br/>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    {% if (store.info.usesMultipleSales is empty and hasStock) or (store.info.usesMultipleSales and hasStock) %}
+                                        <div class="row">
+                                            <div class="shopping-cart-buttons col-xs-12 col-sm-12 col-md-12">
+                                                {% if not variant.product.isAvailableForBooking %}
+                                                    {% if variant.isFractionalStock %}
+                                                        <input type="text" id="quantity" name="quantity"
+                                                               class="quantity f2-shipping-estimate-quantity product-quantity flexy-weight-mask"
+                                                               min="0,001" value="1,000"
+                                                               data-maximum-quantity="{{ variant.stock.hasStockControl ? variant.stock.quantity : '' }}"
+                                                               data-stock="{{ variant.stock.hasStockControl ? variant.stock.quantity : '' }}">
+                                                    {% else %}
+                                                        <input type="number" id="quantity" name="quantity"
+                                                               class="quantity f2-shipping-estimate-quantity product-quantity number"
+                                                               min="1" value="1"
+                                                               data-maximum-quantity="{{ variant.stock.hasStockControl ? variant.stock.quantity : '' }}">
+                                                    {% endif %}
+                                                {% endif %}
+
+                                                {% if variant.product.isAvailableForSale %}
+                                                    <button type="button"
+                                                            class="btn flexy-add-to-cart main_cart_add btn-light-blue col-md-5 col-sm-5 col-xs-7"
+                                                            data-variant-id="{{ variant.id }}"
+                                                            data-product-quantity="#quantity"
+                                                            data-distributioncenter="{{ (shoppingStore)?shoppingStore.referenceCode:null }}">
+                                                        <i class="fa fa-shopping-cart d_inline_m m_right_9"></i>
+                                                        &nbsp;Comprar
+                                                    </button>
+                                                {% endif %}
+
+                                                {% if variant.product.isAvailableForBooking %}
+                                                    <button type="button" id="booking-add-btn"
+                                                            class="btn flexy-add-to-booking main_cart_add btn-light-blue col-md-5 col-sm-5 col-xs-7"
+                                                            data-variant-id="{{ variant.id }}"
+                                                            data-product-quantity="#quantity"
+                                                            data-distributioncenter="{{ (shoppingStore)?shoppingStore.referenceCode:null }}">
+                                                        <i class="fa fa-shopping-cart d_inline_m m_right_9"></i>
+                                                        &nbsp;Alugar
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xs-12 col-md-12">
+                                                <form action="{{ path("flexy_ftwo_store_wishlist_add") }}"
+                                                      method="post">
+                                                    <input type="hidden" name="productId"
+                                                           value="{{ variant.product.id }}"/>
+                                                    <button type="submit" title="Adicionar a lista de desejos"
+                                                            class="wishlist-btn">
+                                                        <i class="fa fa-heart-o"></i>
+                                                        &nbsp;Adicionar à minha lista de desejos
+                                                    </button>
+                                                </form>
+                                            </div>
+                                            <div class="col-xs-12 col-md-12">
+                                                {% if variant.product.isAvailableForQuote and activated %}
+                                                    <button type="button" id="quote-add-btn" class="wishlist-btn"
+                                                            data-variant-id="{{ variant.id }}"
+                                                            data-product-quantity="#quantity"
+                                                            data-distributioncenter="{{ (shoppingStore)?shoppingStore.referenceCode:null }}">
+                                                        <i class="fa fa-file"></i>
+                                                        &nbsp;Adicionar ao orçamento
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+
+
+                                            {% if currentCustomer and currentCustomer.hasGiftList %}
+                                                <div class="row">
+                                                    <div class="col-xs-12 col-md-12">
+                                                        <a class="f2-add-product-gift-list lista add-gift-list"
+                                                           href="javascript:void(0);" style=""
+                                                           data-product-id="{{ variant.product.id }}">
+                                                            <i class="fa fa-gift fa-lg"></i>&nbsp; Adicionar à minha
+                                                            lista de presentes
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <br>
+                                                <span>Frete e prazo:</span>
+                                                <div class="input-group">
+                                                    <input type="text" name="zipCode" id="zipCode" placeholder="CEP"
+                                                           value="{{ app.request.get('zipCode') }}"
+                                                           class="form-control cep flexy-postcode-mask f2-shipping-estimate-postcode"
+                                                           maxlength="9">
+                                                    <span class="input-group-btn">
+														<button id="calculate"
+                                                                class="btn btn-default f2-shipping-estimate-action"
+                                                                type="submit">Calcular</button>
+													</span>
+                                                    <input type="hidden" class="f2-shipping-estimate-variant-id"
+                                                           value="{{ variant.id }}"/>
+                                                </div>
+                                                <div class="cep_validate"></div>
+                                                <br>
+                                                <div class="f2-shipping-estimate-container"></div>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <p>
+                                                    <b>Avise-me quando chegar:</b>
+                                                </p>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="input-group">
+                                                    <input type="text"
+                                                           class="flexy-product-notify-when-available-email form-control"
+                                                           placeholder="E-mail">
+                                                    <span class="input-group-btn">
+														<button class="btn btn-secondary flexy-product-notify-when-available-send btn-blue"
+                                                                type="button" data-variant-id="{{ variant.id }}">Cadastrar</button>
+													</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    <div class="addthis_sharing_toolbox"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <section id="product-more-info">
+                    <div class="box-border block-form">
+                        {% set hasFirstTab = variant.product.descriptionGroup.descriptionTwo %}
+                        {% set hasSecondTab = variant.product.descriptionGroup.descriptionThree or variant.product.descriptionGroup.descriptionFour %}
+                        {% set hasThirdTab = true %}
+
+                        <ul class="nav nav-pills nav-justified">
+                            {% if hasFirstTab %}
+                                <li class="active">
+                                    <a href="#description" data-toggle="tab">Sobre o produto</a>
+                                </li>
+                            {% endif %}
+
+                            {% if hasSecondTab %}
+                                <li class="{{ not hasFirstTab ? "active" : "" }}">
+                                    <a href="#technical" data-toggle="tab">Informações técnicas</a>
+                                </li>
+                            {% endif %}
+
+                            {% if hasThirdTab %}
+                                <li class="{{ not hasFirstTab and not hasSecondTab ? "active" : "" }}">
+                                    <a href="#review" data-toggle="tab">Avaliações</a>
+                                </li>
+                            {% endif %}
+                            {% if customerList.totalResults > 0 %}
+                                <li class="">
+                                    <a href="#where_buy" data-toggle="tab">Onde Comprar</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+
+                        <div class="tab-content">
+                            {% if hasFirstTab %}
+                                <div class="tab-pane active" id="description">
+                                    {{ variant.product.descriptionGroup.descriptionTwo|raw }}
+                                </div>
+                            {% endif %}
+
+                            {% if hasSecondTab %}
+                                <div class="tab-pane {{ not hasFirstTab ? " active" : " " }}" id="technical">
+                                    {% if variant.product.descriptionGroup.descriptionThree %}
+                                        <div class="description">{{ variant.product.descriptionGroup.descriptionThree|raw }}</div>
+                                    {% endif %}
+
+                                    {% if variant.product.descriptionGroup.descriptionFour %}
+                                        <div class="description">
+                                            {{ variant.product.descriptionGroup.descriptionFour|raw }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+
+                            {% if hasThirdTab %}
+                                <div class="tab-pane {{ not hasFirstTab and not hasSecondTab ? " active" : " " }}"
+                                     id="review">
+                                    <div class="comments">
+                                        {% for comment in comments %}
+                                            <div class="comment">
+                                                <div class="review-header">
+                                                    <h5>{{ comment.customer.firstName is defined ? comment.customer.firstName : comment.customer.tradeName }}</h5>
+                                                    <div class="product-rating">
+                                                        <div class="stars">
+                                                            {% for i in 1..5 %}
+                                                                <span class="star {{ i <= comment.rating.rating ? 'active' : '' }}"></span>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                    <small class="text-muted">{{ comment.createdAt }}</small>
+                                                </div>
+                                                <div class="review-body">
+                                                    <p>{{ comment.content }}</p>
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <p class="text-center"><br>Nenhuma avaliação realizada.</p>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div class="product-rating-block">
+                                        {% if flexy_ftwo_current_user_exists() %}
+                                            <h4>Faça sua avaliação:</h4>
+                                            <div class="form-group">
+                                                <textarea rows="8"
+                                                          class="flexy-product-review-comment form-control"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="product-rating">
+                                                    <label class="control-label">Sua nota:</label>
+                                                    <select class="flexy-product-review-rating form-control">
+                                                        {% for i in 1..5 %}
+                                                            <option value="{{ i }}">{{ i }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <button type="button" class="flexy-product-review-send btn-default-1"
+                                                    data-product-id="{{ variant.product.id }}">Enviar
+                                            </button>
+                                        {% else %}
+                                            <p>
+                                                <a href="{{ path("flexy_ftwo_store_customer_login") }}">Acesse sua
+                                                    conta</a>, ou
+                                                <a href="{{ path("flexy_ftwo_store_customer_create") }}">cadastre-se</a>,
+                                                e conte-nos sobre sua experiência na compra deste produto.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if customerList.totalResults > 0 %}
+                                <div class="tab-pane" id="where_buy">
+                                    {% include 'FlexyFtwoStoreBundle:Include/Customer:list.html.twig' with { 'customerList' : customerList } %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </section>
+                {% set additionalProducts = flexy_ftwo_product_related_additional(variant.product, {shoppingStore: shoppingStore}) %}
+                {% set variantSalable = hasStock and variant.product.isAvailableForSale %}
+                {% set variantQuotable = hasStock and variant.product.isAvailableForQuote %}
+                {% if additionalProducts|length > 0 and hasStock %}
+                    {% set anyAdditionalHasStock = false %}
+                    {% for additional in additionalProducts %}
+                        {% set variantAdditionalHasStock =
+                            dc ? flexy_ftwo_variant_has_stock(additional.variant, dc)
+                            : flexy_ftwo_variant_has_stock(additional.variant) %}
+                        {% if variantAdditionalHasStock %}
+                            {% set anyAdditionalHasStock = true %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if anyAdditionalHasStock %}
+                        {% include 'FlexyFtwoStoreBundle:Include:product-related-slider.html.twig' with {
+                            id: "family-carousel",
+                            title: "Adicionais",
+                            relatedProducts: additionalProducts,
+                            additional: true,
+                            variantSalable : variantSalable,
+                            variantQuotable : variantQuotable,
+                            mainVariantId : variant.id
+                        } %}
+                    {% endif %}
+                {% endif %}
+
+                {% set seeAlsoProducts = flexy_ftwo_product_related_see_also(variant.product, { 'noGroupRelated' : true }) %}
+                {% if seeAlsoProducts|length > 0 %}
+                    {% include 'FlexyFtwoStoreBundle:Include:product-related-slider.html.twig' with {
+                        id: "family-carousel",
+                        title: "Veja Também",
+                        relatedProducts: seeAlsoProducts,
+                        additional: false
+                    } %}
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Go to www.addthis.com/dashboard to customize your tools -->
+    <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-53fcef104475215a"></script>
+    <script>
+        (function () {
+            var tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        })();
+    </script>
+
+    {% if variant.product.isAvailableForBooking %}
+        <script src="{{ flexy_ftwo_resource_url_js('js/litepicker.js') }}"></script>
+        <script>
+            const datePickerOptions = JSON.parse(`{{ bookingDataPickerOptions | json_encode | raw }}`);
+            const beginDateBooking = document.getElementById('initialDateBooking');
+            const endDateBooking = document.getElementById('endDateBooking');
+            const btnBookingAdd = document.querySelector('#booking-add-btn')
+
+            let datePicker = new Litepicker({
+                element: beginDateBooking,
+                elementEnd: endDateBooking,
+                numberOfMonths: 2,
+                numberOfColumns: 2,
+                resetButton: true,
+                selectForward: true,
+                singleMode: false,
+                tooltipText: {
+                    one: 'dia',
+                    other: 'dias'
+                },
+                tooltipNumber: (totalDays) => {
+                    return totalDays;
+                },
+                ...datePickerOptions,
+                setup: (picker) => {
+                    picker.on('selected', async (beginDate, endDate) => {
+                        let beginDateFormated = beginDate.format('YYYY-MM-DD');
+                        let endDateFormated = endDate.format('YYYY-MM-DD');
+
+                        await this.calculatePriceByPeriodSelected("{{ variant.id }}", beginDateFormated, endDateFormated)
+
+                        btnBookingAdd.setAttribute('data-product-begindatebooking', beginDateFormated);
+                        btnBookingAdd.setAttribute('data-product-enddatebooking', endDateFormated)
+                    });
+                }
+            })
+
+            /**
+             * Prepare calendar with unavailable dates
+             * @returns {Promise<void>}
+             */
+            async function prepareDateRange() {
+                try {
+                    this.toggleBookingDates(beginDateBooking, endDateBooking, true);
+
+                    const datesUnavailable = await this.calculateUnavailableDates({{ variant.id }});
+                    datePicker.setLockDays(datesUnavailable);
+                } catch (exception) {
+                    console.log(exception)
+                } finally {
+                    this.toggleBookingDates(beginDateBooking, endDateBooking, false)
+                }
+            }
+
+            /**
+             * Request platform to get unavailable dates for variant
+             * @param variantId
+             * @returns {Promise<Response>}
+             */
+            async function calculateUnavailableDates(variantId) {
+                const result = await fetch(`{{ path('flexy_ftwo_store_booking_unavailable_dates') }}?variantId=${variantId}`).then(response => {
+                    if (response.ok) {
+                        return response.json().then(data => {
+                            return data;
+                        });
+                    }
+                    throw response;
+                }).catch(response => {
+                    console.log(response)
+                });
+                return result;
+            }
+
+            /**
+             * Re-calculate prices by period
+             * @param $variantId
+             * @param $beginDate
+             * @param $endDate
+             * @returns {Promise<void>}
+             */
+            async function calculatePriceByPeriodSelected($variantId, $beginDate, $endDate) {
+                let form = new FormData();
+                form.append('variantId', $variantId);
+                form.append('beginDate', $beginDate);
+                form.append('endDate', $endDate);
+
+                this.loadingBookingButton(true);
+
+                const {
+                    price,
+                    promotion,
+                    maxInstallments,
+                    installments
+                } = await fetch(`{{ path('flexy_ftwo_store_booking_calculate_price_by_period') }}`, {
+                    method: "POST",
+                    body: form
+                }).then(response => {
+                    if (response.ok) {
+                        return response.json().then(data => {
+                            return data;
+                        });
+                    }
+                    throw response;
+                }).catch(exception => {
+                    console.log(exception)
+                }).finally(() => {
+                    this.loadingBookingButton(false);
+                })
+
+                this.recalculatePriceElement(price, promotion);
+                this.recalculateInstallmentElement(maxInstallments);
+                {% if boletoDiscount %}
+                this.recalculateBoletoDiscount({{ boletoDiscount }}, price, promotion);
+                {% endif %}
+
+                this.recalculateInstallmentListElement(installments);
+            }
+
+            /**
+             * Disable or enable date inputs for booking
+             * @param beginElement
+             * @param endElement
+             * @param isDisabled
+             */
+            function toggleBookingDates(beginElement, endElement, isDisabled = false) {
+                beginElement.disabled = isDisabled
+                endElement.disabled = isDisabled
+            }
+
+            /**
+             * Change button options when date selected
+             * @param isLoading
+             */
+            function loadingBookingButton(isLoading) {
+                btnBookingAdd.textContent = isLoading ? 'Carregando...' : 'Alugar'
+                btnBookingAdd.disabled = isLoading;
+            }
+
+            /**
+             * Convert value (float) to money
+             * @param value
+             * @returns {*}
+             */
+            function formatMoney(value) {
+                const formatMoney = Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                })
+
+                return formatMoney.format(value);
+            }
+
+            /**
+             * Re-calculate original price by period
+             * @param price
+             * @param promotion
+             */
+            function recalculatePriceElement(price, promotion = null) {
+                const priceElement = document.querySelector('.price');
+                priceElement.innerHTML = "";
+
+                promotion && priceElement.insertAdjacentHTML(
+                    'afterbegin',
+                    `<span class='full-price'>de <del>${this.formatMoney(promotion.originalPrice)}</del> por <br></span>`
+                );
+
+                priceElement.insertAdjacentText('beforeend', this.formatMoney(promotion ? promotion.finalPrice : price))
+            }
+
+            /**
+             * Re-calculate installments text by period
+             * @param maxInstallments
+             */
+            function recalculateInstallmentElement(maxInstallments) {
+                const installmentElement = document.querySelector('#installmentDetails');
+                const newInstallmentElement = document.createElement('div');
+                if (maxInstallments.installmentNumber > 0) {
+                    newInstallmentElement.innerText = `${maxInstallments.installmentNumber}x de ${this.formatMoney(maxInstallments.installmentValue)} no cartão`;
+                }
+                newInstallmentElement.classList.add('float-left')
+                newInstallmentElement.id = 'installmentDetails'
+
+                installmentElement.replaceWith(newInstallmentElement);
+            }
+
+            /**
+             * Re-calculate boleto discount by period
+             * @param boletoDiscount
+             * @param price
+             * @param promotion
+             */
+            function recalculateBoletoDiscount(boletoDiscount, price, promotion = null) {
+                const priceWithBoletoDiscountElement = document.querySelector('.installments .price-with-boleto-discount');
+                const paymentMethodBoletoElement = document.querySelector('.details #payment-method-boleto');
+
+                let priceWithDiscount = price * ((100 - boletoDiscount) / 100)
+
+                priceWithDiscount = promotion ? promotion.finalPrice * ((100 - boletoDiscount) / 100) : priceWithDiscount
+
+                priceWithBoletoDiscountElement.innerHTML = `à vista ${this.formatMoney(priceWithDiscount)}<span class="discount">(-{{ boletoDiscount }}%)</span>`;
+                paymentMethodBoletoElement.innerHTML = `À vista por ${this.formatMoney(priceWithDiscount)}`;
+            }
+
+            /**
+             * Re-calculate installments details list by period
+             * @param installments
+             */
+            function recalculateInstallmentListElement(installments) {
+                const installmentDetailsListElement = document.querySelector('.beauty-select .details');
+                const numberAndValueInstallments = document.querySelectorAll('.installments .number-and-value-installments');
+
+                numberAndValueInstallments.forEach((item) => {
+                    item.remove();
+                })
+                Object.entries(installments.no_tax).forEach(([key, installment]) => {
+                    if (key > 0) {
+                        installmentDetailsListElement.insertAdjacentHTML('beforeend',
+                            `<li class="number-and-value-installments">${key} x ${this.formatMoney(installment)} sem juros </li>`);
+                    }
+                })
+                Object.entries(installments.tax).forEach(([key, installment]) => {
+                    if (key > 0) {
+                        installmentDetailsListElement.insertAdjacentHTML('beforeend',
+                            `<li class="number-and-value-installments">${key} x ${this.formatMoney(installment)} com juros</li>`);
+                    }
+
+                })
+            }
+
+            this.prepareDateRange();
+        </script>
+    {% endif %}
+{% endblock %}
+
+{% block css %}
+    <link href="{{ asset('bundles/flexyftwostore/css/wysiwyg.css') }}" rel="stylesheet" type="text/css"/>
+{% endblock %}

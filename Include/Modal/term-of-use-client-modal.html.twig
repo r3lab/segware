@@ -1,0 +1,21 @@
+<div id="form-use-client-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h6 class="modal-title">Termo de Uso</h6>
+            </div>
+
+            <div class="modal-body"  style="overflow-y: scroll;">
+                <form action="{{ path('flexy_ftwo_store_cart_list') }}" method="post" class="form-list">
+                    <h3>{{ termOfUse.name }}</h3>
+                    <p>{{ termOfUse.content|raw }}</p>
+                    </br></br>
+                    <div>
+                        <button type="submit" id="" class="btn btn-light-blue" style="position: fixed; bottom: 20px; right: 20px;"> Aceitar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

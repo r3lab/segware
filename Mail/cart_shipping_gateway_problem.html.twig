@@ -1,0 +1,13 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+
+{% block content %}
+    <div style="{{ style.header }}">
+        <h1>Problemas com o gateway de cálculo de frente!</h1>
+    </div>
+    <div style="{{ style.inner }}">
+        <h3>Olá.</h3>
+        <p>Identificamos que durante um pedido o sistema não conseguiu se conectar ao serviço responsável pelos cálculos de frente. Por favor, entre em contato com a equipe de suporte para averiguar e evitar maiores problemas.</p>
+        <p>Atenciosamente,</p>
+        <p>Equipe Flexy</p>
+    </div>
+{% endblock %}

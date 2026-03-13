@@ -1,0 +1,12 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+
+{% block content %}
+    <div style="{{ style.header }}">
+        <h1>Acesso rejeitado!</h1>
+    </div>
+    <div style="{{ style.inner }}">
+        <h3>Olá {{ customer.fullName }},</h3>
+        <p>{{ customer.user.justified }}</p>
+        {{ mailSignature|raw }}
+    </div>
+{% endblock %}

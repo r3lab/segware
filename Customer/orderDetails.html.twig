@@ -1,0 +1,566 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+{% set title = "Pedido " ~ order.number %}
+{% set isLightHeader = true %}
+{% set contacts = order.contacts %}
+{% set subscription = order.orderSubscriptionPlan %}
+{% set booking = order.orderBookings %}
+{% set currentAgent = flexy_ftwo_current_agent() %}
+{% set canceled = flexy_ftwo_last_order_canceled_status(order) %}
+{% set activeOnSupplyLink = 'https://fretebrasil.activecorp.com.br/SITE/AcompanhamentoEntrega/' %}
+{% set aliquotsTotal = 0 %}
+
+{% if not flexy_ftwo_last_order_paid_status(order) and order.firstPaymentMethod.isBoletoAFaturar %}
+    {% set firstStatus = flexy_ftwo_last_order_preparing_shipment_status(order) %}
+{% else %}
+    {% set firstStatus = flexy_ftwo_last_order_paid_status(order) %}
+{% endif %}
+
+{% set steps = [
+    {presentation : 'realizado', status : subscription ? firstStatus : flexy_ftwo_last_order_opened_status(order)},
+    {presentation : 'aprovado', status : firstStatus},
+    {presentation : 'aguardando envio', status : flexy_ftwo_last_order_waiting_shipment_status(order)},
+    {presentation : 'enviado', status : flexy_ftwo_last_order_shipped_status(order)},
+    {presentation : 'entregue', status : flexy_ftwo_last_order_delivered_status(order)},
+] %}
+
+{% block content %}
+    <section>
+        <div class="second-page-container">
+            <div class="container">
+                {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [
+                    {'title' : 'Meus pedidos', 'url' : path('flexy_ftwo_store_customer_profile') },
+                    {'title' : title }
+                ]} %}
+
+				<div class="row">
+                	<div class="col-md-12">
+                        {% if booking|length > 0 %}
+                            <h3>Aluguel {{ order.number }}</h3>
+                        {% else %}
+                            <h3>Pedido {{ order.number }}</h3>
+                        {% endif %}
+                        {% if order.shoppingStore %}
+                            <h3>Vendido e entregue por <a href="{{ path("flexy_ftwo_store_shoppingStore_index", {shoppingStoreReferenceCode: order.shoppingStore.referenceCode}) }}">{{ order.shoppingStore.name }}</a></h3>
+                        {% endif %}
+                        {% if canceled %}
+                            <p class="alert alert-warning">Pedido cancelado em <strong>{{ canceled.createdAt|date('d/m/Y') }}</strong>.</p>
+                        {% endif %}
+                    	<hr>
+                    </div>
+
+                    {% if not order.isOriginalSubscription %}
+                    <div class="col-md-12 hidden-xs">
+                        <div class="steps-box">
+                            <div class="steps">
+                                {% for step in steps %}
+                                    <div class="checkout-steps-item {{ step.status ? 'status-check' : 'status-uncheck' }}">
+                                        <span class="status"></span>
+                                        <p>Pedido {{ step.presentation }}</p>
+                                        <p><strong>{{ step.status ? step.status.createdAt|date('d/m/Y') : 'aguardando' }}</strong></p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% set showCommissions = order.agentCommissions|length > 0 and currentAgent %}
+                {% set collSize = showCommissions or subscription or booking ? '4' : '6' %}
+                <div class="row">
+                    <div class="col-md-{{ collSize }}">
+                        <div class="page-header">
+                            <h3>
+                                <span class="fa fa-credit-card"></span> Forma de pagamento
+                            </h3>
+                        </div>
+
+                        {% for payment in order.paymentMethods %}
+                            {% if payment.isBoleto %}
+                                <div><strong>Forma:</strong> Boleto</div>
+                                <div><strong>Valor:</strong> R$ {{ payment.billingTotal|number_format(2, ',', '.')  }}</div>
+                                {% if order.status.isWaitingPayment %}
+                                    <div><a href="{{ path('flexy_ftwo_store_checkout_print_boleto', {paymentId : payment.id}) }}" target="_blank">Imprimir segunda via do boleto</a></div>
+                                {% endif %}
+                            {% elseif payment.isPix %}
+                                <div><strong>Forma:</strong> Pix</div>
+                                <div><strong>Valor:</strong> R$ {{ payment.billingTotal|number_format(2, ',', '.')  }}</div>
+                                {% if order.status.isWaitingPayment %}
+                                    <div>
+                                        <strong>QrCode:</strong>
+                                        <a href="javascript:;" id="show-pix-qrcode">Exibir QrCode</a>
+                                    </div>
+                                    <div id="pix-qrcode-payment-container" class="hidden" >
+                                        <div id="pix-qrcode-payment-loading">
+                                            <span class="fa fa-spin fa-spinner fa-5x graph-load"></span>
+                                        </div>
+                                        <img id="pix-qrcode-payment" class="hidden" />
+                                    </div>
+                                    <div>
+                                        <strong>
+                                            Pix
+                                            <span id="pix-copy-and-paste-payment-loading">
+                                                <span class="fa fa-spin fa-spinner graph-load"></span>
+                                            </span>
+                                            <a id="pix-copy-and-paste-payment" class="hidden copy-to-clipboard" data-text="">
+                                                copia e cola
+                                            </a>
+                                        </strong>
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <div><strong>Forma:</strong> {{ payment.presentation | upper }} </div>
+                                {% if payment.creditCard.installments %}
+                                    <div>
+                                        <strong>Parcelas: </strong>{{ payment.creditCard.installments }}x
+                                        {% if payment.creditCard.installmentsValue %}
+                                            de R$ {{ payment.creditCard.installmentsValue|number_format(2, ',', '.') }}
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                                {% if payment.name == 'payment.method.boletoafaturar' %}
+                                    <div><strong>Prazo:</strong> {{ payment.boletoRule.label }}</div>
+                                    <div><strong>Valor:</strong> R$ {{ payment.billingTotal|number_format(2, ',', '.')  }}</div>
+                                {% endif %}
+
+                                {% if order.masterSale %}
+                                    {% set paymentMethodRedeOrderPaymentMethod = order.masterSale.firstPaymentMethod.redeOrderPaymentMethod %}
+                                {% else %}
+                                    {% set paymentMethodRedeOrderPaymentMethod = order.firstPaymentMethod.redeOrderPaymentMethod %}
+                                {% endif %}
+
+                                {% if paymentMethodRedeOrderPaymentMethod and paymentMethodRedeOrderPaymentMethod.authorizedValue %}
+                                    <div>
+                                        <strong>{{ 'rede.admin.capture.authorization-value'|trans }}:</strong> R$ {{ paymentMethodRedeOrderPaymentMethod.authorizedValue|number_format(2, ',', '.') }}
+                                    </div>
+
+                                    {% if paymentMethodRedeOrderPaymentMethod.totalCapturedValue %}
+                                        <div>
+                                            <strong>{{ 'rede.admin.capture.captured-value'|trans }}:</strong>
+                                            R$ {{ paymentMethodRedeOrderPaymentMethod.totalCapturedValue|number_format(2, ',', '.') }}
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% if subscription %}
+                        <div class="col-md-{{ collSize }}">
+                            <div class="page-header">
+                                <h3>
+                                    <span class="fa fa-money"></span> Plano de assinatura
+                                </h3>
+                            </div>
+
+                            <dl class="dl-horizontal">
+                                <dt>Nome de plano</dt>
+                                <dd>{{ subscription.subscriptionPlan.name }}</dd>
+                                <dt>Intervalo</dt>
+                                <dd>{{ subscription.intervalLabel }}
+                                </dd>
+                                {% set modifiedDate = "+" ~ subscription.charges * subscription.interval ~ "day" %}
+
+                                <dt>Início da inscrição</dt>
+                                <dd>{{ subscription ? order.createdAt|date('d/m/Y') : subscription.originalOrder.createdAt|date('d/m/Y') }}</dd>
+
+                                <dt>Fim da assinatura</dt>
+                                <dd>{{ order.originalSubscription ?
+                                    order.createdAt|date_modify(modifiedDate)|date('d/m/Y') :
+                                    subscription.originalOrder.createdAt|date_modify(modifiedDate)|date('d/m/Y') }}
+                                </dd>
+
+                                {% if subscription.originalOrder %}
+                                    <dt>Assinatura</dt>
+                                    <dd><a href="{{ path("flexy_ftwo_store_customer_order_detail", {orderId : subscription.originalOrder.id}) }}">{{ subscription.originalOrder }}</a></dd>
+                                {% endif %}
+
+                                {% if subscription.trialDays > 0 %}
+                                    {% set testDate = "+" ~ subscription.trialDays ~ "day" %}
+                                    <dt>Teste da assinatura</dt>
+                                    <dd>{{ subscription.trialDays }} dias</dd>
+                                    <dt>Início do teste</dt>
+                                    <dd>{{ order.originalSubscription ? order.createdAt|date('d/m/Y') : subscription.originalOrder.createdAt|date('d/m/Y') }}</dd>
+
+                                    <dt>Final do teste</dt>
+                                    <dd>{{ order.originalSubscription ?
+                                        order.createdAt|date_modify(testDate)|date('d/m/Y') :
+                                        subscription.originalOrder.createdAt|date_modify(testDate)|date('d/m/Y') }}
+                                    </dd>
+                                {% endif %}
+
+                                {% if not subscription.originalOrder and not subscription.order.isCancelled%}
+                                    <br>
+                                    <div class="text-center">
+                                        <div id="cancelled-subscription-loading" class="hidden"></div>
+                                        <a href="{{ path("flexy_ftwo_store_customer_order_detail", {orderId: subscription.order.id }) }}" class="btn btn-danger btn-sm" id="js-canceller-subscription">Cancelar Assinatura</a>
+                                    </div>
+                                {% endif %}
+                            </dl>
+                        </div>
+                    {% endif %}
+
+                    {% if booking|length > 0 %}
+                        <div class="col-md-{{ collSize }}">
+                            <div class="page-header">
+                                <h3>
+                                    <span class="fa fa-exchange"></span> Aluguel
+                                </h3>
+                            </div>
+                            <dl class="dl-horizontal">
+                                <dt>Período de Aluguel</dt>
+                                <dd>{{ booking.first.start|date('d/m/Y') }} à {{ booking.first.end|date('d/m/Y') }}</dd>
+                            </dl>
+                        </div>
+                    {% endif %}
+
+                    <div class="col-md-{{ collSize }}">
+                        <div class="page-header">
+                            <h3>
+                                <span class="fa fa-truck"></span> Dados de entrega
+                            </h3>
+                        </div>
+
+                        {% set showStoreAddress = true %}
+                        {% for shippingMethod in order.shippingMethods %}
+                            <div>
+                                <strong>Forma de entrega</strong>: {{ shippingMethod.presentation }}
+                            </div>
+
+                            {% if shippingMethod.isPickupOnPlace and showStoreAddress %}
+                                {% if order.shoppingStore %}
+                                    <div>
+                                        <strong>Endereço</strong>: {{ order.shoppingStore.distributionCenter.street|trim }}, {{ order.shoppingStore.distributionCenter.number }}, {% if order.shoppingStore.distributionCenter.complement == true %}{{ order.shoppingStore.distributionCenter.complement }},{% endif %} {{ order.shoppingStore.distributionCenter.district }}, {{ order.shoppingStore.distributionCenter.city }}, {{ order.shoppingStore.distributionCenter.state }}, {{ order.shoppingStore.distributionCenter.postcode[:5] }}-{{ order.shoppingStore.distributionCenter.postcode[5:] }}, {{ order.shoppingStore.distributionCenter.country }}
+                                    </div>
+                                {% else %}
+                                    <div>
+                                        <strong>Endereço</strong>: {{ store.info.distributionCenter.street|trim }}, {{ store.info.distributionCenter.number }}, {% if store.info.distributionCenter.complement == true %}{{ store.info.distributionCenter.complement }},{% endif %} {{ store.info.distributionCenter.district }}, {{ store.info.distributionCenter.city }}, {{ store.info.distributionCenter.state }}, {{ store.info.distributionCenter.postcode[:5] }}-{{ store.info.distributionCenter.postcode[5:] }}, {{ store.info.distributionCenter.country }}
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <div>
+                                    <strong>Endereço</strong>: {{ shippingMethod.address }}
+                                </div>
+                            {% endif %}
+                            {% if order.trackingCode and not shippingMethod.isActiveOnSupply %}
+                                <div>
+                                    <strong>Rastreamento</strong>:
+                                        {{ order.trackingCode }}
+                            	</div>
+                            {% endif %}
+                            {% if shippingMethod.isActiveOnSupply and order.status.isShipped %}
+                                <div>
+                                    <strong>Rastreamento</strong>:
+                                        <a href={{ activeOnSupplyLink }} target="_blank">{{ activeOnSupplyLink }}</a>
+                            	</div>
+                            {% endif %}
+                            <div>
+                                {% set dayOrDays = 'dias' %}
+                                {% if (shippingMethod.estimatedDeliveryFrom == 1) and (shippingMethod.estimatedDeliveryTo == 1) %}
+                                    {% set dayOrDays = 'dia' %}
+                                {% endif %}
+
+                                <strong>Estimativa de entrega</strong>:
+
+                                {% if shippingMethod.pickupOnPlace %}
+                                    {% if shippingMethod.deliveryTimePresentation %}
+                                        {{ shippingMethod.deliveryTimePresentation }}
+                                    {% else %}
+                                        A partir de {{ shippingMethod.estimatedDeliveryFrom }} {{ dayOrDays }}
+                                    {% endif %}
+                                {% elseif shippingMethod.isShippify %}
+                                    {{ shippingMethod.deliveryTimePresentation }}
+                                {% elseif shippingMethod.estimatedDeliveryFrom == shippingMethod.estimatedDeliveryTo %}
+                                    {{ shippingMethod.estimatedDeliveryFrom }} {{ dayOrDays }}
+                                {% elseif shippingMethod.scheduledDeliveryMethod %}
+                                    {{ shippingMethod.deliveryTimePresentation }}
+                                {% else %}
+                                    De {{ shippingMethod.estimatedDeliveryFrom }} a {{ shippingMethod.estimatedDeliveryTo }} {{ dayOrDays }}
+                                {% endif %}
+                            </div>
+
+                            {% if shippingMethod.observations is not empty %}
+                                <div>
+                                    <strong>Observações:</strong> {{ shippingMethod.observations }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if order.invoice is defined and order.invoice is not empty %}
+                            <div><strong>Nota fiscal:</strong> <a href="{{ order.invoice.url }}" target="_blank">{{ order.invoice.code }}</a></div>
+                        {% endif %}
+                    </div>
+
+                    {% if showCommissions %}
+                        <div class="col-md-{{ collSize }}">
+                            <div class="page-header">
+                                <h3>
+                                    <span class="fa fa-money"></span> Comissão
+                                </h3>
+                            </div>
+
+                            {% for agentCommission in order.agentCommissionsByAgent(currentAgent) %}
+                            R$ {{ agentCommission.commission|number_format(2, ',', '.') }}
+                                {% if agentCommission.agentShoppingStore %}
+                                    <em>(Comissionado pela loja)</em>
+                                {% elseif agentCommission.agentToken %}
+                                    <em>(Comissão por token: {{ agentCommission.agentToken }})</em>
+                                {% else %}
+                                    <em>(Comissão pelo cliente)</em>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 col-ms-12">
+                        <div class="page-header">
+                            <h3>
+                                <span class="fa fa-shopping-cart"></span> Produtos
+                            </h3>
+                        </div>
+
+                        {% for item in order.getItems %}
+                            <div class="media media-items bs-callout bs-callout-primary">
+                                <div class="media-left">
+                                    <img class="media-object" src="{{ f2_store_image_placeholder_small(item.variant.product.masterImage) }}">
+                                </div>
+
+                                <div class="media-body items">
+                                    <h4 class="media-heading">
+                                        <strong>{{ item.variant.product.name }} ({{ item.variant.referenceCode }})</strong>
+                                    </h4>
+
+                                    {% if item.attributeValues.length %}
+                                        <ul class="list-unstyled text-muted">
+                                            {% for attributeValue in item.attributeValues %}
+                                                {% if attributeValue.value is not empty %}
+                                                    {% set attributeOption = attributeValue.option %}
+                                                    {% set attribute = attributeOption.attribute %}
+                                                    {% if attribute.type.isImage %}
+                                                        <li>
+                                                            <small>{{ attribute.name }}:</small>
+                                                            <img class="img-thumbnail" src="{{ attributeValue.value }}" alt="{{ attribute.name }}"/>
+                                                        </li>
+                                                    {% else %}
+                                                        <li>
+                                                            <small>{{ attribute.name }}: {{ attributeValue.value }}</small>
+                                                        </li>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+
+                                    <div class="list-group mb-0">
+                                        <div class="list-group-item items-list">
+                                            <small>Preço unitário:</small>
+
+                                            <small>R$ {{ item.getUnitPrice|number_format(2, ',', '.') }}</small>
+                                        </div>
+
+                                        <div class="list-group-item items-list">
+                                            <small>Quantidade:</small>
+
+                                            <small>
+                                                {% if item.variant.isFractionalStock %}
+                                                    {{ item.quantity|number_format(3, ',', '.') }}
+                                                {% else %}
+                                                    {{ item.quantity }}
+                                                {% endif %}
+                                            </small>
+                                        </div>
+
+                                        <div class="list-group-item items-list">
+                                            <small>Subtotal:</small>
+
+                                            <small>
+                                                R$ {{ item.getTotal|number_format(2, ',', '.') }}
+                                            </small>
+                                        </div>
+
+                                        {% if item.getBillingDiscountTotal %}
+                                            <div class="list-group-item items-list">
+                                                <small>Descontos promocionais:</small>
+
+                                                <small>
+                                                    - R$ {{ item.getBillingDiscountTotal|number_format(2, ',', '.') }}
+                                                </small>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if item.shippingIpi %}
+                                            <div class="list-group-item items-list">
+                                                <small>IPI do frete:</small>
+
+                                                <small>
+                                                    R$ {{ item.shippingIpi|number_format(2, ',', '.') }}
+                                                </small>
+                                            </div>
+                                        {% endif %}
+
+                                        {% for aliquotOrderItem in item.aliquotOrderItems %}
+                                            {% set aliquotsTotal = aliquotsTotal + aliquotOrderItem.value %}
+                                            <div class="list-group-item items-list">
+                                                <small>{{ aliquotOrderItem.aliquot.name }}</small>
+                                                <small>R$ {{ aliquotOrderItem.value|number_format(2, ',', '.') }}</small>
+                                            </div>
+                                        {% endfor %}
+
+                                        {% if item.taxSubstitutionBilled %}
+                                            <div class="list-group-item items-list">
+                                                <small>ICMS-ST:</small>
+
+                                                <small>
+                                                    R$ {{ item.taxSubstitutionBilled|number_format(2, ',', '.') }}
+                                                </small>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if item.getPaymentMethodDiscount %}
+                                            <div class="list-group-item items-list">
+                                                <small>Descontos de pagamento:</small>
+
+                                                <small>
+                                                    - R$ {{ item.getPaymentMethodDiscount|number_format(2, ',', '.') }}
+                                                </small>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if item.getPaymentMethodAddition %}
+                                            <div class="list-group-item items-list">
+                                                <small>Acréscimos de pagamento:</small>
+
+                                                <small>
+                                                    R$ {{ item.getPaymentMethodAddition|number_format(2, ',', '.') }}
+                                                </small>
+                                            </div>
+                                        {% endif %}
+
+                                        <div class="list-group-item items-list">
+                                            <small>Total:</small>
+
+                                            <small>R$ {{ item.getBillingTotal|number_format(2, ',', '.') }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        <table class="table table-striped table-inline">
+                            <tbody>
+                                <tr>
+                                    <td>Valor dos itens sem desconto</td>
+                                    <td>R$ {{ order.getItemsTotalWithoutDiscount|number_format(2, ',', '.') }}</td>
+                                </tr>
+
+                                {% if aliquotsTotal > 0 %}
+                                    <tr>
+                                        <td>Total de impostos cobrados</td>
+                                        <td>R$ {{ aliquotsTotal|number_format(2, ',', '.') }}</td>
+                                    </tr>
+                                {% endif %}
+
+                                <tr>
+                                    <td>Frete</td>
+                                    <td>R$ {{ order.firstShippingMethod.originalPrice|number_format(2, ',', '.') }}</td>
+                                </tr>
+
+                                {% if order.getBillingDiscountTotal > 0 %}
+                                    <tr>
+                                        <td>Descontos promocionais</td>
+                                        <td>- R$ {{ order.getBillingDiscountTotal|number_format(2, ',', '.') }}</td>
+                                    </tr>
+                                {% endif %}
+
+                                {% if order.shippingIpi > 0 %}
+                                    <tr>
+                                        <td>IPI do Frete</td>
+                                        <td>R$ {{ order.shippingIpi|number_format(2, ',', '.') }}</td>
+                                    </tr>
+                                {% endif %}
+
+                                {% if order.taxSubstitutionBilled > 0 %}
+                                    <tr>
+                                        <td>ICMS ST</td>
+                                        <td>R$ {{ order.taxSubstitutionBilled|number_format(2, ',', '.') }}</td>
+                                    </tr>
+                                {% endif %}
+
+                                {% if order.firstPaymentMethod.discountApplied > 0 %}
+                                    <tr>
+                                        <td>Desconto de pagamento</td>
+                                        <td>- R$ {{ order.getPaymentMethodDiscountTotal|number_format(2, ',', '.') }}</td>
+                                    </tr>
+                                {% endif %}
+
+                                <tr class="lead">
+                                    <td><strong>Total</strong></td>
+                                    <td><strong>R$ {{ order.getTotal|number_format(2, ',', '.') }}</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {% if order.getAttributeValues.length %}
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="page-header">
+                                <h3>
+                                    <span class="fa fa-info-circle"></span> Informações adicionais
+                                </h3>
+                            </div>
+
+                            <ul class="list-unstyled">
+                                {% for orderAttributeValue in order.getAttributeValues if orderAttributeValue.value %}
+                                    <li>
+                                        <strong>{{ orderAttributeValue.option.attribute.name }}</strong>
+                                        {% if orderAttributeValue.option.attribute.type.isDocument %}
+                                            <a href="{{ asset(orderAttributeValue.value, 'cloudfront') }}" target="_blank">
+                                                <span class="fa fa-file"></span>
+                                            </a>
+                                        {% elseif orderAttributeValue.option.attribute.type.isImage %}
+                                            <a href="javascript:void(0);" class="openDataImageLink" data-image-data="{{ orderAttributeValue.value }}" data-image-name="observacao-imagem" title="Visualizar imagem">
+                                                <span class="fa fa-picture-o"></span>
+                                            </a>
+                                        {% else %}
+                                            {{ orderAttributeValue.value }}
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="row">
+                	<div class="col-md-12">
+                        <div class="page-header">
+                            <h3>
+                                <span class="fa fa-comments"></span> Mensagens sobre este pedido
+                            </h3>
+                        </div>
+
+                        {% if contacts|length > 0 %}
+                            {% include 'FlexyFtwoStoreBundle:Contact:contact-list.html.twig' with {contacts : contacts, detailed: false} %}
+                        {% else %}
+                            <p class="text-center">Nenhuma mensagem sobre este pedido.</p>
+                        {% endif %}
+
+                        {% include 'FlexyFtwoStoreBundle:Contact:contact-form.html.twig' with {contact : contacts|first, subject : order.number, shoppingStore: order.shoppingStore} %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% include 'FlexyFtwoStoreBundle:Checkout:renderPixQrCodeAndCopyAndPaste.js.twig' with { order: order } %}
+    {% include 'FlexyFtwoStoreBundle:Customer:subscriptionCanceller.js.twig' with { order: order } %}
+{% endblock %}
+
+{% block javascript %}
+    <script src="{{ asset('bundles/flexyftwostore/js/contact/attach.js') }}"></script>
+{% endblock %}

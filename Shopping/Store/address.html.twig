@@ -1,0 +1,47 @@
+<div class="form-group">
+    <label class="form-label">CEP:<span class="text-error">*</span></label>
+    <div class="controls">
+        <input type="text" id="distributionCenter_defaultDCAddress_postcode" name="distributionCenter[postcode]" required="required" class="form-control flexy-input-postcode" data-prefix="distributionCenter_defaultDCAddress_" value="{{ app.request.get('distributionCenterPostcode', store.distributionCenter.postcode) }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">Rua:<span class="text-error">*</span></label>
+    <div class="controls">
+        <input type="text" id="distributionCenter_defaultDCAddress_street" name="distributionCenter[street]" required="required" class="form-control" value="{{ app.request.get('distributionCenterStreet', store.distributionCenter.street) }}">
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="form-label">Complemento:</label>
+    <div class="controls">
+        <input type="text" id="distributionCenter_defaultDCAddress_complement" name="distributionCenter[complement]" class="form-control" value="{{ app.request.get('distributionCenterComplement', store.distributionCenter.complement) }}">
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="form-label">Número:<span class="text-error">*</span></label>
+    <div class="controls">
+        <input type="text" id="distributionCenter_defaultDCAddress_number" name="distributionCenter[number]" required="required" class="form-control integer" value="{{ app.request.get('distributionCenterNumber', store.distributionCenter.number) }}" maxlength="39" autocomplete="off">
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="form-label">Bairro:<span class="text-error">*</span></label>
+    <div class="controls">
+        <input type="text" id="distributionCenter_defaultDCAddress_district" name="distributionCenter[district]" required="required" class="form-control" value="{{ app.request.get('distributionCenterDistrict', store.distributionCenter.district) }}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">Cidade:<span class="text-error">*</span></label>
+    <div class="controls">
+        <input type="text" id="distributionCenter_defaultDCAddress_city" name="distributionCenter[city]" required="required" class="form-control" value="{{ app.request.get('distributionCenterCity', store.distributionCenter.city) }}">
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="form-label">Estado:<span class="text-error">*</span></label>
+    <div class="controls">
+        {{ flexy_ftwo_address_state_list_html_select({'id': 'distributionCenter_defaultDCAddress_state_selector','name' : 'distributionCenter[state]','required' : 1,'selectedValue' : app.request.get('distributionCenterState', store.distributionCenter.state)}) }}
+    </div>
+</div>
+<input type="hidden" name="distributionCenter[country]" value="Brasil"/>

@@ -1,0 +1,9 @@
+{% include 'FlexyFtwoStoreBundle:Mail:order.html.twig' with {
+    'order' : order,
+    'title': 'Pedido realizado!',
+    'message' : "<p>Olá, " ~ order.customer.fullName ~ "!</p>
+                <p>Seu pedido, número <b>" ~  order.number ~ "</b>, foi realizado com sucesso em <b>" ~ order.createdAt|date('d/m/Y - H:i:s') ~ "</b>.</p>
+                <p>Você poderá acompanhar o andamento do seu pedido a qualquer momento na página de seu perfil:</p>
+                <p><a href='" ~ url('flexy_ftwo_store_customer_profile') ~ "'> " ~ url('flexy_ftwo_store_customer_profile') ~ "</a>.</p>
+                <p>Segue abaixo um resumo de seu pedido.</p>"
+} %}

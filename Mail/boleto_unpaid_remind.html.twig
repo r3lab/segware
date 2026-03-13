@@ -1,0 +1,10 @@
+{% include 'FlexyFtwoStoreBundle:Mail:order.html.twig' with {
+'order' : order,
+'title': 'Identificamos um boleto em aberto!',
+'message' : "Olá, " ~ order.customer.fullName ~ ".<br />
+           <p>Verificamos que você realizou o pedido <b>" ~  order.number ~ "</b>, na data <b>" ~ order.createdAt|date('d/m/Y - H:i:s') ~ "</b>, em nosso portal, no entanto, ainda não identificamos o pagamento do boleto.</p>
+           <p>Não se preocupe pois os produtos estão reservados para você até a data de vencimento do boleto que é <b>" ~ order.firstPaymentMethod.paymentExpiresAt|date('d/m/Y') ~ "</b>.</p>
+           <p>Caso o pagamento não seja identificado, após o vencimento o pedido será cancelado e será necessário refazer a compra em nosso portal.</p>
+           <p>Lembramos ainda que o prazo de entrega começará a contar a partir da confirmação do pagamento.</p>
+           <p>Segue abaixo um resumo de seu pedido.</p>"
+} %}

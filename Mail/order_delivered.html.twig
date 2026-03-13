@@ -1,0 +1,8 @@
+{% include 'FlexyFtwoStoreBundle:Mail:order.html.twig' with {
+    'order' : order,
+    'title': 'Pedido entregue!',
+    'message' : "<p>Olá, " ~ order.customer.fullName ~ "!</p>
+                <p>Seu pedido, número <b>" ~  order.number ~ "</b>, foi entregue com sucesso.</p>
+                <p>Agradecemos pela confiança em nossos produtos e serviços e será um prazer atendê-lo novamente.</p>
+                <p>Segue abaixo um resumo de sua compra.</p>"
+} %}

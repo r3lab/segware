@@ -1,0 +1,46 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+{% set variant = VariantNotifyAvailable.variant %}
+{% set product = variant.product %}
+
+{% block content %}
+    <div style="{{ style.header }}">
+        <h1>Chegou!</h1>
+    </div>
+    <div style="{{ style.inner }}">
+        <h3>Olá.</h3>
+        <p>O produto {{ variant.fullName(false) }}, que você estava esperando, felizmente esta de volta.</p>
+        <p>Veja abaixo os detalhes do produto:</p>
+
+        <table style="border:0; width:100%;" cellspacing="0" cellpadding="20">
+            <tr>
+                <td>
+                    {% for image in product.images if image.isMaster %}
+                        <img src="{{ image.urlSmall }}" style="max-width: 80px; max-height: 80px;"/>
+                    {% endfor %}
+                </td>
+                <td style="border-left:1px solid #ddd;">
+                    <p>
+                        {{ variant.fullName(false) }} <br/>
+                        <span style="font-size: 12px; color: #666;">Ref.: {{ variant.referenceCode  }}</span>
+                        <br/><br/>
+                        {% set shoppingStore = product.shoppingStore %}
+                        {% if shoppingStore %}
+                            {% set url = url('flexy_ftwo_store_shoppingStore_product_details', {
+                                'shoppingStoreReferenceCode': shoppingStore.referenceCode,
+                                'slug' : product.slug,
+                                'masterVariantReferenceCode' : variant.referenceCode
+                            }) %}
+                        {% else %}
+                            {% set url = url('flexy_ftwo_store_product_details', {
+                                'slug' : product.slug,
+                                'masterVariantReferenceCode' : variant.referenceCode
+                            }) %}
+                        {% endif %}
+                        <a style="{{ style.link }}"  href="{{ url }}">Ir para loja</a>
+                    </p>
+                </td>
+            </tr>
+        </table>
+        {{ mailSignature|raw }}
+    </div>
+{% endblock %}

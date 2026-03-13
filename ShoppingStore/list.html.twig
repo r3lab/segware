@@ -1,0 +1,9 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% block title %}Quote{% endblock %}
+
+{% block content %}
+    {% for shoppingStore in shoppingStores %}
+        {{ shoppingStore.referenceCode }}<br/>
+    {% endfor %}
+{% endblock %}

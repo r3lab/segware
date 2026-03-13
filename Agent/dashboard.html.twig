@@ -1,0 +1,196 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+{% set title = "Dashboard" %}
+{% set agent = flexy_ftwo_current_agent() %}
+
+{% block content %}
+    <link rel="stylesheet" href="{{ flexy_ftwo_resource_url_css("css/agent/dashboard.css") }}"/>
+
+    <section>
+        <div class="second-page-container">
+            <div class="container">
+                {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [{'title' : title }] } %}
+                <div class="row">
+                    {% for flashMessage in app.session.flashbag.get('store-agentDashboard-date-error') %}
+                        <div class="alert alert-danger">{{ flashMessage|trans({}, 'frontend') }}
+                            <button class="close" data-dismiss="alert"></button>
+                        </div>
+                        <br>
+                    {% endfor %}
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h2>Painel de Vendas</h2>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="row">
+                            {{ form_start(form) }}
+                            <div class="col-lg-6{% if form.dateFrom.vars.errors|length > 0 %} has-error{% endif %}">
+                                {{ form_widget(form.dateFrom) }}
+                            </div>
+                            <div class="col-lg-6{% if form.dateTo.vars.errors|length > 0 %} has-error{% endif %}">
+                                <div class="input-group">
+                                    {{ form_widget(form.dateTo) }}
+                                    <span class="input-group-btn">
+                                        <button type="submit" class="btn-primary btn">
+                                            <span class="fa fa-search"></span>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="info-box">
+                            <div class="data-icon"><i class="fa fa-usd fa-3x iconMargin"></i></div>
+                            <div class="data-display">
+                                <div>Faturamento</div>
+                                <span id="billingTotal">R$ {{ summary.revenueAmount|number_format(2, ',', '.') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-sm-6" title="Vendas">
+                        <div class="info-box">
+                            <div class="data-icon"><i class="fa fa-credit-card fa-3x iconMargin"></i></div>
+                            <div class="data-display">
+                                <div>Vendas</div>
+                                <span id="salesTotal">{{ summary.salesCount }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-sm-6">
+                        <div class="info-box">
+                            <div class="data-icon"><i class="fa fa-bar-chart-o fa-3x iconMargin"></i></div>
+                            <div class="data-display">
+                                <div>Comissão</div>
+                                <span id="commissionTotal">R$ {{ summary.commissionTotal|number_format(2, ',', '.') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-sm-6">
+                        <div class="info-box">
+                            <div class="data-icon"><i class="fa fa-barcode fa-3x iconMargin"></i></div>
+                            <div class="data-display">
+                                <div>Aguardando pgto.</div>
+                                <span id="ordersWaitingPaymentTotal">{{ summary.ordersAwaitingForPayment }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-chart">
+                    <div class="dashboard-subtitle"><h4><i class="fa fa-usd"></i> Faturamento por dia</h4></div>
+                    <hr/>
+                    <div id="revenuesChart" class="chart"></div>
+                </div>
+
+                <div class="dashboard-chart">
+                    <div class="dashboard-subtitle"><h4><i class="fa fa-credit-card"></i> Vendas por dia</h4></div>
+                    <hr/>
+                    <div id="salesChart" class="chart"></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="dashboard-subtitle">
+                            <h4><i class="fa fa-usd"></i> Últimos pedidos realizados</h4>
+                        </div>
+
+                        <hr/>
+
+                        <article>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>Número</th>
+                                        {% if store.info.usesMultipleSales %}
+                                            <th>Loja</th>
+                                        {% endif %}
+                                        <th>Cliente</th>
+                                        <th>Realizado em</th>
+                                        <th>Itens</th>
+                                        <th>Andamento</th>
+                                        <th>Total</th>
+                                        {% if agent %}
+                                            <th>Comissão</th>
+                                        {% endif %}
+                                        <th>&nbsp;</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    {% for order in summary.orders %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ path("flexy_ftwo_store_customer_order_detail", {orderId : order.id}) }}">{{ order.number }}</a>
+                                            </td>
+                                            {% if store.info.usesMultipleSales %}
+                                                <td>{{ order.shoppingStore.name }}</td>
+                                            {% endif %}
+                                            <td>{{ order.customer.fullName }}</td>
+                                            <td>{{ order.createdAt|date("d/m/Y") }}</td>
+                                            <td>{{ order.items|length }} <span>item(ns)</span></td>
+                                            <td>
+                                                <span class="label">{{ orderPresentations[order.status.name] ?: order.status.presentation }}</span>
+                                            </td>
+                                            <td>R$ {{ order.billingTotal|number_format(2, ',', '.') }}</td>
+                                            {% if agent %}
+                                                <td>{{ order.agentCommissionValueByAgent(agent)|number_format(2, ',', '.') }}</td>
+                                            {% endif %}
+                                            <td class="text-right">
+                                                {% if not app.user.customer %}
+                                                    <a href="{{ path('flexy_ftwo_store_customer_order_redo', {'orderId': order.id}) }}" title="Refazer pedido">
+                                                        <span class="fa fa-files-o"></span>
+                                                    </a>
+                                                {% else %}
+                                                    <a href="{{ path('flexy_ftwo_store_customer_order_redo', {'orderId': order.id}) }}"
+                                                       {{ app.user.customer ?: 'disabled' }}
+                                                       title="Refazer pedido">
+                                                        <span class="fa fa-files-o"></span>
+                                                    </a>
+                                                {% endif %}
+
+                                                <a class="btn btn-mini"
+                                                   href="{{ path("flexy_ftwo_store_customer_order_detail", {orderId : order.id}) }}"
+                                                   title="Ver detalhes">
+                                                    <span class="fa fa-plus-circle"></span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="6">
+                                                <h3>Nenhum pedido realizado.</h3>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% if summary.orders %}
+                                {{ knp_pagination_render(summary.orders) }}
+                            {% endif %}
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://code.highcharts.com/4.1.8/highcharts.js"></script>
+<script src="https://code.highcharts.com/4.1.8/modules/exporting.js"></script>
+
+<script>
+{{ chart(revenuesChart) }}
+{{ chart(salesChart) }}
+</script>
+{% endblock %}

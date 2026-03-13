@@ -1,0 +1,417 @@
+<input type="hidden" name="customer[defaultShippingAddress][country]" value="Brasil"/>
+
+<div class="row">
+    {% set form_user = attribute(form, 'user') is defined or attribute(form, 'getUser') is defined ? true : false %}
+    <div class="col-xs-12 col-lg-{{ form_user ? '4' : '6' }}">
+        <div class="block-form box-border wow fadeInLeft animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+            <h3><i class="fa fa-user"></i> Dados pessoais</h3>
+
+            {% if form.user is defined %}
+                <div class="form-group">
+                    <label>Tipo <span class="text-error">*</span></label>
+                    <div class="">
+                        {{ form_widget(form.type, {'attr' : {'required' : 'required', 'class' : 'form-control'}}) }}
+                        <div class="error-created">{{ form_errors(form.type) }}</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Perfil <span class="text-error">*</span></label>
+                    <div class="">
+                        {{ form_widget(form.customerType, {'attr' : {'required' : 'required', 'class' : 'form-control'}}) }}
+                        <div class="error-created">{{ form_errors(form.customerType) }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if form.cpf is defined %}
+                <div class="{{ form_user ? "cpf" : "" }}">
+                    <div class="form-group">
+                        <label>Nome <span class="text-error">*</span></label>
+                        <div class="">
+                            {{ form_widget(form.firstname, {'attr' : {'required' : 'required', 'class' : 'form-control'}}) }}
+                            <div class="error-created">{{ form_errors(form.firstname) }}</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>CPF <span class="text-error">*</span></label>
+                        <div class="">
+                            {{ form_widget(form.cpf.cpf, {'attr': {'class': 'form-control flexy-input-cpf', 'required' : 'required'}}) }}
+                            <div class="error-created">{{ form_errors(form.cpf.cpf) }}</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Sexo <span class="text-error">*</span></label>
+                        <div class="">
+                            {{ form_widget(form.gender, {'attr' : {'required' : 'required', 'class' : 'form-control'}}) }}
+                            <div class="error-created">{{ form_errors(form.gender) }}</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nascimento <span class="text-error">*</span></label>
+                        <div class="">
+                            {{ form_widget(form.dateOfBirth, {'attr': {'class': 'flexy-date-parts hide', 'data-date-presentation' : '#customer_dateOfBirth_presentation'}}) }}
+                            <input type="text" id="customer_dateOfBirth_presentation" class="flexy-input-date form-control" required="required">
+                            <div class="error-created">
+                                {{ form_errors(form.dateOfBirth) }}
+                                {{ form_errors(form.dateOfBirth.day) }}
+                                {{ form_errors(form.dateOfBirth.month) }}
+                                {{ form_errors(form.dateOfBirth.year) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if form.cnpj is defined %}
+                <div class="{{ form.user ? "cnpj" : "" }}">
+                    <div class="form-group">
+                        <label>Razão social <span class="text-error">*</span></label>
+                        <div class="">
+                            {{ form_widget(form.cnpj.companyName, {'attr' : {'class' : 'form-control'}}) }}
+                            <div class="error-created">{{ form_errors(form.cnpj.companyName) }}</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nome fantasia <span class="text-error">*</span></label>
+                        <div class="">
+                            {{ form_widget(form.cnpj.tradeName, {'attr' : {'class' : 'form-control'}}) }}
+                            <div class="error-created">{{ form_errors(form.cnpj.tradeName) }}</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável <span class="text-error">*</span></label>
+                        <div class="">
+                            {{ form_widget(form.cnpj.responsible, {'attr' : {'class' : 'form-control'}}) }}
+                            <div class="error-created">{{ form_errors(form.cnpj.responsible) }}</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>CNPJ <span class="text-error">*</span></label>
+                        <div class="">
+                            {{ form_widget(form.cnpj.cnpj, {'attr': {'class': 'flexy-input-cnpj form-control'}}) }}
+                            <div class="error-created">{{ form_errors(form.cnpj.cnpj) }}</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Inscrição estadual</label>
+                        <div class="">
+                            {{ form_widget(form.cnpj.stateRegistration, {'attr' : {'class' : 'form-control'}}) }}
+                            <div class="radio">
+                                <label class="control-label">
+                                    <input type="checkbox" id="check">
+                                    Isento de inscrição estadual
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label>Telefone <span class="text-error">*</span></label> <div id="phone-error" class="text-error" style="font-size: 15px"></div>
+                <div class="">
+                    {{ form_widget(form.primaryPhone) }}
+                    <div class="error-created ">{{ form_errors(form.primaryPhone) }}</div>
+
+                </div>
+            </div>
+
+            {% set customerAttributes = flexy_ftwo_customer_attribute_list() %}
+            {% for customerAttribute in customerAttributes %}
+                {% for customerAttributeOption in customerAttribute.options %}
+
+                    <div class="form-group" style="margin-bottom: 0">
+                        <label class="form-label">
+                            {{ customerAttribute.name }}
+                            {{ customerAttributeOption.attribute.required ? '<span class="text-error">*</span>' : '' }}
+                        </label>
+                        <div id="father-div-{{ customerAttribute.referenceCode }}" class="controls input-group" style="width: 100%">
+                            {% set attributeValue = customer.getAttributeValue(customerAttributeOption.attribute.id) %}
+                            {% if customerAttribute.type.isDocument() %}
+                                {% set documentRequired = customerAttributeOption.attribute.required and not attributeValue.value ? true : false %}
+                                {% set attributeValueName = 'attribute_values_' ~ customerAttributeOption.id  %}
+                                {% if documentRequired %}
+                                    {{ form_widget(form[attributeValueName], {'attr': { 'class': 'form-control', 'required' : true, 'style': 'display: block;'}}) }}
+                                {% else %}
+                                    {{ form_widget(form[attributeValueName], {'attr': { 'class': 'form-control width-input' }}) }}
+                                {% endif %}
+                                <input
+                                    type="hidden"
+                                    id="customer_attribute_values_{{ customerAttributeOption.id }}_has_document"
+                                    name="customer_attribute_values_{{ customerAttributeOption.id }}_has_document"
+                                    value="{{ attributeValue.value ? '1' : '' }}"
+                                    class="form-control"
+                                    data-required="{{ customerAttributeOption.attribute.required }}"
+                                    {{ customerAttributeOption.attribute.required and not attributeValue.value ? 'required' : '' }}
+                                />
+                                <span class="input-group-btn" title="Visualizar documento">
+                                    <a class="btn btn-default-1 form-file-button"
+                                        {{ attributeValue.value ? '':' disabled' }}
+                                        target="{{ attributeValue.value ? '_blank' : '_self' }}"
+                                        href="{{ attributeValue.value ? asset(attributeValue.value, 'cloudfront') : 'javascript:void(0);' }}"
+                                        id="view_document_customer_attribute_values_{{ customerAttributeOption.id }}"
+                                        data-document-name="{{ customerAttribute.name }}"
+                                    >
+                                        <i class="fa fa-file-o"></i> {{ attributeValue ? "Visualizar documento" : "Nenhum documento adicionado" }}
+                                    </a>
+                                    <button id="button_view_document_customer_attribute_values_{{ customerAttributeOption.id }}"
+                                            style="display:none;" class="btn btn-default-1 view_document_customer_attribute"
+                                            data-id="{{ customerAttributeOption.id }}"
+                                            data-image-name="{{ customerAttributeOption.attribute.name|slugify }}"
+                                            {{ attributeValue.value ? ' target="_blank"':' disabled' }}>
+                                        <i class="fa fa-file-o"></i> {{ attributeValue.value ? "Visualizar documento" : "Nenhum documento adicionado" }}
+                                    </button>
+                                    <button
+                                            id="remove_customer_attribute_values_{{ customerAttributeOption.id }}"
+                                            type="button"
+                                            class="removeDocument btn btn-default-1 form-file-button"
+                                            data-id="{{ customerAttributeOption.id }}"
+                                            title="Remover documento"
+                                            {{ attributeValue.value ? 'data-has-previous-value="1"':'data-has-previous-value="0" disabled style="display:none;"' }}>
+                                        <i class="fa fa-times"></i>
+                                    </button>
+                                </span>
+                            {% else %}
+                                <input
+                                    type="{{ customerAttribute.type.isImage() ? "file": "text" }}"
+                                    id="customer_attribute_values{{ customerAttributeOption.id }}"
+                                    name="attributeValues[{{ customerAttributeOption.id }}]"
+                                    value="{{ attributeValue and not customerAttribute.type.isImage() ? attributeValue.value : null }}"
+                                    class="form-control"
+                                    data-required="{{ customerAttributeOption.attribute.required }}"
+                                    {{ customerAttributeOption.attribute.required and not attributeValue.value ? 'required' : '' }}
+                                    />
+                                {% if customerAttribute.type.isImage %}
+                                    <input type="hidden"
+                                           id="attributeValues_{{ customerAttributeOption.id }}_Temp"
+                                           name="attributeValues[{{ customerAttributeOption.id }}]"
+                                           value="{{ attributeValue.value ?: null }}"
+                                    />
+                                    <span class="input-group-btn" title="Visualizar imagem">
+                                        <button href="javascript:void(0);"
+                                                type="button"
+                                                class="openDataImage btn btn-default-1 form-file-button"
+                                                data-id="{{ customerAttributeOption.id }}"
+                                                data-image-name="{{ customerAttribute.name|slugify }}"
+                                                {{ attributeValue.value ? '':' disabled' }}
+                                        >
+                                            <i class="fa fa-picture-o"></i> {{ attributeValue ? "Visualizar imagem" : "Nenhuma imagem adicionada" }}
+                                        </button>
+                                    </span>
+                                    <span class="input-group-btn removeDataImage" {{ attributeValue.value ? '' : ' style="display: none;"' }} id="remove_image_customer_attribute_values{{ customerAttributeOption.id }}">
+                                        <button href="javascript:void(0)"
+                                                type="button"
+                                                class="removeDataImage btn btn-default-1 form-file-button"
+                                                data-id="{{ customerAttributeOption.id }}"
+                                                title="Remover imagem"
+                                                {{ attributeValue.value ? '' : ' disabled' }}>
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    </span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        {% if customerAttribute.type.isImage %}
+                            <span id="helpBlock-{{ customerAttributeOption.id }}" class="hidden help-block text-message-error"></span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+
+            {% if form_user %}
+                <div class="form-group">
+                    <div class="radio">
+                        <label class="control-label">
+                            {{ form_widget(form.newsletter, { 'attr': { 'class': '', 'checked' : 'checked'}}) }}
+                            Desejo receber ofertas por e-mail
+                        </label>
+                    </div>
+                </div>
+            {% endif %}
+            {% if termIsRequired == true  and termIsRequired is not null %}
+
+                <div class="form-group">
+
+                    <div class="radio">
+
+                        <label class="control-label">
+
+                            {{ form_widget(form.termOfUse, { 'attr': { 'class': '', 'required' : true }}) }}
+
+                            Eu li e Concordo com os
+
+                            <a href="{{ path('flexy_ftwo_store_terms_of_use_client_read') }}" target="_blank">Termos de Uso</a>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+            {% elseif termIsRequired == false and termIsRequired is not null %}
+                <div class="form-group">
+                    <div class="radio">
+                        <label class="control-label">
+                            <input type="checkbox" id="customer_termOfUseClient" name="customer[termOfUse]" value="0">
+                          Eu li e Concordo com termos
+                            <a href="{{ path('flexy_ftwo_store_terms_of_use_client_read') }}" target="_blank">Termos de Uso</a>
+                        </label>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if form_user %}
+        <div class="col-xs-12 col-lg-4">
+            <div class="block-form box-border wow fadeInLeft animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                <h3><i class="fa fa-lock"></i> Acesso</h3>
+                <div class="form-group">
+                    <label>E-mail <span class="text-error">*</span></label>
+                    <div class="">
+                        {{ form_widget(form.user.email.first, {'attr': {'class': 'form-control emailInput', 'value' : app.request.get('email')}}) }}
+                        <div class="error-created">{{ form_errors(form.user.email.first) }}</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Repita seu e-mail <span class="text-error">*</span></label>
+                    <div class="">
+                        {{ form_widget(form.user.email.second, {'attr': {'class': 'form-control', 'value' : app.request.get('email')}}) }}
+                        <div class="error-created">{{ form_errors(form.user.email.second) }}</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Senha <span class="text-error">*</span></label>
+                    <div class="">
+                        {% if isStrongPasswordMandatory %}
+                            {{ form_widget(form.user.password.first, {'attr': {'class': 'form-control strong-password-validation' }}) }}
+                            <div id="message-error-invalid-password" class="store-strong-password" style="display: none;"></div>
+                        {% else %}
+                            {{ form_widget(form.user.password.first, {'attr': {'class': 'form-control' }}) }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Repita sua senha <span class="text-error">*</span></label>
+                    <div class="">
+                        {{ form_widget(form.user.password.second, {'attr': {'class': 'form-control'}}) }}
+
+                        <div class="error-created">{{ form_errors(form.user.password.first) }}</div>
+                        <div class="error-created">{{ form_errors(form.user.password.second) }}</div>
+                    </div>
+                </div>
+                    <input type="hidden" name="customer[user][name]" value=""/>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="col-xs-12 col-lg-{{ form_user ? '4' : '6' }}">
+        <div class="block-form box-border wow fadeInLeft animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+            <h3><i class="fa fa-truck"></i>Endereço</h3>
+            <div class="form-group">
+                <a href="http://www.buscacep.correios.com.br" target="_blank" class="pull-right cep-help">Não sei meu CEP</a>
+
+                <label>CEP <span class="text-error">*</span></label>
+                <div class="">
+                    {{ form_widget(form.defaultShippingAddress.postcode, {'attr': {'class': 'form-control flexy-input-postcode', 'data-prefix' : 'customer_defaultShippingAddress_'}}) }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Estado <span class="text-error">*</span></label>
+                <div class="">
+                    <select id="customer_defaultShippingAddress_state" name="customer[defaultShippingAddress][state]" data-value="{{ app.request.get('customer')? app.request.get('customer').defaultShippingAddress.state : ( customer.defaultShippingAddress ? customer.defaultShippingAddress.state : null ) }}" class="form-control" required="required">
+                        <option value=""></option>
+                        <option value="AC">Acre</option>
+                        <option value="AL">Alagoas</option>
+                        <option value="AM">Amazonas</option>
+                        <option value="AP">Amapá</option>
+                        <option value="BA">Bahia</option>
+                        <option value="CE">Ceará</option>
+                        <option value="DF">Distrito Federal</option>
+                        <option value="ES">Espírito Santo</option>
+                        <option value="GO">Goiás</option>
+                        <option value="MA">Maranhão</option>
+                        <option value="MT">Mato Grosso</option>
+                        <option value="MS">Mato Grosso do Sul</option>
+                        <option value="MG">Minas Gerais</option>
+                        <option value="PA">Pará</option>
+                        <option value="PB">Paraíba</option>
+                        <option value="PR">Paraná</option>
+                        <option value="PE">Pernambuco</option>
+                        <option value="PI">Piauí</option>
+                        <option value="RJ">Rio de Janeiro</option>
+                        <option value="RN">Rio Grande do Norte</option>
+                        <option value="RO">Rondônia</option>
+                        <option value="RS">Rio Grande do Sul</option>
+                        <option value="RR">Roraima</option>
+                        <option value="SC">Santa Catarina</option>
+                        <option value="SE">Sergipe</option>
+                        <option value="SP">São Paulo</option>
+                        <option value="TO">Tocantins</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Cidade <span class="text-error">*</span></label>
+                <div class="">
+                    {{ form_widget(form.defaultShippingAddress.city, {'attr': {'class': 'form-control'}}) }}
+                    <div class="error-created">{{ form_errors(form.defaultShippingAddress.city) }}</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Bairro <span class="text-error">*</span></label>
+                <div class="">
+                    {{ form_widget(form.defaultShippingAddress.district, {'attr': {'class': 'form-control'}}) }}
+                    <div class="error-created">{{ form_errors(form.defaultShippingAddress.district) }}</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Rua <span class="text-error">*</span></label>
+                <div class="">
+                    {{ form_widget(form.defaultShippingAddress.street, {'attr': {'class': 'form-control'}}) }}
+                    <div class="error-created">{{ form_errors(form.defaultShippingAddress.street) }}</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Número <span class="text-error">*</span></label>
+                <div class="">
+                    {{ form_widget(form.defaultShippingAddress.number, {'attr': {'class': 'form-control flexy-input-integer'}}) }}
+                    <div class="error-created">{{ form_errors(form.defaultShippingAddress.number) }}</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Complemento</label>
+                <div class="">
+                    {{ form_widget(form.defaultShippingAddress.complement, {'attr': {'class': 'form-control'}}) }}
+                    <div class="error-created">{{ form_errors(form.defaultShippingAddress.complement) }}</div>
+                </div>
+            </div>
+            {{ store.googleReCaptcha.tokenV3|raw }}
+            <div class="text-right form-group">
+            	<button type="submit" class="btn btn-default">{{ form_user ? "Criar conta" : "Atualizar cadastro" }}</button>
+            </div>
+
+            {% if not form_user %}
+                <div class="row">
+                    <div class="col-xs-12">
+                        <hr>
+                        <div class="header-for-light">
+                            <h1 class="wow fadeInRight animated animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                                Excluir conta
+                            </h1>
+                        </div>
+                        <p>Ao excluir sua conta você será impossibilitado de realizar novos pedidos e suas informações pessoais também serão apagadas, com excessão daquelas que devemos legalmente manter por determinado período e as necessárias para garantir sua segurança.</p>
+                        <p>Se você tiver algum pedido em andamento você ainda poderá receber e-mails sobre o status desse pedido.</p>
+                        <div class="text-right form-group">
+                            <button type="button" class="delete-customer-button btn btn-danger" data-href="/customer/remove">
+                                    Excluir conta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>

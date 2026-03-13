@@ -1,0 +1,56 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+
+{% block content %}
+    <div style="{{ style.header }}">
+        <h1>
+            {% if contact.quote %}
+                <p>Mensagem recebida no orçamento</p> <p>
+                    <a
+                        target="_blank"
+                        style="color: white;"
+                        href="{{ url('flexy_ftwo_admin_quote_details', {'quoteId': contact.quote.id}) }}"
+                    >
+                        #{{ contact.quote.number }}
+                    <a>
+                </p>
+            {% elseif contact.order %}
+                <p>Mensagem recebida no pedido</p>
+                <p>
+                    <a
+                        target="_blank"
+                        style="color: white;"
+                        href="{{ url('flexy_ftwo_admin_order_details', {'orderId': contact.order.id}) }}"
+                    >
+                        #{{ contact.order.number }}
+                    </a>
+                </p>
+            {% else %}
+                Mensagem recebida!
+            {% endif %}
+        </h1>
+    </div>
+    <div style="{{ style.inner }}">
+        <h3>Olá, {{ contact.name }}!</h3>
+        <p>Recebemos sua mensagem e logo entraremos em contato.</p>
+        <p>
+            Nome: {{ contact.name }}<br />
+            E-mail: {{ contact.email }}<br />
+            Telefone: {{ flexy_ftwo_mask_number(contact.phone, '(99) 99999-9999') }}<br />
+            Assunto: {{ contact.subject }}<br />
+            <br />
+            Mensagem:
+            <br />
+            <br />
+            {{ contact.message|nl2br }}
+        </p>
+	<div style="text-align: center; {{ style.inner }}">
+            <a
+                target="_blank"
+                style="{{ style.whiteButton }}"
+           	href="{{ url('flexy_ftwo_admin_contact_edit', {'id': contact.id}) }}"
+            >
+            	Visualizar mensagem
+            </a>
+	</div>
+    </div>
+{% endblock %}

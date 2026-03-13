@@ -1,0 +1,13 @@
+{% extends 'FlexyFtwoStoreBundle:Mail:base.html.twig' %}
+{% block content %}
+    <div style="{{ style.header }}">
+        <h1>Parabéns, sua loja foi publicada!</h1>
+    </div>
+    <div style="{{ style.inner }}">
+        <h3>Olá, {{ shoppingStore.platformUser.name }}!</h3>
+
+        <p>
+            Parabéns, a loja <strong>{{ shoppingStore.name }} </strong> foi publicada!.
+        </p>
+    </div>
+{% endblock %}

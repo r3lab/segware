@@ -1,0 +1,11 @@
+{% include 'FlexyFtwoStoreBundle:Mail:order.html.twig' with {
+'order' : order,
+'title': 'Pedido cancelado!',
+'message' : "Olá, " ~ order.customer.fullName ~ ".<br />
+           <p>Seu pedido, número <b>" ~  order.number ~ "</b>, foi cancelado. Isto pode ter ocorrido devido a não termos identificado o pagamentos do mesmo, ou por outro motivo interno.</p>
+           <p>Caso você tenha realizado o pagamento deste pedido, por favor, entre em contato, com nossa <a href='" ~ url('flexy_ftwo_store_contact') ~ "' style='color: #428bca; text-decoration: none;'>Central de Atendimento</a>.</p>
+           <p>Você pode refazer o pedido a qualquer momento, através do link abaixo:</p>
+           <p style='margin-top:30px;'><a style='" ~ style.button ~ "' href='" ~ url('flexy_ftwo_store_customer_order_redo', {'orderId': order.id}) ~ "'>Refazer pedido</a></p>
+           <br/>
+           <p>Segue abaixo um resumo de seu pedido.</p>"
+} %}

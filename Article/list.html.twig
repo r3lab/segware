@@ -1,0 +1,46 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% set title = "Notícias" %}
+{% set articles = flexy_ftwo_article_list(page, 10).articles %}
+
+{% block content %}
+    <section>
+        <div class="second-page-container">
+            <div class="block">
+                <div class="container">
+                    <div class="header-for-light">
+                        <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">Notícias</h1>
+                    </div>
+
+                    {% if articles|length > 0 %}
+                        {% for article in articles %}
+                            {% if loop.first or loop.index % 3 == 1 %}<div class="row">{% endif %}
+                            <div class="col-md-4 text-center">
+                                <div class="blog">
+                                    <figure class="figure-hover-overlay">
+                                        <a href="{{ path('flexy_ftwo_store_article_details', {'idArticle' : article.id}) }}"></a>
+                                        <img class="img-responsive" alt="" src="{{ article.thumbnail ? article.thumbnail : flexy_ftwo_resource_url_img("img/product-placeholder.gif") }}">
+                                        <span class="bar"></span>
+                                    </figure>
+
+                                    <div class="blog-caption">
+                                        <h3><a class="blog-name" href="{{ path('flexy_ftwo_store_article_details', {'idArticle' : article.id}) }}">{{ article.title }}</a></h3>
+                                        <p class="post-information">
+                                            <span><i class="fa fa-clock-o"></i> {{ article.referenceDate|date("d/m/Y") }}</span>
+                                        </p>
+
+                                        <p>{{ article.abstract|raw }}</p>
+                                        <a href="{{ path('flexy_ftwo_store_article_details', {'idArticle' : article.id}) }}" class="btn-read">Ler mais</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if loop.last or loop.index % 3 == 0 %}</div>{% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <h3>Nenhuma notícia encontrada.</h3>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

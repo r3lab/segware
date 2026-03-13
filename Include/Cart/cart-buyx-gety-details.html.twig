@@ -1,0 +1,35 @@
+{% for item in cart.allItems %}
+    {% set promotionApplied = item.getPromotionAppliedByPromotionType('promotion.type.cartBuyXGetY') %}
+    {% if promotionApplied %}
+        <div class="modal fade" id="buyXgetYModal-{{ item.id }}" tabindex="-1" role="dialog" style="margin-top: 90px">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Promoção Compre X Leve Y: {{ promotionApplied.promotion }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <ul>
+                            <li>Condições da promoção:</li>
+                            <ul>
+                                {% for promotionVariantsQuantityCondition in promotionApplied.promotion.promotionVariantsQuantityConditions %}
+                                    {% set variantsPresentation = [] %}
+                                    {% for variant in promotionVariantsQuantityCondition.variants %}
+                                        {% set variantsPresentation = variantsPresentation|merge([variant.presentation]) %}
+                                    {% endfor %}
+                                    <li><mark>{{ variantsPresentation|join(' ou ') }}</mark>, quantidade: <mark>{{ promotionVariantsQuantityCondition.quantity }}</mark></li>
+                                {% endfor %}
+                            </ul>
+                            {% set productPrice = 'R$'~item.unitPriceWithCatalogAndProgressiveDiscount|number_format(2, ',', '.') %}
+                            <li>Aplicada ao preço unitário de <mark>{{ promotionApplied.quantity }}</mark> unidades do produto <mark>{{ item.variant }}</mark></li>
+                            <li>Preço unitário produto: <mark>{{ productPrice }}</mark></li>
+                            <li>Desconto: <mark>{{ promotionApplied.presentation }}</mark></li>
+                            <li>Desconto aplicado: <mark>{{ promotionApplied.discountAppliedPresentation }}</mark></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% set promotionApplied = false %}
+{% endfor %}

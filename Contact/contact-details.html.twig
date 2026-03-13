@@ -1,0 +1,16 @@
+{% extends 'FlexyFtwoStoreBundle:Layout:base.html.twig' %}
+
+{% set title = "Detalhes do contato" %}
+{% set contacts = f2_store_customer_contact_history({ contactId : contact.id }) %}
+
+{% block content %}
+    {% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-contact-success'), 'error' : false} %}
+    {% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-contact-error'), 'error' : true} %}
+
+    <div class="container">
+        <h1>Detalhes do contato: {{ contact.subject }}</h1>
+
+        {% include 'FlexyFtwoStoreBundle:Contact:contact-form.html.twig' with {contact : contacts|first} %}
+        {% include 'FlexyFtwoStoreBundle:Contact:contact-list.html.twig' with {contacts : contacts} %}
+    </div>
+{% endblock %}

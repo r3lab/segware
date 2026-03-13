@@ -1,0 +1,63 @@
+{% set showStoreAddress = true %}
+{% set shippingObservations = [] %}
+<div class="shipping-estimate f2-shipping-estimate">
+    {% for key, shippingMethod in shippingMethods %}
+        {% if shippingMethod.presentation %}
+            <div class="estimation">
+                <strong>
+                {% if shippingMethod.isFreeDelivery %}
+                    Frete grátis
+                {% else %}
+                    {{ shippingMethod.presentation }}:
+                {% endif %}
+
+                </strong>
+                {% if shippingMethod.price > 0 %}
+                    R$ {{ shippingMethod.price|number_format(2, ',', '.') }} -
+                {% endif %}
+
+                {% if shippingMethod.deliveryTimeFrom >= 0 and shippingMethod.deliveryTimeTo >= 0 %}
+
+                    {% if shippingMethod.deliveryTimeFrom == shippingMethod.deliveryTimeTo %}
+                        {{  shippingMethod.pickupOnPlace ? "A partir de" : "Até" }}  {{ shippingMethod.deliveryTimeTo + shippingMethod.withdrawalTimeFrom}} {{ 'date.day'|transchoice(shippingMethod.deliveryTimeTo + shippingMethod.withdrawalTimeFrom) }}
+                    {% elseif shippingMethod.isShippify %}
+                        De {{ shippingMethod.deliveryTimeFrom }} até {{ shippingMethod.deliveryTimeTo }}
+                    {% else %}
+                        {{ shippingMethod.deliveryTimeFrom }} a {{ shippingMethod.deliveryTimeTo }} dias
+                    {% endif %}
+
+                {% elseif not isBipBoy %}
+                    {% if shippingMethod.isPickupOnPlace and showStoreAddress %}
+                        A partir de {{ shippingMethod.deliveryTimeFrom + shippingMethod.deliveryTimeTo }} dias
+                    {% else %}
+                        {{  shippingMethod.pickupOnPlace ? "A partir de " : "" }} {{ shippingMethod.deliveryTimeFrom + shippingMethod.deliveryTimeTo }} dias
+                    {% endif %}
+                {% else %}
+                    {{ shippingMethod.deliveryTimeToMinutes }} minutos
+                {% endif %}
+            </div>
+            {% if shippingMethod.observations is not empty %}
+                {% set shippingObservations = shippingObservations|merge([{ 'presentation': shippingMethod.presentation, 'observations': shippingMethod.observations }]) %}
+            {% endif %}
+        {% else %}
+            <script>
+                console.log("{{ key|capitalize }}: {{ shippingMethod }}");
+            </script>
+        {% endif %}
+    {% endfor %}
+    {% if shippingObservations|length > 0 %}
+        <div class="shipping-alerts">
+            <h5><small>Observações:</small></h5>
+            {% for ob in shippingObservations %}
+            <p><small><cite><strong>{{ ob.presentation }}</strong>: {{ ob.observations }}</cite></small></p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if errorMessages|length > 0 and shippingMethods|length == 0 %}
+        <div class="shipping-errors-box">
+            {% for errorMessage in errorMessages %}
+                <div class="shipping-error">{{ errorMessage }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
