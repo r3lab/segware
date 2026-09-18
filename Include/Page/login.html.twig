@@ -7,50 +7,62 @@
     <div class="second-page-container">
         <div class="block">
             <div class="container">
-                <div class="header-for-light">
-                    <h1 class="wow fadeInRight animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
-                        <span>Entrar</span> ou <span>Criar conta</span>
+
+
+                {#<div class="header-for-light">
+                    <h1>
+                        <span>Entrar</span></span>
                     </h1>
-                </div>
+                </div>#}
 
-                <div class="row">
-                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
-                        <div class="block-form box-border wow fadeInLeft animated" data-wow-duration="1s">
-                            <h3><i class="fa fa-user"></i> Já sou cliente</h3>
-                            <p>Digite suas credenciais de acesso</p>
+                <div class="row" style="display: flex;">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin: 0 auto;">
+                        <div class="block-form box-border">
+                            <h3 style="justify-content: center;"><span class="lnr lnr-user"></span> Login</h3>
+                            <p style="text-align: center">Clique no botão abaixo para realizar o login</p>
 
-                            <form action="{{ path('login_check') }}" method="post">
+						  	<form action="{{ path('login_check') }}" method="post">
+								<div style="display: none;">
+									<input type="text" name="website" tabindex="-1" autocomplete="off">
+									<input type="email" name="contact_email" tabindex="-1" autocomplete="off">
+								</div>
+
                                 {% set redirectTo = app.request.get('redirect') %}
                             	{% if redirectTo %}
                                 	<input type="hidden" name="redirectTo" value="{{ redirectTo }}" />
                                 {% endif %}
 
-                                <div class="row">
-                                    <div class="col-md-6">
+                                <div class="row" style="display: flex; flex-direction: column; align-items: center;">
+                                    <div class="col-md-6" style="display: none;">
                                         {{ form_widget(form._username, { 'attr': {'class': 'form-control', 'placeholder' : 'Digite seu e-mail ou CPF/CNPJ'}, 'type' : 'text'  }) }}
                                         {{ form_errors(form._username) }}
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-6" style="display: none;">
                                         {{ form_widget(form._password, {'attr': {'class': 'form-control', 'placeholder' : 'Digite sua senha'}, }) }}
                                         {{ form_errors(form._password) }}
                                     </div>
-                                    <div class="col-md-12">
+                                    <div class="col-md-6" style="display: none;">
                                     	<hr>
                                     </div>
-                                    <div class="col-md-6">
-                                        <a href="{{ path('flexy_ftwo_store_user_remember_password') }}">Esqueci minha senha</a>
+                                    <div class="col-md-6" style="display: none;">
+                                        <input type="hidden" name="form_time" value="{{ form_time }}" />
+                                        <a href="{{ path('flexy_ftwo_store_user_remember_password') }}" class="mb-10 d-block">
+                                        Esqueci minha senha
+                                        </a>
                                     </div>
                                     <div class="col-md-6 text-right">
-                                        <input type="submit" value="Entrar" class="btn-default-1">
+                                        <a href="https://cloud.segware.com.br/login?redirect=segware-store" class="btn-default-1" style="width: 100%; display: block; text-align: center;">
+                                            Entrar com login Segware
+                                        </a>
                                     </div>
                                 </div>
                             </form>
                         </div>
                     </div>
-                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
-                        <div class="block-form box-border wow fadeInRight animated" data-wow-duration="1s">
-                            <h3><i class="fa fa-shopping-cart"></i> Primeira compra</h3>
-                            <p>Crie uma conta conosco para poder aproveitar todas as nossas ofertas.</p>
+                    {#<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                        <div class="block-form box-border">
+                            <h3><span class="lnr lnr-cart"></span> Primeira compra</h3>
+                            <p>Crie uma conta conosco</p>
                             <form action="{{ path('flexy_ftwo_store_customer_create') }}" method="get">
                                 <div class="row">
                                     <div class="col-md-12">
@@ -65,15 +77,15 @@
                                 </div>
 							</form>
                         </div>
-                    </div>
+                    </div>#}
                 </div>
-                {% if facebookLoginUrl or googleLoginUrl or microsoftLoginUrl or microsoftLoginCnpjUrl %}
+                {% if facebookLoginUrl or googleLoginUrl or microsoftLoginUrl or microsoftLoginCnpjUrl or siengeIdLoginUrl or isEdbLoginEnabled %}
                     <div class="row">
                         <div class="col-md-12">
                             <hr>
                         </div>
                         {% if facebookLoginUrl %}
-                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
+                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3 social-content-button">
                                 <a class="btn btn-block btn-social btn-facebook" href="{{ facebookLoginUrl }}">
                                     <span class="fa fa-facebook"></span> Entrar com Facebook
                                 </a>
@@ -81,25 +93,187 @@
                         {% endif %}
 
                         {% if googleLoginUrl %}
-                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
+                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3 social-content-button">
                                 <a class="btn btn-block btn-social btn-google" href="{{ googleLoginUrl }}">
                                     <span class="fa fa-google"></span> Entrar com Google
                                 </a>
                             </div>
                         {% endif %}
 
+                        {% if siengeIdLoginUrl %}
+                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3 social-content-button">
+                                <a class="btn btn-block btn-social btn-siengeid" href="#" data-toggle="modal" data-target="#add-email-sienge-id">
+                                    <div class="siengeid-icon">
+                                        <img src="{{ flexy_ftwo_resource_url_img('img/sienge-id-logo.png') }}" style="display:block; border: 0;" />
+                                    </div>
+                                    Entrar com SiengeID
+                                </a>
+                            </div>
+
+                            <div id="add-email-sienge-id" class="modal fade" tabindex="-1" role="dialog">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <h4 class="modal-title">Login por SiengeID</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input id="login-url-sienge-id" type="hidden" value="{{ siengeIdLoginUrl }}" />
+
+                                            <div id="alert-error-sienge-id" class="row mb-20" style="display: none;">
+                                                <div class="col-md-12 alerts container">
+                                                    <div class="alert alert-danger">O campo "Email" é de preenchimento obrigatório<button class="close" data-dismiss="alert"><i class="fa fa-times"></i></button></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="input-email-sienge-id">Email:</label>
+                                                        <input id="input-email-sienge-id" name="input-email-sienge-id" type="email" class="form-control" value=""/>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <button type="button" id="login-sienge-id" class="btn btn-light-blue">Entrar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if isEdbLoginEnabled %}
+                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3 social-content-button">
+                                <a class="btn btn-block btn-social btn-edb" href="#" data-toggle="modal" data-target="#add-email-edb-id">
+                                    <!--
+                                    <div class="edb-icon">
+                                        <img src="{{ flexy_ftwo_resource_url_img('img/sienge-id-logo.png') }}" style="display:block; border: 0;" />
+                                    </div>
+                                    -->
+                                    Entrar com Portal e.DB
+                                </a>
+                            </div>
+
+                            <div id="add-email-edb-id" class="modal fade" tabindex="-1" role="dialog">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <h4 class="modal-title">Login por Portal e.DB</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="{{ path('flexy_ftwo_store_customer_login_db_insert_dfa') }}" method="post" id="form-login-db">
+                                                <input id="input-email-edb" name="input-email-edb" type="hidden" value=""/>
+                                                {# Adicionar form_time para proteção em formulários EDB também #}
+                                                <input type="hidden" name="form_time" value="{{ form_time|default(''|date('U')) }}" />
+
+                                                <div id="alert-error-sienge-id" class="row mb-20" style="display: none;">
+                                                    <div class="col-md-12 alerts container">
+                                                        <div class="alert alert-danger">Todos os campos são de preenchimento obrigatório<button class="close" data-dismiss="alert"><i class="fa fa-times"></i></button></div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label for="input-codigo-cliente-edb">Serviço solicitante:</label>
+                                                            <input id="input-codigo-cliente-edb" name="input-codigo-cliente-edb" type="text" class="form-control" value=""/>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label for="input-cpf-edb">CPF:</label>
+                                                            <input id="input-cpf-edb" name="input-cpf-edb" type="text" class="form-control flexy-input-cpf" value=""/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label for="input-senha-edb">Senha:</label>
+                                                            <input id="input-senha-edb" name="input-senha-edb" type="password" class="form-control" value=""/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <button type="button" id="login-edb" class="btn btn-light-blue">Entrar</button>
+                                                <a href="https://out-prd.diagnosticosdobrasil.com.br/Portal/Login" target="_blank" id="login-edb" class="btn btn-light-blue">Esqueci a Senha</a>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3 social-content-button">
+                                <a class="btn btn-block btn-social btn-edb" href="#" data-toggle="modal" data-target="#add-email-flexy-edb">
+                                    <!--
+                                    <div class="edb-icon">
+                                        <img src="{{ flexy_ftwo_resource_url_img('img/sienge-id-logo.png') }}" style="display:block; border: 0;" />
+                                    </div>
+                                    -->
+                                    Entrar Flexy/DB
+                                </a>
+                            </div>
+
+                            <div id="add-email-flexy-edb" class="modal fade" tabindex="-1" role="dialog">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <h4 class="modal-title">Login Flexy/DB</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="{{ path('flexy_ftwo_store_customer_login_flexy_db') }}" method="post">
+                                                {# Adicionar form_time para proteção em formulários Flexy/DB também #}
+                                                <input type="hidden" name="form_time" value="{{ form_time|default(''|date('U')) }}" />
+
+                                                <div id="alert-error-sienge-id" class="row mb-20" style="display: none;">
+                                                    <div class="col-md-12 alerts container">
+                                                        <div class="alert alert-danger">Todos os campos são de preenchimento obrigatório<button class="close" data-dismiss="alert"><i class="fa fa-times"></i></button></div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label for="input-cnpj-flexy-edb">CNPJ:</label>
+                                                            <input id="input-cnpj-flexy-edb" name="input-cnpj-flexy-edb" type="text" class="form-control flexy-input-cnpj" value=""/>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label for="input-cpf-flexy-edb">CPF:</label>
+                                                            <input id="input-cpf-flexy-edb" name="input-cpf-flexy-edb" type="text" class="form-control flexy-input-cpf" value=""/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label for="input-senha-flexy-edb">Senha:</label>
+                                                            <input id="input-senha-flexy-edb" name="input-senha-flexy-edb" type="password" class="form-control" value=""/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <button type="submit" id="login-flexy-edb" class="btn btn-light-blue">Entrar</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
                         {% if microsoftLoginCnpjUrl or microsoftLoginCnpjUrl %}
-                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
+                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3 social-content-button">
                                 <a class="btn btn-block btn-social btn-microsoft" href="{{ microsoftLoginUrl }}">
                                     <div class="microsoft-icon">
-                                        <svg 
-                                            aria-hidden="true" 
-                                            focusable="false" 
-                                            data-prefix="fab" 
-                                            data-icon="microsoft" 
-                                            class="svg-inline--fa fa-microsoft fa-w-14" 
-                                            role="img" 
-                                            xmlns="http://www.w3.org/2000/svg" 
+                                        <svg
+                                            aria-hidden="true"
+                                            focusable="false"
+                                            data-prefix="fab"
+                                            data-icon="microsoft"
+                                            class="svg-inline--fa fa-microsoft fa-w-14"
+                                            role="img"
+                                            xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 448 512">
                                                 <path fill="currentColor" d="M0 32h214.6v214.6H0V32zm233.4 0H448v214.6H233.4V32zM0 265.4h214.6V480H0V265.4zm233.4 0H448V480H233.4V265.4z"></path>
                                         </svg>
@@ -107,17 +281,17 @@
                                     Entrar com Microsoft
                                 </a>
                             </div>
-                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
+                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3 social-content-button">
                                 <a class="btn btn-block btn-social btn-microsoft" href="{{ microsoftLoginCnpjUrl }}">
                                     <div class="microsoft-icon">
-                                        <svg 
-                                            aria-hidden="true" 
-                                            focusable="false" 
-                                            data-prefix="fab" 
-                                            data-icon="microsoft" 
-                                            class="svg-inline--fa fa-microsoft fa-w-14" 
-                                            role="img" 
-                                            xmlns="http://www.w3.org/2000/svg" 
+                                        <svg
+                                            aria-hidden="true"
+                                            focusable="false"
+                                            data-prefix="fab"
+                                            data-icon="microsoft"
+                                            class="svg-inline--fa fa-microsoft fa-w-14"
+                                            role="img"
+                                            xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 448 512">
                                                 <path fill="currentColor" d="M0 32h214.6v214.6H0V32zm233.4 0H448v214.6H233.4V32zM0 265.4h214.6V480H0V265.4zm233.4 0H448V480H233.4V265.4z"></path>
                                         </svg>
@@ -128,7 +302,7 @@
                         {% endif %}
 
                         {% if microsoftRegisterUrl or microsoftRegisterCnpjUrl %}
-                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
+                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3 social-content-button">
                                 <a class="btn btn-block btn-social btn-microsoft" href="{{ microsoftRegisterUrl }}">
                                     <div class="microsoft-icon">
                                         <svg
@@ -146,7 +320,7 @@
                                     Cadastrar com Microsoft
                                 </a>
                             </div>
-                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
+                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3 social-content-button">
                                 <a class="btn btn-block btn-social btn-microsoft" href="{{ microsoftRegisterCnpjUrl }}">
                                     <div class="microsoft-icon">
                                         <svg
@@ -172,3 +346,63 @@
         </div>
     </div>
 </section>
+
+<script src="{{ flexy_ftwo_resource_url_js('js/browser-fingerprint.js') }}"></script>
+<script type="text/javascript">
+  (function() {
+    'use strict';
+
+    function attachFingerprintToForm(form) {
+      if (!form || !window.BrowserFingerprint) {
+        return;
+      }
+
+      form.addEventListener('submit', function(e) {
+        var existingField = form.querySelector('input[name="_client_fp"]');
+        if (existingField && existingField.value) {
+
+          return true;
+        }
+
+        e.preventDefault();
+
+        window.BrowserFingerprint.addToForm(form).then(function() {
+          form.submit();
+        }).catch(function() {
+          form.submit();
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var mainLoginForm = document.querySelector('form[action="{{ path('login_check') }}"]');
+      if (mainLoginForm) {
+        attachFingerprintToForm(mainLoginForm);
+      }
+
+      var edbForm = document.getElementById('form-login-db');
+      if (edbForm) {
+        attachFingerprintToForm(edbForm);
+      }
+
+      var flexyEdbForms = document.querySelectorAll('form[action="{{ path('flexy_ftwo_store_customer_login_flexy_db') }}"]');
+      flexyEdbForms.forEach(function(form) {
+        attachFingerprintToForm(form);
+      });
+    });
+  })();
+
+  document.getElementById("login-sienge-id").addEventListener("click", function() {
+    let url = document.getElementById('login-url-sienge-id')
+    let email = document.getElementById('input-email-sienge-id')
+    let errorMsg = document.getElementById('alert-error-sienge-id')
+
+    if (!email.value) {
+      errorMsg.style.display = 'block';
+
+      return;
+    }
+
+    window.location.href = `${url.value}&login_hint=${email.value}`
+  });
+</script>

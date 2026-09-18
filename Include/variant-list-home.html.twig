@@ -1,0 +1,112 @@
+<section id="variant-list">
+    <div class="second-page-container home pb-0">
+        <div class="row">
+            <h2>{{titleCategory}}</h2>      
+            {% if variants|length > 0 %}
+                <div class="mv-container">
+                    <div class="carousel-categories-home {{titleCategoryRef|lower}}">
+                        <div class="mv-inner">
+                            <div class="swiper-container slide">
+                                <div class="swiper-wrapper">
+                                    {% for variant in variants %}
+                                        <div class="swiper-slide mv-item">
+                                            {% include 'FlexyFtwoStoreBundle:Include:variant.html.twig' with {variant : variant} %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="swiper-pagination"></div>
+                            </div>
+                            {% if variants|length > 4 %}
+                                <div class="btn-prev-categories {{titleCategoryRef|lower}}">
+                                	<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                                      <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+                                    </svg>
+                               	</div>
+                                <div class="btn-next-categories {{titleCategoryRef|lower}}">
+                                	<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                      <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
+                                    </svg>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% block javascript %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Categorias Home
+        var category{{titleCategoryRef|capitalize}}Swiper = new Swiper('.carousel-categories-home.{{titleCategoryRef|lower}} .slide', {
+            
+            slidesPerView: 4,
+            loop: false,
+            spaceBetween: 10,
+
+            updateOnWindowResize: true,
+
+            watchOverflow: true,
+
+            navigation: {
+                nextEl: '.btn-next-categories.{{titleCategoryRef|lower}}',
+                prevEl: '.btn-prev-categories.{{titleCategoryRef|lower}}'
+            },
+
+            preloadImages: false,
+            lazy: true,
+
+            watchSlidesProgress: true,
+            preventClicks: true,
+            preventClicksPropagation: true,
+            threshold: 8,
+
+            observer: false,
+            observeParents: false,
+
+            autoplay: {
+                delay: 8000,
+                pauseOnMouseEnter: true,
+                disableOnInteraction: true
+            },
+            speed: 600,
+
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+            },
+
+            on: {
+                init: function() {
+                    setTimeout(function() {
+                        var images = document.querySelectorAll(".carousel-categories-home.{{titleCategoryRef|lower}}");
+                        images.forEach(function(image) {
+                        //image.style.visibility = "visible";
+                        image.style.opacity = "1"; // Aplica o fade-in
+                        });
+                    }, 500);
+                }
+            },
+            breakpoints: {
+                300: {
+                    slidesPerView: 2
+                },
+                640: {
+                    slidesPerView: 2
+                },
+                768: {
+                    slidesPerView: 2
+                },
+                992: {
+                    slidesPerView: 3
+                },
+                1199: {
+                    slidesPerView: 4
+                },
+            }
+        });
+    });
+ </script>
+ {% endblock %}

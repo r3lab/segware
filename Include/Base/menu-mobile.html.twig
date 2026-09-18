@@ -1,0 +1,129 @@
+{# Setando listas de categorias #}
+{% set ListaCategorias = [] %}
+
+{% set resultPai = flexy_ftwo_category_list(
+    flexy_ftwo_category_list_by_parent_reference_code('departamentos'),
+    'sortOrder-desc'
+) %}
+
+{% set categoriasPai = resultPai and resultPai.categories ? resultPai.categories : [] %}
+
+{% for category in categoriasPai %}
+
+    {% set resultFilhas = flexy_ftwo_category_list(category) %}
+    {% set categoriasFilhas = resultFilhas and resultFilhas.categories ? resultFilhas.categories : [] %}
+
+    {% set filhas = [] %}
+
+    {% for category1 in categoriasFilhas %}
+
+        {% set resultNetas = flexy_ftwo_category_list(category1) %}
+        {% set categoriasNetas = resultNetas and resultNetas.categories ? resultNetas.categories : [] %}
+
+        {% set netas = [] %}
+
+        {% for category2 in categoriasNetas %}
+            {% set netas = netas|merge([{
+                'name': category2.name,
+                'referenceCode': category2.referenceCode,
+                'filhas': []
+            }]) %}
+        {% endfor %}
+
+        {% set filhas = filhas|merge([{
+            'name': category1.name,
+            'referenceCode': category1.referenceCode,
+            'filhas': netas
+        }]) %}
+
+    {% endfor %}
+
+    {% set ListaCategorias = ListaCategorias|merge([{
+        'name': category.name,
+        'referenceCode': category.referenceCode,
+        'filhas': filhas
+    }]) %}
+    
+{% endfor %}
+
+{# Mobile #}
+<div class="sidenav">
+    <div class="bg-menu-principal w-100"></div>
+        <div class="menu-principal w-100">
+            <ul  class="w-100 menu-principal">
+                <a href="#" title="Abrir / Fechar Menu" class="open-menu closebtn"><i class="fa fa-bars" aria-hidden="true"></i></a>
+                <li class="user-login mobile">
+                    {% if flexy_ftwo_current_user_exists() %}
+                         {% if user.agent %}
+                            {% set name = user.agent.name|split(' ')|first %}
+                        {% else %}
+                            {% set name = app.user.customer.Fullname|split(' ')|first %}
+                        {% endif %}
+                        <a href="#"><span>Olá, {{ name|split(' ')|first }}</span></a>
+                    {% else %}
+                        <a href="{{ path("flexy_ftwo_store_customer_login") }}">Faça login ou Cadastre-se</a>
+                    {% endif %}
+                </li>
+                <li class="first-child">
+                    <ul>
+                        <li class="user-login mobile">
+                            {% if flexy_ftwo_current_user_exists() %}
+                                <a href="#" class="sub-menu">
+                                    <span>Minha conta</span>
+                                    <i class="fa fa-angle-down" aria-hidden="true" style="transition: 0.5s;"></i>
+                                </a>
+                                <div class="drop-down-level-1">
+                                    <div class="customer-mobile">
+                                        <ul class="list-unstyled ps-2">
+                                            {% if user and not user.agent %}
+                                            <li><a class="link-menu-mobile" href="{{ path("flexy_ftwo_store_customer_profile") }}"><span class="span-link-menu-mobile">Meus pedidos</span></a></li>
+                                            <li><a class="link-menu-mobile" href="{{ path("flexy_ftwo_store_wishlist_my") }}"><span class="span-link-menu-mobile">Favoritos</span></a></li>
+                                            {% elseif user.agent %}
+                                                <li><a href="{{ path("flexy_ftwo_store_dashboard_agent_commission_dashboard") }}"><i class="fa fa-bar-chart-o"></i>&nbsp; Painel de Vendas</a></li>
+                                                <li><a href="{{ path("flexy_ftwo_store_agent_profile") }}"><i class="fa fa-file"></i>&nbsp; Pedidos</a></li>
+                                                <li><a href="{{ path("flexy_ftwo_store_user_remember_password_reset") }}"><i class="fa fa-unlock-alt"></i>&nbsp; Alterar Senha</a></li>
+                                                <li><a href="javascript:void(0)" id="" class="f2-agent-promotional-link-click-responsive"><i class="fa fa-link"></i>&nbsp;Link Promocional</a></li>
+                                            {% endif %}
+                                            <li><a class="link-menu-mobile" href="{{ path("flexy_ftwo_store_customer_logout") }}"><span class="span-link-menu-mobile">Sair da conta</span></a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </li>
+                    </ul>
+                    <ul class="">
+						{% for category in ListaCategorias %}
+                            <li>
+                                <a href="{{path("flexy_ftwo_store_product_list", {categoryReferenceCode : category.referenceCode})}}" title="{{category.name}}" class="{{ (category.filhas|length > 0) ? ' sub-menu' : '' }}">
+                                    <span>{{category.name}}</span>
+                                    {% if category.filhas|length > 0 %}<i class="fa fa-angle-down" aria-hidden="true" style="transition: 0.5s;"></i>{% endif %}
+                                </a>
+                                {% if category.filhas|length > 0 %}
+                                    <div class="drop-down-level-1">
+                                        <ul>
+                                            {% for subCategory in category.filhas %}
+                                                <li>
+                                                    <a href="{{ path("flexy_ftwo_store_product_list", {categoryReferenceCode : subCategory.referenceCode}) }}" class="{{ (subCategory.filhas|length > 0) ? ' sub-menu-2' : '' }}">
+                                                        <span>{{ subCategory.name }}</span>
+                                                        {% if subCategory.filhas|length > 0 %}<i class="fa fa-angle-down" aria-hidden="true" style="transition: 0.5s;"></i>{% endif %}
+                                                    </a>
+                                                    {% if subCategory.filhas|length > 0 %}
+                                                        <ul class="drop-down-level-2">
+                                                            {% for subSubCategory in subCategory.filhas %}
+                                                            <li><a class="ps-3" href="{{ path("flexy_ftwo_store_product_list", {categoryReferenceCode : subSubCategory.referenceCode}) }}">{{ subSubCategory.name }}</a></li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    {% endif %}
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </li>
+						{% endfor %}
+					</ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

@@ -1,4 +1,4 @@
-{% extends "FlexyFtwoStoreBundle:Layout:base.html.twig" %}
+ {% extends "FlexyFtwoStoreBundle:Layout:base.html.twig" %}
 {% set title = variant %}
 {% set dc =  store.shoppingStore ? store.shoppingStore.distributionCenter.referenceCode : null %}
 {% set price = flexy_ftwo_product_variant_price(variant , dc) %}
@@ -25,7 +25,6 @@
         'sort.order' : 'lastBuyers-desc'
     }
 ) %}
-{% set activated = flexy_ftwo_shoppingStore_is_activated() %}
 
 {% block metatag %}
     {% if variant.product.masterImage %}
@@ -48,45 +47,99 @@
                 <div class="block-product-detail">
                     <div class="row">
                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
-                            <div class="product-media">
-                                <div id="gal1">
-                                    {% for image in flexy_ftwo_product_image_list(variant.product.id) %}
-                                        <a href="javascript:void(0);" data-image="{{ image.urlLarge }}"
-                                           data-zoom-image="{{ image.urlOriginal }}">
-                                            <img id="img_{{ loop.index }}" src="{{ image.urlSmall }}" alt="">
-                                        </a>
-                                    {% endfor %}
-
-                                    {% for video in variant.product.videos %}
-                                        <a href="javascript:void(0);" data-video="{{ video.code }}">
-                                            <img src="https://img.youtube.com/vi/{{ video.code }}/0.jpg">
-                                        </a>
-                                    {% endfor %}
-                                </div>
-                                <div class="product-media-details">
-                                    <div class="product-image">
-                                        <img id="{{ variant.product.masterImage ? "product-zoom" : "" }}"
-                                             src="{{ flexy_ftwo_image_placeholder_large(variant.product.masterImage, "img/product-placeholder.gif") }}"
-                                             data-zoom-image="{{ variant.product.masterImage ? variant.product.masterImage.urlOriginal : flexy_ftwo_resource_url_img("img/product-placeholder.gif") }}"
-                                             alt="">
+                            {# Images Desktop #}
+                            <div class="product-main-details-media">
+                                <div class="product-media-details product-main-media">
+                            	    <div class="product-image product-details-image-zoom">
+                                        {# Favoritos #}
+                                        <div class="product-favorite">                    
+                                            <form action="{{ path("flexy_ftwo_store_wishlist_add") }}" method="post">
+                                                <input type="hidden" name="productId" value="{{ variant.product.id }}"/>
+                                                <button type="submit" class="wishlist-btn favorite-variant-btn" alt="Ícone para adicionar produto na lista de desejos"><span class="lnr lnr-heart"></span></button>                           
+                                            </form>
+                                        </div> 
+                                        {# Tag Frete grátis #}
+                                        {% if infoFreteGratis == "Frete grátis" %}
+                                        <div class="frete-gratis">
+                                        {{infoFreteGratis}}
+                                        </div>
+                                        {% endif %}
+                                        {# Tag descontos #}
+                                        {% if promotion %}
+                                        <div class="selo-desconto">
+                                        {% set porcentagem = promotion.discountPercent %}
+                                        <b>-{{ porcentagem|number_format(0, ',', '.') }}%</b>
+                                        </div>
+                                        {% endif %}
+                                        {# Master image #}
+                                	    <img id="{{ variant.product.masterImage ? "product-zoom" : "" }}" src="{{ variant.product.masterImage ? variant.product.masterImage.urlLarge : "https://d8vlg9z1oftyc.cloudfront.net/segware/segware-file-manager/assets/images/placeholder.jpg"}}" data-zoom-image="{{ variant.product.masterImage ? variant.product.masterImage.urlOriginal : flexy_ftwo_resource_url_img("img/product-placeholder.gif") }}" alt="">        
                                     </div>
+                                    {# Video #}
                                     <div class="product-video"></div>
                                 </div>
+                                {#<span style="background: red">{{variant.product}}</span>#}
+                                {# Thumbnails #}        
+                                
+                                {# Set variables align thumbnails #}
+                                        {% set qtdImages = 0 %}
+                                        {% set qtdVideos = 0 %}
+                                        
+                                        {% for image in flexy_ftwo_product_image_list(variant.product.id) %}
+                                            {% set qtdImages = flexy_ftwo_product_image_list(variant.product.id)|length %}
+                                        {% endfor %}
+                                        
+                                        {% for video in variant.product.videos %}
+                                            {% set qtdVideos = variant.product.videos|length %}
+                                        {% endfor %}
+                                        
+                                        {% set alignCarrossel = 0 %}                      
+                                        {% if qtdImages >= 3 and qtdVideos == 1 %}
+                                            {% set alignCarrossel = 1 %}
+                                        {% elseif qtdImages >= 4 and qtdVideos == 0 %}
+                                            {% set alignCarrossel = 1 %} 
+                                        {% elseif qtdImages <= 3 and qtdVideos == 0 %} 
+                                            {% set alignCarrossel = 0 %}
+                                        {% elseif qtdImages <= 3 and qtdVideos == 1 %} 
+                                            {% set alignCarrossel = 0 %}    
+                                        {% else %}  
+                                        {% set alignCarrossel = 0 %}
+                                        {% endif %} 
+                                {% if qtdImages > 0 %}        
+                                <div id="gal1" class="product-main-gallery-container">
+                                    <div class="product-main-gallery">
+                                        <div class="owl-carousel owl-theme thumb-carousel">
+                                            {# Loop image #}
+                                            {% for image in flexy_ftwo_product_image_list(variant.product.id) %}
+                                                <a href="javascript:void(0);" data-image="{{ image.urlLarge }}" data-zoom-image="{{ image.urlOriginal }}" class="{{ alignCarrossel ? 'no-align' : 'align-left' }}">
+                                                    <img id="img_{{ loop.index }}" src="{{ image.urlSmall }}" alt="">
+                                                </a>
+                                            {% endfor %}
+                                            {# Loop video #}
+                                            {% for video in variant.product.videos %}
+                                                <a href="javascript:void(0);" data-video="{{ video.code }}" class="{{ alignCarrossel ? 'no-align' : 'align-left' }}">
+                                                    <img src="https://img.youtube.com/vi/{{ video.code }}/0.jpg">
+                                                </a>
+                                            {% endfor %} 
+                                        </div>                  
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
                             </div>
+                            {# End Imagens #}
                         </div>
                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
                             <div class="product-detail-section">
-                                <h3>{{ variant.product.name }}</h3>
-                                <div class="row">
-                                    <div class="col-sm-6">
-                                        <p class="product-ref">REF.:
-                                            {{ variant.referenceCode }}</p>
+                                <h1>{{ variant.product.name }}</h1>
+                                <div class="ref-rating row">
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                        <p class="product-ref">REF.: {{ variant.referenceCode }}</p>
                                     </div>
-                                    <div class="col-sm-6">
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                         <div class="product-rating">
+                                            <p class="product-ref"> Avaliações:</p>
                                             <div class="stars">
                                                 {% set rating = flexy_ftwo_product_average_rating(variant.product) %}
-
                                                 {% for i in 5..1 %}
                                                     <span class="star {{ i > rating ? '' : 'active' }}"></span>
                                                 {% endfor %}
@@ -105,6 +158,8 @@
                                     {% endif %}
                                 </div>
                             </div>
+                            
+                            <div class="product-details">
                             {% if variant.product.customProductAttributes|length > 0 %}
                                 <div class="f2-product-attributes">
                                     <hr/>
@@ -133,6 +188,8 @@
                                     <hr/>
                                 </div>
                             {% endif %}
+                            </div>
+                            
                             <div class="product-detail-section">
                                 <div class="product-information">
                                     {% if (store.info.usesMultipleSales is empty and hasStock) or (store.info.usesMultipleSales and hasStock) %}
@@ -246,8 +303,7 @@
                                                                 <li>
                                                                     <strong>{{ subscriptionPlan.name }}</strong>
                                                                     -
-                                                                    {{ subscriptionPlan.numberOfRecurrences }}x
-                                                                    {{ subscriptionPlan.intervalBetweenRecurrencesLabel|lower }}
+                                                                    {{ subscriptionPlan.getDescription() }}
                                                                     .
                                                                 </li>
                                                                 <br>
@@ -264,12 +320,9 @@
                                                 </div>
                                             </div>
                                         {% endif %}
-                                    {% else %}
-                                        <p class="price">Indisponível</p>
-                                        <p>Este produto esta indisponível por falta de estoque.</p>
                                     {% endif %}
 
-                                    {% if not variant.product.isSimple %}
+                                    {% if not variant.product.isSimple and not variant.product.isConfigurable %}
                                         {% if kitProducts|length > 0 %}
                                             {% include 'FlexyFtwoStoreBundle:Include/Product:grid-closed.html.twig' with {variant: variant} %}
                                         {% else %}
@@ -290,21 +343,90 @@
                                     {% set seeAlso = flexy_ftwo_product_related_by_group(variant.product, 'other-colors') %}
                                     {% if seeAlso|length > 0 %}
                                         <div class="opcoes">
-                                            <div>Outras cores:</div>
+                                            <div>Outras cores</div>
                                             <ul>
                                                 {% for productRelated in seeAlso %}
-                                                    <li>
-                                                        <a href="{{ flexy_ftwo_product_url(productRelated.variant) }}">
-                                                            <img src="{{ productRelated.groupImage ? productRelated.groupImage.path : flexy_ftwo_image_placeholder_small(productRelated.variant.product.masterImage, 'img/product-placeholder.gif') }}">
+                                                    {% set productRelatedHasStock = flexy_ftwo_variant_has_stock(productRelated.variant, shoppingStore ? shoppingStore.referenceCode : null) %}
+                                                    <li class="{{ productRelatedHasStock ? '' : 'unavailable' }}" title="{{ productRelatedHasStock ? '' : 'Indisponível' }}">
+                                                        <a href="{{ productRelatedHasStock ? flexy_ftwo_product_url(productRelated.variant) : "javascript:void(0);" }}">
+                                                            <img src="{{ productRelated.variant.product.masterImage ? productRelated.variant.product.masterImage.urlMedium : 'https://d8vlg9z1oftyc.cloudfront.net/segware/segware-file-manager/assets/images/placeholder.jpg'}}">
                                                         </a>
                                                     </li>
                                                 {% endfor %}
                                             </ul>
                                         </div>
                                     {% endif %}
+
+                                    {% if variant.product.isConfigurable %}
+                                        <div class="panel-group item-configurable" id="accordion" role="tablist" aria-multiselectable="false">
+                                            {% for slot in productConfigurableSlots  %}
+                                                <div class="panel panel-default">
+                                                    <div class="panel-heading" role="tab" id="heading-{{ slot.referenceCode }}">
+                                                        <h4 class="panel-title">
+                                                            <a class="{{ loop.first ? 'open' : '' }}" role="button" {{ slot.mandatory ? '' : 'style="color: gray;"' }} data-toggle="collapse" data-parent="#accordion" href="#collapse-{{ slot.referenceCode }}" aria-expanded="true" aria-controls="collapse-{{ slot.referenceCode }}">
+                                                                {{ slot.name }} {{ slot.mandatory ? '' : ' - Opcional' }}
+                                                            </a>
+                                                        </h4>
+                                                    </div>
+                                                    <div id="collapse-{{ slot.referenceCode }}" class="panel-collapse collapse {{ loop.first ? 'in' : '' }}" role="tabpanel" aria-labelledby="heading-{{ slot.referenceCode }}">
+                                                        <div class="panel-body">
+                                                            {% for configurable in slot.productsConfigurable %}
+																{% set productItemHasStock = flexy_ftwo_product_has_stock(configurable.variant.product) %}
+                                                                <div class="panel-item-wrapper">
+                                                                    <div class="item-img">
+                                                                        <img style="{% if not productItemHasStock %} filter: grayscale(100%) {% endif %}" class="media-object img-thumbnail" src="{{ f2_store_image_placeholder_small(configurable.variant.product.masterImage) }}">
+                                                                    </div>
+                                                                    <div class="item-info">
+                                                                        <div class="item-name">
+                                                                            <p {% if not productItemHasStock %} style="text-decoration: line-through; color: darkgray;" {% endif %} class="mb-0">
+                                                                                {{ configurable.variant.product.name }}
+                                                                            </p>
+                                                                        </div>
+                                                                        <div class="item-price">
+                                                                            {% if configurable.price > 0 %}
+                                                                            <p>
+                                                                                +R$ {{(promotion and promotion.discountPercent ? (configurable.price * (1 - promotion.discountPercent / 100))|number_format(2, ',', '.') : configurable.price|number_format(2, ',', '.'))}}
+                                                                            </p>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="item-select">
+                                                                        {% if configurable.slot.quantitySelectableProducts > 1 %}
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                data-price="{{ configurable.price }}"
+                                                                                data-promotion-price="{{ (promotion and promotion.discountPercent ? configurable.price * (1 - promotion.discountPercent / 100) : 0) }}"
+                                                                                id="configurableProducts[{{ slot.referenceCode }}]"
+                                                                                name="configurableProducts[{{ slot.referenceCode }}]"
+                                                                                value="{{ configurable.id }}" {{ configurable.isDefault ? 'checked' : ''}}
+                                                                                {% if not productItemHasStock %}disabled{% endif %}
+                                                                                onClick="checksLimitSelectedItems('{{ configurable.slot.name }}', '{{ configurable.slot.referenceCode }}', {{ configurable.slot.quantitySelectableProducts }})"
+                                                                            >
+                                                                        {% else %}
+                                                                            <input
+                                                                                type="radio"
+                                                                                data-price="{{ configurable.price }}"
+                                                                                data-promotion-price="{{ (promotion and promotion.discountPercent ? configurable.price * (1 - promotion.discountPercent / 100) : 0) }}"
+                                                                                class="radio"
+                                                                                id="configurableProducts[{{ slot.referenceCode }}]"
+                                                                                name="configurableProducts[{{ slot.referenceCode }}]"
+                                                                                value="{{ configurable.id }}" {{ configurable.isDefault ? 'checked' : ''}}
+                                                                                {% if not productItemHasStock %}disabled{% endif %}
+                                                                            >
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+
                                     <input type="hidden" name="customer" id="customer"
                                            value="{{ app.user.customer }}"/>
-                                    {% if app.user.customer %}
+                                    {% if app.user.customer or app.user.agent %}
                                         {% if variant.product.isAvailableForBooking %}
                                             <div class="row">
                                                 <div class="col-sm-12 col-md-6">
@@ -324,33 +446,71 @@
                                     {% endif %}
 
                                     {% if (store.info.usesMultipleSales is empty and hasStock) or (store.info.usesMultipleSales and hasStock) %}
+                                        
                                         <div class="row">
                                             <div class="shopping-cart-buttons col-xs-12 col-sm-12 col-md-12">
                                                 {% if not variant.product.isAvailableForBooking %}
                                                     {% if variant.isFractionalStock %}
+                                                    <div class="quantity-wrapper">
                                                         <input type="text" id="quantity" name="quantity"
-                                                               class="quantity f2-shipping-estimate-quantity product-quantity flexy-weight-mask"
-                                                               min="0,001" value="1,000"
-                                                               data-maximum-quantity="{{ variant.stock.hasStockControl ? variant.stock.quantity : '' }}"
-                                                               data-stock="{{ variant.stock.hasStockControl ? variant.stock.quantity : '' }}">
+                                                            class="quantity f2-shipping-estimate-quantity product-quantity "
+                                                            min="0.001" value="1.000"
+                                                            data-maximum-quantity="{{ variant.stock.hasStockControl ? variant.stock.quantity : '' }}"
+                                                            data-stock="{{ variant.stock.hasStockControl ? variant.stock.quantity : '' }}"
+                                                            data-product-name="{{ variant.product.name }}">
+                                                        <script>
+                                                            document.addEventListener('DOMContentLoaded', function() {
+                                                                var quantityInput = document.querySelector('#quantity');
+                                                                quantityInput.addEventListener('input', function() {
+                                                                    this.value = this.value.replace(/,/g, '.');
+                                                                });
+                                                            });
+                                                        </script>
+                                                    </div>
                                                     {% else %}
+                                                    <div class="quantity-wrapper">
                                                         <input type="number" id="quantity" name="quantity"
-                                                               class="quantity f2-shipping-estimate-quantity product-quantity number"
-                                                               min="1" value="1"
-                                                               data-maximum-quantity="{{ variant.stock.hasStockControl ? variant.stock.quantity : '' }}">
+                                                            class="quantity f2-shipping-estimate-quantity product-quantity number"
+                                                            min="1" value="1"
+                                                            data-maximum-quantity="{{ variant.stock.hasStockControl ? variant.stock.quantity : '' }}"
+                                                            data-product-name="{{ variant.product.name }}">
+                                                            </div>
                                                     {% endif %}
                                                 {% endif %}
 
-                                                {% if variant.product.isAvailableForSale %}
-                                                    <button type="button"
-                                                            class="btn flexy-add-to-cart main_cart_add btn-light-blue col-md-5 col-sm-5 col-xs-7"
-                                                            data-variant-id="{{ variant.id }}"
-                                                            data-product-quantity="#quantity"
-                                                            data-distributioncenter="{{ (shoppingStore)?shoppingStore.referenceCode:null }}">
-                                                        <i class="fa fa-shopping-cart d_inline_m m_right_9"></i>
-                                                        &nbsp;Comprar
-                                                    </button>
-                                                {% endif %}
+                                                <div class="buttons-arround">
+                                                    {% if variant.product.isAvailableForSale %}
+                                                        <button type="button"
+                                                                class="btn flexy-add-to-cart-custom main_cart_add btn-light-blue col-md-5 col-sm-5 col-xs-7"
+                                                                style="margin-right:10px;"
+                                                                data-variant-id="{{ variant.id }}"
+                                                                data-product-quantity="#quantity"
+                                                                data-distributioncenter="{{ (shoppingStore)?shoppingStore.referenceCode:null }}">
+                                                                Comprar
+                                                        </button>
+                                                        {% if cardSaving and pagarmeActived %}
+                                                            <button
+                                                                    type="button"
+                                                                    class="btn flexy-add-to-cart-fast main_cart_add btn-light-blue col-md-5 col-sm-5 col-xs-7"
+                                                                    data-variant-id="{{ variant.id }}"
+                                                                    data-product-quantity="#quantity"
+                                                                    data-distributioncenter="{{ (shoppingStore) ? shoppingStore.referenceCode : null }}"
+                                                                    onclick="sendToCartFast('cart', $(this), {{ variant.id }}, event)">
+                                                                    &nbsp;Comprar com 1 clique
+                                                            </button>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                    <div id="quote-arround">
+                                                        {% if variant.product.isAvailableForQuote %}
+                                                            <button type="button" id="quote-add-btn" class="wishlist-btn"
+                                                                    data-variant-id="{{ variant.id }}"
+                                                                    data-product-quantity="#quantity"
+                                                                    data-distributioncenter="{{ (shoppingStore)?shoppingStore.referenceCode:null }}">
+                                                                    Adicionar ao orçamento
+                                                            </button>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
 
                                                 {% if variant.product.isAvailableForBooking %}
                                                     <button type="button" id="booking-add-btn"
@@ -362,11 +522,14 @@
                                                         &nbsp;Alugar
                                                     </button>
                                                 {% endif %}
+                                                
                                             </div>
 
                                         </div>
+                                        
                                         <div class="row">
-                                            <div class="col-xs-12 col-md-12">
+
+                                            {#<div class="col-xs-12 col-md-12">
                                                 <form action="{{ path("flexy_ftwo_store_wishlist_add") }}"
                                                       method="post">
                                                     <input type="hidden" name="productId"
@@ -377,20 +540,8 @@
                                                         &nbsp;Adicionar à minha lista de desejos
                                                     </button>
                                                 </form>
-                                            </div>
-                                            <div class="col-xs-12 col-md-12">
-                                                {% if variant.product.isAvailableForQuote and activated %}
-                                                    <button type="button" id="quote-add-btn" class="wishlist-btn"
-                                                            data-variant-id="{{ variant.id }}"
-                                                            data-product-quantity="#quantity"
-                                                            data-distributioncenter="{{ (shoppingStore)?shoppingStore.referenceCode:null }}">
-                                                        <i class="fa fa-file"></i>
-                                                        &nbsp;Adicionar ao orçamento
-                                                    </button>
-                                                {% endif %}
-                                            </div>
-
-
+                                            </div>#}
+                                            
                                             {% if currentCustomer and currentCustomer.hasGiftList %}
                                                 <div class="row">
                                                     <div class="col-xs-12 col-md-12">
@@ -404,176 +555,126 @@
                                                 </div>
                                             {% endif %}
                                         </div>
-                                        <div class="row">
-                                            <div class="col-sm-6">
-                                                <br>
-                                                <span>Frete e prazo:</span>
-                                                <div class="input-group">
-                                                    <input type="text" name="zipCode" id="zipCode" placeholder="CEP"
-                                                           value="{{ app.request.get('zipCode') }}"
-                                                           class="form-control cep flexy-postcode-mask f2-shipping-estimate-postcode"
-                                                           maxlength="9">
-                                                    <span class="input-group-btn">
-														<button id="calculate"
-                                                                class="btn btn-default f2-shipping-estimate-action"
-                                                                type="submit">Calcular</button>
-													</span>
-                                                    <input type="hidden" class="f2-shipping-estimate-variant-id"
-                                                           value="{{ variant.id }}"/>
+
+                                        {% if not variant.product.isDigital and variant.product.isAvailableForSale %}
+                                            <div class="row">
+                                                <div class="frete-prazo col-sm-12 col-md-12 col-xs-12">
+                                                    <span class="title-frete-prazo">Frete e prazo</span>
+                                                    <div class="input-group">
+                                                        <input type="text" name="zipCode" id="zipCode" placeholder="Insira seu CEP"
+                                                                value="{{ app.request.get('zipCode') }}"
+                                                                class="form-control cep flexy-postcode-mask f2-shipping-estimate-postcode"
+                                                                maxlength="9">
+
+                                                            <button id="calculate"
+                                                                    class="btn btn-default f2-shipping-estimate-action"
+                                                                    type="submit">Calcular</button>
+
+                                                        <input type="hidden" class="f2-shipping-estimate-variant-id"
+                                                                value="{{ variant.id }}"/>
+
+                                                    </div>
+                                                    <div class="cep_validate"></div>
+                                                    <br>
+                                      
+                                                    <div class="f2-shipping-estimate-container"></div>
+                                                    
                                                 </div>
-                                                <div class="cep_validate"></div>
-                                                <br>
-                                                <div class="f2-shipping-estimate-container"></div>
                                             </div>
-                                        </div>
-                                    {% else %}
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <p>
-                                                    <b>Avise-me quando chegar:</b>
-                                                </p>
-                                            </div>
-                                            <div class="col-md-12">
-                                                <div class="input-group">
-                                                    <input type="text"
-                                                           class="flexy-product-notify-when-available-email form-control"
-                                                           placeholder="E-mail">
-                                                    <span class="input-group-btn">
-														<button class="btn btn-secondary flexy-product-notify-when-available-send btn-blue"
-                                                                type="button" data-variant-id="{{ variant.id }}">Cadastrar</button>
-													</span>
+                                        {% endif %}
+                                        
+                                        {% if not flexy_ftwo_current_user_exists() and not store.config.displayPrice %}
+                                            <hr class="divider-actions-product-details"/>
+                                            <div class="row">
+                                                <div class="cart-login">
+                                                    <p class="text-center">
+                                                        <a href="{{ path("flexy_ftwo_store_customer_login", {redirect: flexy_ftwo_product_url(variant)}) }}">Acesse sua conta</a> ou
+                                                        <a href="{{ path("flexy_ftwo_store_customer_create", {redirect: flexy_ftwo_product_url(variant)}) }}">cadastre-se</a> para visualizar o preço.
+                                                    </p>
                                                 </div>
+                                            </div>
+                                        {% endif %}
+                                    
+                                    {% endif %}    
+                                        
+                                    {# Produto sem estoque #}
+                                    {% if not hasStock %}
+                                        <div class="unavaliable-wrapper">
+                                            <div class="unavaliable-info">
+                                                <p class="title">Produto sem estoque</p>
+                                                <p>Este produto esta indisponível por falta de estoque.</p>
+                                                <p>Informe o seu e-mail no campo abaixo e seja avisado assim que ele voltar ao nosso estoque.<p>
+                                            </div>
+                                            <div class="input-group">
+                                                <input type="text" class="flexy-product-notify-when-available-email form-control" placeholder="E-mail">
+                                                <button class="btn btn-secondary flexy-product-notify-when-available-send btn-blue" type="button" data-variant-id="{{ variant.id }}">Avise-me</button>
                                             </div>
                                         </div>
                                     {% endif %}
 
-                                    <div class="addthis_sharing_toolbox"></div>
+                                    {# Buy box#}
+                                    {#{% if not shoppingStore and variant.product.isAvailableForSale %}
+                                        <div class="col-md-12" style="padding: 0px;">
+                                            {% if hasStock and not variant.product.shoppingStore.id  %}
+                                                {% include 'FlexyFtwoStoreBundle:Include/Product:price-list.html.twig' with {variant : variant} %}
+                                            {% endif %}
+                                        </div> 
+                                    {% endif %}#}
+                                    {# End Buy box #}
+
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <section id="product-more-info">
-                    <div class="box-border block-form">
+                <div class="row" id="product-more-info">
+                    <div class="block-form">
+
                         {% set hasFirstTab = variant.product.descriptionGroup.descriptionTwo %}
                         {% set hasSecondTab = variant.product.descriptionGroup.descriptionThree or variant.product.descriptionGroup.descriptionFour %}
                         {% set hasThirdTab = true %}
 
-                        <ul class="nav nav-pills nav-justified">
-                            {% if hasFirstTab %}
-                                <li class="active">
-                                    <a href="#description" data-toggle="tab">Sobre o produto</a>
-                                </li>
-                            {% endif %}
-
-                            {% if hasSecondTab %}
-                                <li class="{{ not hasFirstTab ? "active" : "" }}">
-                                    <a href="#technical" data-toggle="tab">Informações técnicas</a>
-                                </li>
-                            {% endif %}
-
-                            {% if hasThirdTab %}
-                                <li class="{{ not hasFirstTab and not hasSecondTab ? "active" : "" }}">
-                                    <a href="#review" data-toggle="tab">Avaliações</a>
-                                </li>
-                            {% endif %}
-                            {% if customerList.totalResults > 0 %}
-                                <li class="">
-                                    <a href="#where_buy" data-toggle="tab">Onde Comprar</a>
-                                </li>
-                            {% endif %}
-                        </ul>
-
-                        <div class="tab-content">
-                            {% if hasFirstTab %}
-                                <div class="tab-pane active" id="description">
+                        {% if hasFirstTab %}
+                            <div class="tab-content">
+                                <div class="sobre-produto" id="description">
+                                    <h3>Descrição do produto</h3>
                                     {{ variant.product.descriptionGroup.descriptionTwo|raw }}
                                 </div>
-                            {% endif %}
-
-                            {% if hasSecondTab %}
-                                <div class="tab-pane {{ not hasFirstTab ? " active" : " " }}" id="technical">
+                            </div>
+                        {% endif %}
+                        {% if hasSecondTab %}
+                            <div class="tab-content">
+                                <div class="informacoes-tecnicas" id="technical">
+                                    <h3>Informações técnicas</h3>
                                     {% if variant.product.descriptionGroup.descriptionThree %}
                                         <div class="description">{{ variant.product.descriptionGroup.descriptionThree|raw }}</div>
                                     {% endif %}
-
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if variant.product.descriptionGroup.descriptionFour|length > 0 %}
+                            <div class="tab-content">
+                                <div class="informacoes-tecnicas" id="technical">
+                                    <h3>Informações complementares</h3>
+                                    {# Descrição 4  #}
                                     {% if variant.product.descriptionGroup.descriptionFour %}
                                         <div class="description">
                                             {{ variant.product.descriptionGroup.descriptionFour|raw }}
                                         </div>
-                                    {% endif %}
+                                    {% endif %}                                  
                                 </div>
-                            {% endif %}
-
-                            {% if hasThirdTab %}
-                                <div class="tab-pane {{ not hasFirstTab and not hasSecondTab ? " active" : " " }}"
-                                     id="review">
-                                    <div class="comments">
-                                        {% for comment in comments %}
-                                            <div class="comment">
-                                                <div class="review-header">
-                                                    <h5>{{ comment.customer.firstName is defined ? comment.customer.firstName : comment.customer.tradeName }}</h5>
-                                                    <div class="product-rating">
-                                                        <div class="stars">
-                                                            {% for i in 1..5 %}
-                                                                <span class="star {{ i <= comment.rating.rating ? 'active' : '' }}"></span>
-                                                            {% endfor %}
-                                                        </div>
-                                                    </div>
-                                                    <small class="text-muted">{{ comment.createdAt }}</small>
-                                                </div>
-                                                <div class="review-body">
-                                                    <p>{{ comment.content }}</p>
-                                                </div>
-                                            </div>
-                                        {% else %}
-                                            <p class="text-center"><br>Nenhuma avaliação realizada.</p>
-                                        {% endfor %}
-                                    </div>
-
-                                    <div class="product-rating-block">
-                                        {% if flexy_ftwo_current_user_exists() %}
-                                            <h4>Faça sua avaliação:</h4>
-                                            <div class="form-group">
-                                                <textarea rows="8"
-                                                          class="flexy-product-review-comment form-control"></textarea>
-                                            </div>
-                                            <div class="form-group">
-                                                <div class="product-rating">
-                                                    <label class="control-label">Sua nota:</label>
-                                                    <select class="flexy-product-review-rating form-control">
-                                                        {% for i in 1..5 %}
-                                                            <option value="{{ i }}">{{ i }}</option>
-                                                        {% endfor %}
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <button type="button" class="flexy-product-review-send btn-default-1"
-                                                    data-product-id="{{ variant.product.id }}">Enviar
-                                            </button>
-                                        {% else %}
-                                            <p>
-                                                <a href="{{ path("flexy_ftwo_store_customer_login") }}">Acesse sua
-                                                    conta</a>, ou
-                                                <a href="{{ path("flexy_ftwo_store_customer_create") }}">cadastre-se</a>,
-                                                e conte-nos sobre sua experiência na compra deste produto.</p>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            {% endif %}
-                            {% if customerList.totalResults > 0 %}
-                                <div class="tab-pane" id="where_buy">
-                                    {% include 'FlexyFtwoStoreBundle:Include/Customer:list.html.twig' with { 'customerList' : customerList } %}
-                                </div>
-                            {% endif %}
-                        </div>
+                            </div>
+                        {% endif %}
                     </div>
-                </section>
+                </div>
+
                 {% set additionalProducts = flexy_ftwo_product_related_additional(variant.product, {shoppingStore: shoppingStore}) %}
-                {% set variantSalable = hasStock and variant.product.isAvailableForSale %}
+                
+                {% set variantSalable  = hasStock and variant.product.isAvailableForSale %}
                 {% set variantQuotable = hasStock and variant.product.isAvailableForQuote %}
+                {% set variantRentable = hasStock and variant.product.isAvailableForBooking %}
+                
                 {% if additionalProducts|length > 0 and hasStock %}
                     {% set anyAdditionalHasStock = false %}
                     {% for additional in additionalProducts %}
@@ -593,10 +694,124 @@
                             additional: true,
                             variantSalable : variantSalable,
                             variantQuotable : variantQuotable,
-                            mainVariantId : variant.id
+                            variantRentable : variantRentable,
+                            mainVariantId : variant.id,
+                            sliderGroupId : 'adicionais'
                         } %}
                     {% endif %}
                 {% endif %}
+
+                <div class="row" id="product-more-info">
+                    <div class="tab-content">
+                        <div class="secondary-details avaliacoes" id="review">
+                            <h3>Avaliações</h3>
+                            {% if ratingMedia > 0 %}
+                                <div class="row">
+
+                                    <div class="col-xs-12 col-md-4 product-tab-evaluation-general">
+                                        {% set rating = flexy_ftwo_product_average_rating(variant.product) %}
+                                        <p class="rating-average-number">{{ ratingMedia|number_format(1) }}</p>
+
+                                        <div class="product-rating"  style="margin-top: 25px;">
+                                        <div class="stars" style="--rating:{{ratingMedia|number_format(1)}};"></div>
+                                        </div>
+
+                                        <p><span>Média entre {{ ratingTotalItem }} opini{{ ratingTotalItem == 1 ? 'ão' : 'ões' }}.</span></p>
+                                    </div>
+
+                                    <div class="col-md-8 product-tab-evaluation-bars">
+                                        {% set star1 = 0 %}
+                                        {% set star2 = 0 %}
+                                        {% set star3 = 0 %}
+                                        {% set star4 = 0 %}
+                                        {% set star5 = 0 %}
+
+                                        {% for comment in comments %}
+                                            {% if comment.rating.rating == 1 %}
+                                                {% set star1 = star1 + 1 %}
+                                            {% elseif comment.rating.rating == 2 %}
+                                                {% set star2 = star2 + 1 %}
+                                            {% elseif comment.rating.rating == 3 %}
+                                                {% set star3 = star3 + 1 %}
+                                            {% elseif comment.rating.rating == 4 %}
+                                                {% set star4 = star4 + 1 %}
+                                            {% elseif comment.rating.rating == 5 %}
+                                                {% set star5 = star5 + 1 %}
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        <p><span>5 estrelas</span> <span class="product-stars-quantity-bar" style="--ratingCount:{{ star5 }}; --ratingTotal:{{ comments|length }}"></span></p>
+                                        <p><span>4 estrelas</span> <span class="product-stars-quantity-bar" style="--ratingCount:{{ star4 }}; --ratingTotal:{{ comments|length }}"></span></p>
+                                        <p><span>3 estrelas</span> <span class="product-stars-quantity-bar" style="--ratingCount:{{ star3 }}; --ratingTotal:{{ comments|length }}"></span></p>
+                                        <p><span>2 estrelas</span> <span class="product-stars-quantity-bar" style="--ratingCount:{{ star2 }}; --ratingTotal:{{ comments|length }}"></span></p>
+                                        <p><span>1 estrela</span> <span class="product-stars-quantity-bar" style="--ratingCount:{{ star1 }}; --ratingTotal:{{ comments|length }}"></span></p>
+                                    </div>
+                                </div>    
+                            {% endif %}
+
+                            <div class="product-tab-evaluation-comments">
+
+                                <p class="all-comments-paragraph">Últimos comentários</p>
+                                
+                                {% for comment in comments %}
+                                    <div class="comment" style="display: block;">
+                                        <p>
+                                            <div class="product-rating">
+                                                <div class="stars" style="--rating:{{ comment.rating.rating }};"></div> 
+                                            </div>
+                                        </p>
+                                        <p><strong>{{ comment.customer.firstName is defined ? comment.customer.firstName : comment.customer.tradeName }}</strong></p>
+                                        <p>{{ comment.content }}</p>
+                                    </div>
+
+                                    {#{% if loop.index == 2 %}
+                                        <a class="more-comments blue-link" onclick="showComments(event)" href="javascript:void(0);">Ver mais comentários</a>
+                                    {% endif %}#}
+                                    
+                                {% else %}
+                                    <p class="no-reviews-title">Nenhuma avaliação realizada.</p>
+                                    <p class="no-reviews-subtitle">Seja o primeiro a avaliar esse produto.</p>
+                                {% endfor %}
+                            </div>
+
+                            <div class="product-rating-block">
+                                {% if flexy_ftwo_current_user_exists() %}
+                                    <h4>Faça sua avaliação:</h4>
+                                    <div class="form-group">
+                                        <textarea rows="8"
+                                                class="flexy-product-review-comment form-control"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="product-rating">
+                                            <label class="control-label">Sua nota:</label>
+                                            <select class="flexy-product-review-rating form-control">
+                                                {% for i in 1..5 %}
+                                                    <option value="{{ i }}">{{ i }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <button type="button" class="flexy-product-review-send btn-primary"
+                                            data-product-id="{{ variant.product.id }}">Enviar
+                                    </button>
+                                {% else %}
+                                    <p class="text-center">
+                                        <a href="{{ path("flexy_ftwo_store_customer_login", {redirect: flexy_ftwo_product_url(variant)}) }}">Acesse sua
+                                            conta</a>, ou
+                                        <a href="{{ path("flexy_ftwo_store_customer_create") }}">cadastre-se</a>,
+                                        e conte-nos sobre sua experiência na compra deste produto.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if customerList.totalResults > 0 %}
+                            <div class="tab-pane" id="where_buy">
+                                {% include 'FlexyFtwoStoreBundle:Include/Customer:list.html.twig' with { 'customerList' : customerList } %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
 
                 {% set seeAlsoProducts = flexy_ftwo_product_related_see_also(variant.product, { 'noGroupRelated' : true }) %}
                 {% if seeAlsoProducts|length > 0 %}
@@ -604,15 +819,15 @@
                         id: "family-carousel",
                         title: "Veja Também",
                         relatedProducts: seeAlsoProducts,
-                        additional: false
+                        additional: false,
+                        sliderGroupId : 'produtosRelacionados'
                     } %}
                 {% endif %}
+
             </div>
         </div>
     </section>
 
-    <!-- Go to www.addthis.com/dashboard to customize your tools -->
-    <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-53fcef104475215a"></script>
     <script>
         (function () {
             var tag = document.createElement('script');
@@ -621,7 +836,158 @@
             var firstScriptTag = document.getElementsByTagName('script')[0];
             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
         })();
-    </script>
+
+        /**
+         * Re-calculate installments details list by period
+         * @param installments
+         */
+        function recalculateInstallmentListElement(installments) {
+          const installmentDetailsListElement = document.querySelector('.beauty-select .details');
+          const numberAndValueInstallments = document.querySelectorAll('.installments .number-and-value-installments');
+
+          numberAndValueInstallments.forEach((item) => {
+            item.remove();
+          })
+
+          Object.entries(installments.no_tax).forEach(([key, installment]) => {
+            if (key > 0) {
+              installmentDetailsListElement.insertAdjacentHTML('beforeend',
+                  `<li class="number-and-value-installments">${key} x ${this.formatMoney(installment)} sem juros </li>`);
+            }
+          })
+          Object.entries(installments.tax).forEach(([key, installment]) => {
+            if (key > 0) {
+              installmentDetailsListElement.insertAdjacentHTML('beforeend',
+                  `<li class="number-and-value-installments">${key} x ${this.formatMoney(installment)} com juros</li>`);
+            }
+
+          })
+        }
+
+        /**
+         * Convert value (float) to money
+         * @param value
+         * @returns {*}
+         */
+        function formatMoney(value) {
+          const formatMoney = Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          })
+
+          return formatMoney.format(value);
+        }
+
+        /**
+         * Re-calculate installments text by period
+         * @param maxInstallments
+         */
+        function recalculateInstallmentElement(maxInstallments) {
+          const installmentElement = document.querySelector('#installmentDetails');
+          const newInstallmentElement = document.createElement('div');
+          if (maxInstallments.installmentNumber > 0) {
+            newInstallmentElement.innerText = `${maxInstallments.installmentNumber}x de ${this.formatMoney(maxInstallments.installmentValue)} no cartão`;
+          }
+          newInstallmentElement.classList.add('float-left')
+          newInstallmentElement.id = 'installmentDetails'
+
+          installmentElement.replaceWith(newInstallmentElement);
+        }
+
+        /**
+         * Re-calculate boleto discount by period
+         * @param boletoDiscount
+         * @param price
+         * @param promotion
+         */
+        function recalculateBoletoDiscount(boletoDiscount, price, promotion = null) {
+          const priceWithBoletoDiscountElement = document.querySelector('.installments .price-with-boleto-discount');
+          const paymentMethodBoletoElement = document.querySelector('.details #payment-method-boleto');
+
+          let priceWithDiscount = price * ((100 - boletoDiscount) / 100)
+
+          priceWithDiscount = promotion ? promotion.finalPrice * ((100 - boletoDiscount) / 100) : priceWithDiscount
+
+          priceWithBoletoDiscountElement.innerHTML = `à vista ${this.formatMoney(priceWithDiscount)}<span class="discount">(-{{ boletoDiscount }}%)</span>`;
+          paymentMethodBoletoElement.innerHTML = `À vista por ${this.formatMoney(priceWithDiscount)}`;
+        }
+
+	</script>
+
+    {% if variant.product.isConfigurable %}
+        <script>
+          document.addEventListener("DOMContentLoaded", function() {
+            recalculateProductPrice();
+
+		  	document.querySelectorAll("[name^='configurableProducts']").forEach(function(checkbox) {
+			  checkbox.addEventListener("click", function() {
+				recalculateProductPrice()
+			  });
+			});
+
+			function recalculateProductPrice() {
+			  const selectedConfigurableProducts = document.querySelectorAll("[name^='configurableProducts']:checked");
+			  let totalWithpromotion = {{ promotion.finalPrice }};
+			  let totalPrice = {{ price }};
+			  let finalPrice = {{ (promotion ? promotion.finalPrice : price) }};
+
+			  selectedConfigurableProducts.forEach(function(cb) {
+                totalPrice += parseFloat(cb.dataset.price) || 0;
+                totalWithpromotion += parseFloat(cb.dataset.promotionPrice) || 0;
+                finalPrice += parseFloat(cb.dataset.promotionPrice) || 0;
+			  });
+
+              recalculateConfigurableProductPriceElement(totalPrice, totalWithpromotion);
+			  recalculateBoletoDiscount({{ boletoDiscount }}, finalPrice);
+			  recalculateConfigurableProductInstallments(finalPrice);
+			}
+
+            function recalculateConfigurableProductPriceElement(price, promotion = null) {
+              const priceElement = document.querySelector('.price');
+              priceElement.innerHTML = "";
+
+              promotion && priceElement.insertAdjacentHTML(
+                  'afterbegin',
+                  `<span class='full-price'>de <del>${this.formatMoney(price)}</del> por <br></span>`
+              );
+
+              priceElement.insertAdjacentText('beforeend', this.formatMoney(promotion ? promotion : price))
+            }
+
+			async function recalculateConfigurableProductInstallments(totalPrice) {
+			  let form = new FormData();
+			  form.append('variantId', {{ variant.id }});
+			  form.append('totalPrice', totalPrice);
+
+			  const { installments, maxInstallments } = await fetch(`{{ path('flexy_ftwo_store_product_calculate_installments_for_configurable_product') }}`, {
+				method: "POST",
+				body: form
+			  }).then(response => {
+				if (response.ok) {
+				  return response.json().then(data => {
+					return data;
+				  });
+				}
+				throw response;
+			  }).catch(exception => {
+				console.log(exception)
+			  })
+
+			  recalculateInstallmentElement(maxInstallments);
+			  recalculateInstallmentListElement(installments);
+		  	}
+
+			function checksLimitSelectedItems(slotName, slotReferenceCode, quantitySelectableProducts) {
+			  let totalSelected = document.querySelectorAll(`input[name="configurableProducts[${slotReferenceCode}]"]:checked`).length;
+
+			  if (totalSelected > quantitySelectableProducts) {
+				alert(`Você só pode selecionar até ${quantitySelectableProducts} itens para ${slotName}`);
+				event.target.checked = false;
+			  }
+			}
+          });
+        </script>
+    {% endif %}
 
     {% if variant.product.isAvailableForBooking %}
         <script src="{{ flexy_ftwo_resource_url_js('js/litepicker.js') }}"></script>
@@ -762,20 +1128,6 @@
             }
 
             /**
-             * Convert value (float) to money
-             * @param value
-             * @returns {*}
-             */
-            function formatMoney(value) {
-                const formatMoney = Intl.NumberFormat('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                })
-
-                return formatMoney.format(value);
-            }
-
-            /**
              * Re-calculate original price by period
              * @param price
              * @param promotion
@@ -792,69 +1144,153 @@
                 priceElement.insertAdjacentText('beforeend', this.formatMoney(promotion ? promotion.finalPrice : price))
             }
 
-            /**
-             * Re-calculate installments text by period
-             * @param maxInstallments
-             */
-            function recalculateInstallmentElement(maxInstallments) {
-                const installmentElement = document.querySelector('#installmentDetails');
-                const newInstallmentElement = document.createElement('div');
-                if (maxInstallments.installmentNumber > 0) {
-                    newInstallmentElement.innerText = `${maxInstallments.installmentNumber}x de ${this.formatMoney(maxInstallments.installmentValue)} no cartão`;
-                }
-                newInstallmentElement.classList.add('float-left')
-                newInstallmentElement.id = 'installmentDetails'
-
-                installmentElement.replaceWith(newInstallmentElement);
-            }
-
-            /**
-             * Re-calculate boleto discount by period
-             * @param boletoDiscount
-             * @param price
-             * @param promotion
-             */
-            function recalculateBoletoDiscount(boletoDiscount, price, promotion = null) {
-                const priceWithBoletoDiscountElement = document.querySelector('.installments .price-with-boleto-discount');
-                const paymentMethodBoletoElement = document.querySelector('.details #payment-method-boleto');
-
-                let priceWithDiscount = price * ((100 - boletoDiscount) / 100)
-
-                priceWithDiscount = promotion ? promotion.finalPrice * ((100 - boletoDiscount) / 100) : priceWithDiscount
-
-                priceWithBoletoDiscountElement.innerHTML = `à vista ${this.formatMoney(priceWithDiscount)}<span class="discount">(-{{ boletoDiscount }}%)</span>`;
-                paymentMethodBoletoElement.innerHTML = `À vista por ${this.formatMoney(priceWithDiscount)}`;
-            }
-
-            /**
-             * Re-calculate installments details list by period
-             * @param installments
-             */
-            function recalculateInstallmentListElement(installments) {
-                const installmentDetailsListElement = document.querySelector('.beauty-select .details');
-                const numberAndValueInstallments = document.querySelectorAll('.installments .number-and-value-installments');
-
-                numberAndValueInstallments.forEach((item) => {
-                    item.remove();
-                })
-                Object.entries(installments.no_tax).forEach(([key, installment]) => {
-                    if (key > 0) {
-                        installmentDetailsListElement.insertAdjacentHTML('beforeend',
-                            `<li class="number-and-value-installments">${key} x ${this.formatMoney(installment)} sem juros </li>`);
-                    }
-                })
-                Object.entries(installments.tax).forEach(([key, installment]) => {
-                    if (key > 0) {
-                        installmentDetailsListElement.insertAdjacentHTML('beforeend',
-                            `<li class="number-and-value-installments">${key} x ${this.formatMoney(installment)} com juros</li>`);
-                    }
-
-                })
-            }
-
             this.prepareDateRange();
         </script>
     {% endif %}
+    <script>
+        window.addEventListener("pageshow", function() {
+            document.querySelectorAll("[name^='attributeValues']").forEach(function(element) {
+                element.value = '';
+            });
+        });
+    </script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const quantityInputs = document.querySelectorAll('.quantity');
+
+            quantityInputs.forEach(input => {
+                const isFractional = input.getAttribute('min') === "0.001";
+
+                const decrementButton = document.createElement('button');
+                decrementButton.textContent = '-';
+                decrementButton.className = 'quantity-decrement';
+
+                const incrementButton = document.createElement('button');
+                incrementButton.textContent = '+';
+                incrementButton.className = 'quantity-increment';
+
+                input.parentElement.insertBefore(decrementButton, input);
+                input.parentElement.insertBefore(incrementButton, input.nextSibling);
+
+                function showStockMessage() {
+                    const productName = input.getAttribute('data-product-name') || "Produto";
+                    const max = input.getAttribute('data-maximum-quantity') || "0";
+
+                    alert(`O produto ${productName} não possui estoque suficiente. Atualmente possuímos somente ${max}.`);
+                }
+
+                decrementButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    let currentValue = parseFloat(input.value) || 0;
+                    const min = parseFloat(input.getAttribute('min')) || 0;
+                    const step = isFractional ? 0.001 : 1;
+
+                    currentValue = Math.max(currentValue - step, min);
+                    input.value = currentValue.toFixed(isFractional ? 3 : 0);
+                    input.dispatchEvent(new Event('input'));
+                });
+
+                incrementButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    let currentValue = parseFloat(input.value) || 0;
+                    const max = parseFloat(input.getAttribute('data-maximum-quantity')) || Infinity;
+                    const step = isFractional ? 0.001 : 1;
+
+                    if (currentValue + step > max) {
+                        showStockMessage();
+                        return;
+                    }
+
+                    currentValue += step;
+                    input.value = currentValue.toFixed(isFractional ? 3 : 0);
+                    input.dispatchEvent(new Event('input'));
+                });
+
+                input.addEventListener('blur', function () {
+                    let value = parseFloat(input.value.replace(',', '.')) || 0;
+                    const min = parseFloat(input.getAttribute('min')) || 0;
+                    const max = parseFloat(input.getAttribute('data-maximum-quantity')) || Infinity;
+                    const step = isFractional ? 0.001 : 1;
+
+                    if (value > max) {
+                        showStockMessage();
+                    }
+
+                    value = Math.min(value, max);
+                    value = Math.max(value, min);
+                    value = Math.round(value / step) * step;
+
+                    input.value = value.toFixed(isFractional ? 3 : 0);
+                });
+            });
+        });
+    </script>
+
+{% endblock %}
+
+{% block javascript %}
+ <script>
+        $('.thumb-carousel').owlCarousel({
+            items: 3,
+            loop: true,
+            itemsCustom: false,
+            itemsDesktop: [1199, 3],
+            itemsDesktopSmall: [992, 3],
+            itemsDesktopSmall: [991, 3],
+            itemsTablet: [768, 3],
+            itemsTabletSmall: false,
+            itemsMobile: [479, 2],
+            singleItem: false,
+            itemsScaleUp: false,
+            responsive: true,
+            responsiveRefreshRate: 200,
+            responsiveBaseWidth: window,
+            autoPlay: false,
+            autoplayTimeout: 8000,
+            autoplayHoverPause: true,
+            slideTransition: 'linear',
+            stopOnHover: true,
+            navigation: true,
+            navigationMobile: true,
+            dots: false,
+            paginaton: true
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+
+            function updateArrows() {
+                $('.panel-group .panel-collapse').each(function () {
+                    var $collapse = $(this);
+                    var $link = $collapse.prev('.panel-heading').find('a');
+
+                    if ($collapse.hasClass('in')) {
+                        $link.addClass('open');
+                    } else {
+                        $link.removeClass('open');
+                    }
+                });
+            }
+
+            // Estado inicial (ESSENCIAL)
+            updateArrows();
+
+            // Quando abre
+            $('.panel-group').on('shown.bs.collapse', function () {
+                updateArrows();
+            });
+
+            // Quando fecha
+            $('.panel-group').on('hidden.bs.collapse', function () {
+                updateArrows();
+            });
+
+        });
+    </script>
+		
 {% endblock %}
 
 {% block css %}

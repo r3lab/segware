@@ -1,24 +1,107 @@
-<section>
-    <div class="block2">
-        <div class="main-category-block ">
-            <div class="main-category-title gray">
-                <i class="fa fa-list"></i> {{ title }}:
-            </div>
-
-            {% if relatedProducts|length > 1 %}
-                {#<div class="toolbar-for-light product-related-nav">
-                    <a href="javascript:;" data-role="prev" data-carousel="#{{ id }}" class="prev"><i class="fa fa-angle-left"></i></a>
-                    <a href="javascript:;" data-role="next" data-carousel="#{{ id }}" class="next"><i class="fa fa-angle-right"></i></a>
-                </div>#}
-            {% endif %}
-        </div>
-
-        <div class="row">
-            {% for productRelated in relatedProducts|slice(0,4) if not additional or flexy_ftwo_variant_has_stock(productRelated.variant, dc) %}
-                <div class="col-md-3">
-                    {% include 'FlexyFtwoStoreBundle:Include:product.html.twig' with {'variant' : productRelated.variant, additional: additional , variantSalable : variantSalable , mainVariantId : mainVariantId is defined ? mainVariantId : null } %}
-                </div>
-            {% endfor %}
+<div class="block2">
+    <div class="main-category-block">
+        <div class="main-category-title">
+            <h2>{{ title }}</h2>
         </div>
     </div>
-</section>
+    <div class="mv-container">
+        <div class="carousel-categories-home {{sliderGroupId|lower}}">
+            <div class="mv-inner">
+                <div class="swiper-container slide">
+                    <div class="swiper-wrapper">
+                        {% for productRelated in relatedProducts|slice(0,12) if not additional or flexy_ftwo_variant_has_stock(productRelated.variant, dc) %}
+                            <div class="swiper-slide">
+                                {% include 'FlexyFtwoStoreBundle:Include:product.html.twig' with {'variant' : productRelated.variant, additional: additional , variantSalable : variantSalable , mainVariantId : mainVariantId is defined ? mainVariantId : null } %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="swiper-pagination"></div>
+                </div>
+                {% if relatedProducts|length > 4 %}
+                    <div class="btn-prev-categories {{sliderGroupId|lower}}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+                        </svg>
+                    </div>
+                    <div class="btn-next-categories {{sliderGroupId|lower}}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
+                        </svg>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {  
+        // Relacionados
+        var relacionados{{sliderGroupId|capitalize}}Swiper = new Swiper('.carousel-categories-home.{{sliderGroupId|lower}} .slide', {
+            
+            slidesPerView: 4,
+            loop: false,
+            spaceBetween: 10,
+
+            navigation: {
+                nextEl: '.btn-next-categories.{{sliderGroupId|lower}}',
+                prevEl: '.btn-prev-categories.{{sliderGroupId|lower}}'
+            },
+            
+            autoplay: {
+                delay: 8000,
+                pauseOnMouseEnter: true,
+                disableOnInteraction: true
+            },
+            speed: 600,
+
+            preloadImages: false,
+            lazy: true,
+
+            watchSlidesProgress: true,
+            preventClicks: true,
+            preventClicksPropagation: true,
+            threshold: 8,
+
+            observer: false,
+            observeParents: false,
+            
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+            },
+            
+            on: {
+                init: function() {
+                    setTimeout(function() {
+                        var images = document.querySelectorAll(".carousel-categories-home.{{sliderGroupId|lower}}");
+                        images.forEach(function(image) {
+                        //image.style.visibility = "visible";
+                        image.style.opacity = "1"; // Aplica o fade-in
+                        });
+                    }, 500);
+                }
+            },
+            breakpoints: {
+                300: {
+                    slidesPerView: 2
+                },
+                640: {
+                    slidesPerView: 2
+                },
+                768: {
+                    slidesPerView: 3
+                },
+                992: {
+                    slidesPerView: 3
+                },
+                1199: {
+                    slidesPerView: 4
+                },
+            }
+        });
+    });
+
+</script>
+{% endblock %}

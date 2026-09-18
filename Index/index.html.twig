@@ -1,44 +1,147 @@
 {% extends "FlexyFtwoStoreBundle:Layout:base.html.twig" %}
-
-{% set images = flexy_ftwo_banner_image_list('home-banner').images %}
-
 {% block content %}
-    {% include 'FlexyFtwoStoreBundle:Include/Common:main-banner.html.twig' with {images: images} %}
-
+    {# Banner principal #}
+    {% include 'FlexyFtwoStoreBundle:Include/Common:main-banner.html.twig' with {
+        images: flexy_ftwo_banner_image_list('home-banner').images, 
+        imagesMobile: flexy_ftwo_banner_image_list('home-banner-mobile').images
+    } %}
+    {# Banner diferenciais #}
+    <section class="container-fluid">
+        <div class="banner__diferenciais">
+        {% include 'FlexyFtwoStoreBundle:Include/Commom:banner-diferenciais.html.twig' %}
+        </div>
+    </section>
+    {# Destaques #}
     {% set filters = {
         useSearchParameters: 'true',
         itemsPerPage: 15,
         sortOrder: 'category-asc',
         showOnlyAvailable: 'false',
+        showCustomVariants: 'true',
+        showDescriptions: 'true',
         filter: filterString,
         category: {
             referenceCode: 'destaques',
             isShopping: 'true'
         }
     } %}
-
+	{# Result Destaques #}
     {% set result = f2_variant_list(filters) %}
-
-    <section class="{{ images|length == 0 ? "first-page-container" : "" }}">
+    {% set titleCategory = filters.category.referenceCode ? flexy_ftwo_category_list_by_parent_reference_code(filters.category.referenceCode) : "Todos os produtos" %}
+    {# Product list Destaques #}
+    <section class="first-page-container">
         <div class="container">
-            <div class="row">
-                <aside class="col-md-3 sidebar-menu">
-                    {% include 'FlexyFtwoStoreBundle:Include:sidebar.html.twig' with {withFilter : true, withProducts: true, listAll: true} %}
-                </aside>
-                <div class="filter-menu-modal-close hidden-lg hidden-md"></div>
-
-                <div class="col-md-9">
-                    {% include 'FlexyFtwoStoreBundle:Include:variant-list-block.html.twig' with {
-                        title : 'Destaques',
-                        variants: result.pagination
+            <div class="">
+                <div class="">
+                    {% set path = [{'url': path('flexy_ftwo_store_product_list_all'), 'title' : 'Produtos'}] %}
+                    {% include 'FlexyFtwoStoreBundle:Include:variant-list-home.html.twig' with {
+                        path: path,
+                        category : category,
+                        variants : result.pagination,
+                        totalResults : result.totalResults,
+                        filterCategory : filters.category.referenceCode,
+                        titleCategoryRef : titleCategory.referenceCode,
+                        titleCategory : 'Destaque'
                     } %}
                 </div>
             </div>
         </div>
     </section>
+    
+    {# Banner promocional - Galeria 1 #}
+    {% include 'FlexyFtwoStoreBundle:Include/Commom:banner-promocional-grupo-1.html.twig' %}
+
+    {# Categories #}
+    {% set categories = ['solucoes', 'servicos'] %}
+    {% for categoryName in categories %}
+
+        {% set filtersCategories = {
+            useSearchParameters: 'true',
+            itemsPerPage: 15,
+            sortOrder: 'category-asc',
+            showOnlyAvailable: 'false',
+            showCustomVariants: 'true',
+            showDescriptions: 'true',
+            filter: filterString,
+            category: {
+                referenceCode: categoryName,
+                isShopping: 'true'
+            }
+        } %}
+
+        {% set resultCategories = f2_variant_list(filtersCategories) %}
+        {% set titleCategory = filtersCategories.category.referenceCode ? flexy_ftwo_category_list_by_parent_reference_code(filtersCategories.category.referenceCode) : "Todos os produtos" %}
+
+        {% if titleCategory %}
+            <section class="{{ images|length == 0 ? "first-page-container" : "" }}">
+                <div class="container">
+                    <div class="row">        
+                        {% set path = [{'url': path('flexy_ftwo_store_product_list_all'), 'title' : 'Produtos'}] %}
+                        {% include 'FlexyFtwoStoreBundle:Include:variant-list-categories.html.twig' with {
+                            path: path,
+                            category : category,
+                            variants : resultCategories.pagination,
+                            totalResults : resultCategories.totalResults,
+                            filterCategory : filtersCategories.category.referenceCode,
+                            titleCategory : titleCategory,
+                            titleCategoryRef : titleCategory.referenceCode
+                        } %}
+                    </div>
+                </div>
+            </section>
+		{% endif %}
+
+    {% endfor %}
+    {# Mais vendidos #}
+    {% set filters2 = {
+        useSearchParameters: 'true',
+        itemsPerPage: 15,
+        sortOrder: 'category-asc',
+        showOnlyAvailable: 'false',
+        showCustomVariants: 'true',
+        showDescriptions: 'true',
+        filter: filterString,
+        category: {
+            referenceCode: 'mais-vendidos',
+            isShopping: 'true'
+        }
+    } %}
+	{# Result Mais vendidos #}
+    {% set result2 = f2_variant_list(filters2) %}
+    <section class="{{ images|length == 0 ? "first-page-container" : "" }}">
+        <div class="container">
+            <div class="row">
+				{% set path = [{'url': path('flexy_ftwo_store_product_list_all'), 'title' : 'Produtos'}] %}
+				{% include 'FlexyFtwoStoreBundle:Include:variant-list-home-mais-vendidos.html.twig' with {
+					path: path,
+					category : category,
+					variants : result2.pagination,
+					totalResults : result2.totalResults,
+					filterCategory : filters2.category.referenceCode,
+                    titleCategoryRef : titleCategory.referenceCode,
+					titleCategory : 'Mais vendidos'
+				} %}
+            </div>
+        </div>
+    </section>
+    
+    {# Banner promocional - Galeria 2 #}
+    {% include 'FlexyFtwoStoreBundle:Include/Commom:banner-promocional-grupo-2.html.twig' %}
+    
+   	{# Carrosel de Marcas #}
+    {% set imagesMarcas = flexy_ftwo_banner_image_list('home-marcas').images %}
+    {% if imagesMarcas|length > 0 %}
+		<section class="section-1">
+			<div class="container">
+				{% include 'FlexyFtwoStoreBundle:Include/Common:marcas.html.twig' with {
+					carouselRef : 'marcas',
+					images: imagesMarcas
+				} %}
+			</div>
+		</section>
+    {% endif %}
+  
 {% endblock %}
-
-
 {% block javascript %}
     {%  include 'FlexyFtwoStoreBundle:Javascript:_sidebar.html.twig' %}
 {% endblock %}

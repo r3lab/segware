@@ -1,13 +1,30 @@
 {% set loginUser = app.user %}
-{% set showMultipleUsers = not store.info.usesMultipleSales and loginUser.master and customer.cnpj %}
-{% set orders = f2_customer_order_list(
-    {
-        'customerId' : customer.id ,
-        'agentId' : (agent is defined)?agent.id:null,
-        'shoppingStoreReferenceCode' : (shoppingStoreReferenceCode is defined)?shoppingStoreReferenceCode:null
-    }
-)
-%}
+{#{% set showMultipleUsers = not store.info.usesMultipleSales and loginUser.master and customer.cnpj %}#}
+{% set showMultipleUsers = true %}
+
+{% if customer %}
+	{% set quotesPagination = f2_customer_quote_list(
+		{
+			'customerId' : customer.id,
+			'shoppingStoreReferenceCode' : (shoppingStoreReferenceCode is defined)?shoppingStoreReferenceCode:null,
+		}
+	)
+%}	
+{% else %}
+	{% set customerIds = [] %}
+	{% for customer in agent.customers %}
+		{% set customerIds = customerIds | merge([customer.id]) %}
+	{% endfor %}
+
+	{% set quotesPagination = f2_customer_quote_list(
+		{
+			'customerIds' : customerIds,
+			'shoppingStoreReferenceCode' : (shoppingStoreReferenceCode is defined)?shoppingStoreReferenceCode:null,
+		}
+	)
+	%}
+{% endif %}
+
 {% set pagination = f2_customer_order_list_pagination(
     {
         'customerId' : customer.id,
@@ -40,11 +57,9 @@
 			<li class="active">
 				<a href="#orders" data-toggle="tab">Pedidos</a>
 			</li>
-			{% if customer.quotes|length %}
-				<li>
-					<a href="#quotes" data-toggle="tab">Orçamentos</a>
-				</li>
-			{% endif %}
+			<li>
+				<a href="#quotes" data-toggle="tab">Orçamentos</a>
+			</li>
 			<li>
 				<a href="#subscriptionsplans" data-toggle="tab">Assinaturas</a>
 			</li>
@@ -82,7 +97,8 @@
 								</tr>
 							</thead>
 							<tbody>
-								{% for order in pagination if ((order.user)?order.user.id == loginUser.id:false) or loginUser.master %}
+								{#{% for order in pagination if ((order.user)?order.user.id == loginUser.id:false) or loginUser.master or isEdbLoginEnabled %}#}
+                                {% for order in pagination %}
 									<tr>
 										<td>
 											<a href="{{ path("flexy_ftwo_store_customer_order_detail", {orderId : order.id}) }}">{{ order.number }}</a>
@@ -146,7 +162,7 @@
 				</div>
 			</article>
 		</div>
-		<div class="row tab-pane" id="quotes">
+		{#<div class="row tab-pane" id="quotes">
 			<article class="col-md-12">
 				<div class="table-responsive">
 					<table class="table table-hover">
@@ -166,7 +182,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{% for quote in flexy_ftwo_quotes_current_customer() if quote.user.id == loginUser.id or loginUser.master %}
+							{% for quote in quotesPagination if quote.user.id == loginUser.id or loginUser.master %}
 								<tr>
 									<td>
 										<a href="{{ path("flexy_ftwo_store_customer_quote_detail", {quoteId : quote.id}) }}">{{ quote.number }}</a>
@@ -339,7 +355,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{# TODO : add availabe promotion service extention to bring usable pormotions as dto with details on condition of used #}
+							<!-- TODO : add availabe promotion service extention to bring usable pormotions as dto with details on condition of used -->
 							{% for promotion in customer.availableCoupons %}
 								<tr>
 									<td>{{ promotion.coupons.first.code }}</td>
@@ -365,6 +381,6 @@
 					</table>
 				</div>
 			</article>
-		</div>
+		</div>#}
 	</div>
 </div>

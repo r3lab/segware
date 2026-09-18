@@ -1,47 +1,309 @@
 {% set fullForm = app.request.get('form') ? true : false %}
+
 <div class="row">
-    <div class="col-xs-12 col-lg-{{ fullForm ? '3' : '6' }}">
-        <div class="block-form box-border wow fadeInLeft animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
-            <h3><i class="fa fa-users"></i> Dados da loja</h3>
-            {{ include('FlexyFtwoStoreBundle:ShoppingStore:mainData.html.twig',{'store' : store ,'fullForm' : fullForm}) }}
-        </div>
-    </div>
-    {% if fullForm %}
-        <div class="col-xs-12 col-lg-{{ fullForm ? '3' : '6' }}">
-            <div class="block-form box-border wow fadeInLeft animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
-                <h3><i class="fa fa-user"></i> Responsável</h3>
+    <div id="customer-form" class="customer-form-wrapper" style="display: flex; flex-direction: column;">
 
-                {{ include('FlexyFtwoStoreBundle:ShoppingStore:responsible.html.twig',{'responsible' : store.responsible}) }}
+        {# Dados da loja #}
+        <div class="col-xs-12 col-lg-12">
+            <div class="block-form box-border">
+                <h3><i class="fa fa-users"></i> Dados da loja</h3>
+                {{ include('FlexyFtwoStoreBundle:ShoppingStore:mainData.html.twig',{'store' : store ,'fullForm' : fullForm}) }}
             </div>
         </div>
-        <div class="col-xs-12 col-lg-{{ fullForm ? '3' : '6' }}">
-            <div class="block-form box-border wow fadeInLeft animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
-                <h3><i class="fa fa-truck"></i> Centro de Distribuicao</h3>
-                {{ include('FlexyFtwoStoreBundle:ShoppingStore:address.html.twig',{'store' : store}) }}
-            </div>
-        </div>
-    {% endif %}
-    <div class="col-xs-12 col-lg-{{ fullForm ? '3' : '6' }}">
-        <div class="block-form box-border wow fadeInLeft animated animated" data-wow-duration="1s" style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
-            <h3><i class="fa fa-lock"></i> Dados do Administrador</h3>
+        {# Fim Dados da loja #}
 
-            {{ include('FlexyFtwoStoreBundle:ShoppingStore:user.html.twig',{'shoppingStore' : store}) }}
-            {#activate full form, remove hidden attr#}
-            <div class="form-group" hidden="hidden" style="border: thin dotted">
-                <div class="">
-                    <div class="radio">
-                        <label class="control-label">
-                            <input type="checkbox" id="checkfullform" {{ fullForm ? '' : 'checked' }}>
-                            Quero adicionar os detalhes do responsável da loja e as informações do centro de distribuição mais tarde!
-                        </label>
-                    </div>
+        {# Full form #}
+        {% if fullForm %}
+            <div class="col-xs-12 col-lg-12">
+                <div class="block-form box-border">
+                    <h3><i class="fa fa-user"></i> Responsável</h3>
+
+                    {{ include('FlexyFtwoStoreBundle:ShoppingStore:responsible.html.twig',{'responsible' : store.responsible}) }}
                 </div>
             </div>
-            {##}
-            <input type="hidden" name="apiToken" id="apiToken" value="{{ app.request.get('apiToken', store.apiToken) }}">
-            <div class="text-right">
-                <button type="submit" class="btn-default-1">Cadastrar</button>
+            <div class="col-xs-12 col-lg-{{ fullForm ? '3' : '12' }}">
+                <div class="block-form box-border">
+                    <h3><i class="fa fa-truck"></i> Centro de Distribuicao</h3>
+                    {{ include('FlexyFtwoStoreBundle:ShoppingStore:address.html.twig',{'store' : store}) }}
+                </div>
             </div>
+        {% endif %}
+        {# End Full form #}
+
+        <div class="col-xs-12 col-lg-12">
+
+            <div class="block-form box-border">
+                
+                <div class="row" style="margin-right: 0; margin-left: 0;">
+                {# Dados do administrador #}
+                <h3><i class="fa fa-lock"></i> Dados do Administrador</h3>
+                {{ include('FlexyFtwoStoreBundle:ShoppingStore:user.html.twig',{'shoppingStore' : store}) }}
+                {# Fim - Dados do administrador #}
+                </div>
+
+                <div class="row">
+                {#activate full form, remove hidden attr#}
+                <div class="form-group" hidden="hidden" style="border: thin dotted">
+                    <div class="">
+                        <div class="radio">
+                            <label class="control-label">
+                                <input type="checkbox" id="checkfullform" {{ fullForm ? '' : 'checked' }}>
+                                Quero adicionar os detalhes do responsável da loja e as informações do centro de distribuição mais tarde!
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+                <div class="row" style="margin-right: 0; margin-left: 0;">
+
+                <div class="terms-and-submit">
+
+                    {# Link para abertura do modal #}
+                    {% if termOfUse %}
+                        <div class="terms-link-modal">
+                            <a href="#terms-modal" class="open-terms-modal">
+                                <i class="fa fa-file-text-o"></i> Leia e aceite o termo para cadastrar a sua loja.
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    <input type="hidden" name="apiToken" id="apiToken" value="{{ app.request.get('apiToken', store.apiToken) }}">
+                    <input type="hidden" name="token" id="token" value="{{ token }}">
+
+                    <div class="btn-cadastrar-loja text-right">
+                        <button type="submit" class="btn-default-1" {% if termOfUse %}disabled="disabled"{% endif %} id="submit-store"> Cadastrar </button>
+                    </div>
+
+                </div>
+                
+                {% if termOfUse %}
+
+                    <div id="terms-modal" class="terms-of-use-store-modal" aria-hidden="true">
+
+                        <div class="terms-modal-overlay"></div>
+
+                        <div class="terms-modal-dialog" role="dialog" aria-modal="true">
+
+                            <div class="terms-modal-header">
+                                <h3>Termos de Uso do Marketplace</h3>
+                                <button type="button" class="terms-modal-close" aria-label="Fechar">&times;</button>
+                            </div>
+
+                            <div class="terms-modal-body">
+
+                                <div class="terms-scroll-container" id="terms-scroll-container">
+
+                                    <div class="terms-scroll-content">
+                                        {{ termOfUse.content|raw }}
+                                    </div>
+
+                                </div>
+
+                                <div class="terms-scroll-warning" id="terms-scroll-warning">
+                                    <i class="fa fa-arrow-down"></i>
+                                    Leia o termo até o final para habilitar o aceite.
+                                </div>
+
+                                <div class="terms-accept-wrapper">
+
+                                    <label class="terms-checkbox-label">
+                                        <input type="checkbox" id="terms-accept-checkbox" disabled="disabled">
+                                        <span>
+                                            Li e aceito os termos de uso.
+                                        </span>
+                                    </label>
+                                    <span class="text-error">*</span>
+                                </div>
+
+                            </div>
+
+                            <div class="terms-modal-footer">
+                                <button type="button" class="btn-default-1 terms-modal-close"> Fechar </button>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+                </div>
+
+            </div>
+
         </div>
+        
     </div>
 </div>
+
+{% block javascript %}
+<script>
+    // Função que controla a exibição do modal e aceite do termo de uso
+    document.addEventListener('DOMContentLoaded', function() {
+
+        var modal = document.getElementById('terms-modal');
+        var scrollContainer = document.getElementById('terms-scroll-container');
+        var checkbox = document.getElementById('terms-accept-checkbox');
+        var submitButton = document.getElementById('submit-store');
+        var warning = document.getElementById('terms-scroll-warning');
+        var acceptWrapper = document.querySelector('.terms-accept-wrapper');
+        var openButton = document.querySelector('.open-terms-modal');
+        var closeButtons = document.querySelectorAll('.terms-modal-close');
+        var overlay = document.querySelector('.terms-modal-overlay');
+
+
+        if (checkbox) {
+            checkbox.checked = false;
+            checkbox.disabled = true;
+        }
+
+        if (submitButton) {
+            submitButton.disabled = true;
+        }
+
+        if (acceptWrapper) {
+            acceptWrapper.classList.remove('is-enabled');
+        }
+
+
+        if (openButton) {
+
+            openButton.addEventListener('click', function(e) {
+
+                e.preventDefault();
+
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+
+                document.body.style.overflow = 'hidden';
+
+            });
+
+        }
+
+        function closeModal() {
+
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+
+            document.body.style.overflow = '';
+
+        }
+
+        closeButtons.forEach(function(button) {
+
+            button.addEventListener('click', function() {
+
+                closeModal();
+
+            });
+
+        });
+
+        if (overlay) {
+
+            overlay.addEventListener('click', function() {
+
+                closeModal();
+
+            });
+
+        }
+
+
+        function checkTermsScroll() {
+
+            if (!scrollContainer || !checkbox) {
+                return;
+            }
+
+            var scrollTop = scrollContainer.scrollTop;
+            var scrollHeight = scrollContainer.scrollHeight;
+            var containerHeight = scrollContainer.clientHeight;
+
+            var reachedBottom =
+                scrollTop + containerHeight >= scrollHeight - 5;
+
+
+            if (reachedBottom) {
+
+                checkbox.disabled = false;
+
+                if (warning) {
+                    warning.classList.add('is-hidden');
+                }
+
+                if (acceptWrapper) {
+                    acceptWrapper.classList.add('is-enabled');
+                }
+
+            }
+
+        }
+
+
+        if (scrollContainer) {
+
+            scrollContainer.addEventListener('scroll', function() {
+
+                checkTermsScroll();
+
+            });
+
+        }
+
+
+        if (checkbox) {
+
+            checkbox.addEventListener('change', function() {
+
+                if (this.checked) {
+
+        
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                    }
+
+                    setTimeout(function() {
+
+                        closeModal();
+
+                    }, 300);
+
+                } else {
+
+    
+                    if (submitButton) {
+                        submitButton.disabled = true;
+                    }
+
+                }
+
+            });
+
+        }
+
+
+        document.addEventListener('keydown', function(e) {
+
+            if (
+                e.key === 'Escape' &&
+                modal &&
+                modal.classList.contains('is-open')
+            ) {
+
+                closeModal();
+
+            }
+
+        });
+
+    });
+
+</script>
+{% endblock %}

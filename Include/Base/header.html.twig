@@ -4,135 +4,215 @@
     {% set currentCartUrl = url('flexy_ftwo_store_cart_recovery', { 'id': agentCustomer.user.currentCart.id }) %}
 {% endif %}
 
+{% set customer = flexy_ftwo_current_customer() %}
+
 <header id="header" class="{{ shoppingStore ? 'shopping-store-header' : 'store-header' }}">
-    <div class="header-top-row hidden-sm hidden-xs">
-        <div class="container">
-            <div class="top-welcome">
-                <div id="account-menu" class="pull-left">
-                    {% include 'FlexyFtwoStoreBundle:Include/Agent:share-link.html.twig' %}
-                    {% set user = flexy_ftwo_current_user() %}
-                    {% set showMultipleUsers = not store.info.usesMultipleSales and user.master and app.user.customer.cnpj %}
-                    {% if not user %}
-                        <p class="welcome-message">
-                            <span>Bem vindo, visitante! <a href="{{ path("flexy_ftwo_store_customer_login") }}">Acesse sua conta</a> ou <a href="{{ path("flexy_ftwo_store_customer_create") }}">cadastre-se</a>.</span>
-                        </p>
-                    {% else %}
-                        <a href="#" class="account-menu-title">
-                            {% if user.agent %}
-                        	    {% set name = user.agent.name %}
-                            {% else %}
-                        	    {% set name = app.user.customer.Fullname %}
-                            {% endif %}
-                            <i class="fa fa-user"></i>&nbsp; Olá, {{ name }} ▼
-                        </a>
 
-                        <ul class="list-unstyled account-menu-item">
-                            {% if user.agent %}
-                                <li><a href="{{ path("flexy_ftwo_store_dashboard_agent_commission_dashboard") }}"><i class="fa fa-bar-chart-o"></i>&nbsp; Painel de Vendas</a></li>
-                                <li><a href="{{ path("flexy_ftwo_store_agent_profile") }}"><i class="fa fa-file"></i>&nbsp; Pedidos</a></li>
-                                <li><a href="{{ path("flexy_ftwo_store_user_remember_password_reset") }}"><i class="fa fa-unlock-alt"></i>&nbsp; Alterar Senha</a></li>
-                                <li><a href="javascript:void(0)" id="" class="f2-agent-promotional-link-click"><i class="fa fa-link"></i>&nbsp;Link Promocional</a></li>
-                            {% else %}
-                                <li><a href="{{ path("flexy_ftwo_store_customer_profile") }}"><i class="fa fa-user"></i>&nbsp; Minha conta</a></li>
-                                <li><a href="{{ path("flexy_ftwo_store_customer_address_list") }}"><i class="fa fa-map-marker"></i>&nbsp; Meus endereços</a></li>
-                                <li><a href="{{ path("flexy_ftwo_store_customer_profile") }}"><i class="fa fa-file"></i>&nbsp; Meus pedidos</a></li>
-                                <li><a href="{{ path("flexy_ftwo_store_wishlist_my") }}"><i class="fa fa-star"></i>&nbsp; Meus desejos</a></li>
-                                <li><a href="{{ path("flexy_ftwo_store_giftList_list") }}"><i class="fa fa-gift"></i> Lista de presentes</a></li>
-                                {% if showMultipleUsers %}
-                                    <li><a href="{{ path("flexy_ftwo_store_customer_users_list") }}"><i class="fa fa-group"></i>&nbsp; Usuários</a></li>
+    {% set user = flexy_ftwo_current_user() %}
+    {% set user = flexy_ftwo_current_user() %}
+    {% set showMultipleUsers = user.master and app.user.customer.cnpj %}
+
+	{% if app.user and app.user.agent %}
+    	<div class="header-top-row">
+            <div class="container hidden-xs">
+                <div id="agent-top" class="agent-info">
+
+                    <div id="account-menu" class="pull-left">
+                            {% include 'FlexyFtwoStoreBundle:Include/Agent:share-link.html.twig' %}
+                            <a href="#" class="account-menu-title">
+                                {% if user.agent %}
+                                    {% set name = user.agent.name %}
+                                {% else %}
+                                    {% set name = app.user.customer.Fullname %}
                                 {% endif %}
-                            {% endif %}
+                                <i class="fa fa-user"></i>&nbsp; Olá, {{ name ? name : customer.fullName }} <i class="fa fa-chevron-down"></i>
+                            </a>
+                            <ul class="list-unstyled account-menu-item">
+                                {% if user.agent %}
+                                    <li><a href="{{ path("flexy_ftwo_store_dashboard_agent_commission_dashboard") }}"><i class="fa fa-bar-chart-o"></i>&nbsp; Painel de Vendas</a></li>
+                                    <li><a href="{{ path("flexy_ftwo_store_agent_profile") }}"><i class="fa fa-file"></i>&nbsp; Pedidos</a></li>
+                                    <li><a href="{{ path("flexy_ftwo_store_user_remember_password_reset") }}"><i class="fa fa-unlock-alt"></i>&nbsp; Alterar Senha</a></li>
+                                    <li><a href="javascript:void(0)" id="" class="f2-agent-promotional-link-click"><i class="fa fa-link"></i>&nbsp;Link Promocional</a></li>
+                                {% endif %}
+                                <li><a href="{{ path("flexy_ftwo_store_customer_logout") }}" style="color: #006199; font-weight: 600;"><i class="fa fa-times"></i>&nbsp; Sair da conta</a></li>
+                            </ul>
+                    </div>
+                    {% if app.user and app.user.agent %}
+                        <div id="account-menu" class="pull-left">
+                            <select id="selectCustomer" name="selectCustomer" class="form-control select2 selectCustomer" >
+                                <option>{{ agentCustomer }}</option>
+                                <option value="new">Cadastrar novo cliente</option>
+                                {% for customer in app.user.agent.customers %}
+                                    <option data-id="{{ customer.id }}" value="{{ customer.id }}">{{ customer.fullName }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
 
-                            <li><a href="{{ path("flexy_ftwo_store_customer_logout") }}"><i class="fa fa-times"></i>&nbsp; Sair</a></li>
-                        </ul>
+                        {% if currentCartUrl %}
+                            <div id="account-menu" class="pull-left">
+                                <a class="copy-to-clipboard account-menu-title cursor-pointer" data-text="{{ currentCartUrl }}">
+                                    <span class="fa fa-copy"></span> Copiar link do carrinho atual
+                                </a>
+                            </div>
+                        {%  endif %}
                     {% endif %}
                 </div>
-
-                {% if app.user and app.user.agent %}
-                    <div id="account-menu" class="pull-left">
-                        {# <a href="#" class="account-menu-title" style="display: none" >
-                            &nbsp;&nbsp;&nbsp;&nbsp; em nome de {{ agentCustomer }} <i class="fa fa-angle-down"></i>
-                        </a> #}
-                        <select id="selectCustomer" name="selectCustomer" class="form-control select2 selectCustomer" >
-                            <option>{{ agentCustomer }}</option>
-                            <option value="new">Cadastrar novo cliente</option>
-                            {% for customer in app.user.agent.customers %}
-                                <option data-id="{{ customer.id }}" value="{{ customer.id }}">{{ customer.fullName }}</option>
-                            {% endfor %}
-                        </select>
-                        {# <ul class="list-unstyled account-menu-item agent-customer-select">
-                            <li><a href="javascript:void(0);" data-id="new">Cadastrar novo cliente</a></li>
-                            {% for customer in app.user.agent.customers %}
-                                <li><a href="javascript:void(0);" data-id="{{ customer.id }}">{{ customer.fullName }} {{ customer.cnpj ? ' - ' ~ customer.cnpj.companyName : '' }}</a></li>
-                            {% endfor %}
-                        </ul> #}
-                    </div>
-
-                    {% if currentCartUrl %}
-                        <div id="account-menu" class="pull-left">
-                            <a class="copy-to-clipboard account-menu-title cursor-pointer" data-text="{{ currentCartUrl }}">
-                                <span class="fa fa-copy"></span> Copiar link do carrinho atual
-                            </a>
-                        </div>
-                    {%  endif %}
-                {% endif %}
             </div>
-            <div class="top-welcome hidden-xs hidden-sm pull-right">
-                <p>
-                    <span><i class="fa fa-phone"></i>
-                            {{ store.info.primaryPhone }}
-                    </span>
-                    <span><i class="fa fa-envelope"></i> {{ store.info.email }}</span>
-                </p>
-            </div>
-        </div>
-    </div>
-
+    	</div>
+    {% endif %}
+    
     <div class="header-bg">
         <div class="header-main" id="header-main-fixed">
             <div class="header-main-block1">
                 <div class="container">
                     <div id="container-fixed">
                         <div class="row">
-                            <div class="col-md-3 col-sm-6 col-xs-6">
+
+                            <div class="col-xs-2 col-sm-2 hidden-md hidden-lg pd-0">
+                                <div class="col-1 menu-mobile-icon">
+                                <a href="#" title="Abrir / Fechar Menu" class="open-menu"><i class="fa fa-bars" aria-hidden="true"></i></a>
+                                </div>
+                            </div>        
+
+                            <div class="col-md-3 col-sm-8 col-xs-8 pd-0">
                                 <a href="{{ path("flexy_ftwo_store_index") }}" class="header-logo">
-                                    <img src="{{ store.info.logoUrl }}" alt="{{ store.info.tradingName }}" class="responsive-img">
+                                    <img src="{{ store.info.logoUrl ?  store.info.logoUrl : 'https://d8vlg9z1oftyc.cloudfront.net/segware/image/media/69e11f4e4b081-logo.png' }}" alt="{{ store.info.tradingName }}" class="responsive-img">
                                 </a>
                             </div>
-                            <div class="col-md-5 search-box">
+
+                            <div class="col-md-6 search-box hidden-sm hidden-xs">
+                            	{% if app.request.pathInfo != '/cart/' and app.request.pathInfo != '/checkout/' %}
                                 <div class="top-search-form pull-left">
                                     <form action="{{ shoppingStore ? f2_store_shoppingStore_url('productSearch', {shoppingStoreReferenceCode : shoppingStore.referenceCode}) : path("flexy_ftwo_store_product_search") }}" method="get">
-                                        <input type="text" name="q" placeholder="BUSCAR..." class="form-control search-input">
-                                        <button type="submit"><i class="fa fa-search"></i></button>
+                                        <input type="text" name="q" placeholder="O que você está procurando?" class="form-control search-input" aria-label="Buscar produto">
+                                        <button type="submit"><span class="lnr lnr-magnifier"></span></button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="icons-wrapper col-md-3 col-sm-2 col-xs-2 pd-0">
+                                <div class="top-icons">
+                                    {% if not user %}
+                                        <div id="account-menu" class="pull-left hidden-xs hidden-sm">
+                                            <a href="{{ path("flexy_ftwo_store_customer_profile") }}" class="btn-blue user-login-sigin" title="Acesse sua conta">
+                                                <span class="lnr lnr-user"></span>
+                                            </a>
+                                            <ul class="help deslogado">
+                                                <li class="user-data">
+                                                    <div>
+                                                        <span><a href="{{ path("flexy_ftwo_store_customer_login") }}"><b>Entrar</b></a></span>
+                                                        {#<a href="{{ path("flexy_ftwo_store_customer_create") }}"><b>Cadastrar</b></a>#}
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    {% else %}
+                                        {% if user and not user.agent %}
+                                        <a href="/customer/profile" id="link-account-menu-title" class="account-menu-title">
+                                            <div class="btn-blue user-login-sigout">
+                                                <span class="lnr lnr-user"></span>
+                                            </div>
+                                            <div id="account-menu" class="pull-left hidden-xs hidden-sm">
+                                            {% if user.agent %}
+                                                {% set name = user.agent.name %}
+                                            {% else %}
+                                                {% set name = app.user.customer.firstName|split(' ')|first %}
+                                            {% endif %}
+                                            <div>Olá, {{ name ? name : customer.fullName }}</div>
+                                            <span style="font-weight: 600">Minha conta</span><span style="font-size: 8px; margin-left: 4px;">▼</span>
+                                        </a>
+                                        {% elseif user.agent %}
+                                            <a href="/agent/dashboard" id="link-account-menu-title" class="account-menu-title hidden-xs hidden-sm">
+                                            <div class="btn-blue user-login-sigout">
+                                                <span class="lnr lnr-user"></span>
+                                            </div>
+                                            <div id="account-menu" class="pull-left hidden-xs hidden-sm">
+                                            {% set name = user.agent.name|split(' ')|first  %}
+                                            <div>Acessar o</div>
+                                            <span style="font-weight: 600">Painel de vendas</span><span style="font-size: 7px; margin-left: 4px;"></span>
+                                        </a>
+                                        {% endif %}
+                                        {% if user and not user.agent %}
+                                            <div class="menu-wrapper">
+                                                <ul id="lista-account-menu-item" class="list-unstyled account-menu-item">
+                                                    {#<li><a href="{{ path("flexy_ftwo_store_customer_profile") }}">Minha conta</a></li>#}
+                                                    <li><a href="{{ path("flexy_ftwo_store_customer_profile") }}">Meus pedidos</a></li>
+                                                    <li><a href="{{ path("flexy_ftwo_store_customer_update") }}"></i>Meus dados</a></li>
+                                                    <li><a href="{{ path("flexy_ftwo_store_customer_address_list") }}"></i>Meus endereços</a></li>
+                                                    {% if showMultipleUsers %}
+                                                    <li><a href="{{ path("flexy_ftwo_store_customer_users_list") }}">Usuários</a></li>
+                                                    {% endif %}
+                                                    {#<li><a href="{{ path("flexy_ftwo_store_customer_logout") }}" style="color: #006199; font-weight: 600;"></i>Sair da conta</a></li>#}
+                                                </ul>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    </div>
+                                    {% if app.request.pathInfo != '/cart/' and app.request.pathInfo != '/checkout/' %}
+                                        {% if not user.agent %}
+                                        	<div class="top-icons hidden-sm hidden-xs"><a href="{{ path("flexy_ftwo_store_customer_profile") }}" class="btn-blue" title="Favoritos"><span class="lnr lnr-heart"></span></a></div>
+                                        {% endif %}
+                                    {% endif %}
+                        			
+                                    {% if app.request.pathInfo != '/cart/' and app.request.pathInfo != '/checkout/' %}
+                                    
+                                        {% include 'FlexyFtwoStoreBundle:Include/Base:cart-sumary.html.twig' %}
+                                        {% include 'FlexyFtwoStoreBundle:Include/Base:quote-sumary.html.twig' %}
+
+                                        <div class="top-icon header-mini-cart hidden-md hidden-lg">
+                                            <a href="/cart" class="btn-blue" title="Carrinho de compras">
+                                                <span class="lnr lnr-cart"></span>
+                                                <i class="cart-items-count-custom">{{flexy_ftwo_current_cart_totals().countItems}}</i> 
+                                            </a>
+                                        </div>
+                                    {% else %}
+                                        {% if not user %}
+                                    	<div class="top-icons hidden-md hidden-lg">
+                                        	<a href="{{ path("flexy_ftwo_store_customer_login") }}" class="btn-blue" title="Login">
+                                        		<span class="lnr lnr-user"></span>
+                                            </a>
+                                        </div>
+                                        {% else %}
+                                            <div class="top-icon header-mini-cart hidden-md hidden-lg">
+                                                <a href="/cart" class="btn-blue" title="Carrinho de compras">
+                                                <span class="lnr lnr-cart"></span>
+                                                <i class="cart-items-count-custom">{{flexy_ftwo_current_cart_totals().countItems}}</i> 
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+                                    
+                                    {% set showMultipleUsers = not store.info.usesMultipleSales and user.master and app.user.customer.cnpj %}                                    
+                                </div>                             
+                            </div>
+                        </div>
+						
+                        {% if app.request.pathInfo != '/cart/' and app.request.pathInfo != '/checkout/' %}
+                            <div class="header-content-mobile hidden-md hidden-lg">
+                                <div class="top-search-form pull-left">
+                                    <form action="{{ shoppingStore ? f2_store_shoppingStore_url('productSearch', {shoppingStoreReferenceCode : shoppingStore.referenceCode}) : path("flexy_ftwo_store_product_search") }}" method="get">
+                                        <input type="text" name="q" placeholder="O que você está procurando?" class="form-control search-input" aria-label="Buscar produto">
+                                        <button type="submit"><span class="lnr lnr-magnifier"></span></button>
                                     </form>
                                 </div>
                             </div>
-                            <div class="search-modal-background"></div>
-                            <div class="col-md-4 col-sm-6 col-xs-6">
-                                {% include 'FlexyFtwoStoreBundle:Include/Base:cart-sumary.html.twig' %}
-                                {% include 'FlexyFtwoStoreBundle:Include/Base:quote-sumary.html.twig' %}
-                                <div class="top-icons">
-                                    <button type="button" data-toggle="collapse" data-target="#navbar-collapse-1" class="navbar-toggle">
-
-                                        <span class="icon-bar"></span>
-                                        <span class="icon-bar"></span>
-                                        <span class="icon-bar"></span>
-
-                                    </button>
-                                    <div class="top-icon hidden-md hidden-lg"><a href="{{ path("flexy_ftwo_store_cart_list") }}" class="btn-blue" title="Carrinho de compras"><i class="fa fa-shopping-cart"></i>&nbsp;<i class="cart-items-count"></i></a></div>
-                                    <div class="top-icon hidden-sm hidden-xs"><a href="{{ path("flexy_ftwo_store_customer_profile") }}" class="btn-blue" title="Acesse sua conta"><i class="fa fa-user"></i></a></div>
-                                    <div class="top-icon hidden-md hidden-lg"><a href="javascript:void(0);" class="btn-blue search-box-toggle" title="Pesquisar"><i class="fa fa-search"></i></a></div>
-                                </div>
-                            </div>
-                        </div>
+						{% endif %}
+                        
                     </div>
-
                 </div>
             </div>
-            <div class="header-main-block2">
-                {% include 'FlexyFtwoStoreBundle:Include/Base:menu.html.twig' %}
-            </div>
+            {% if app.request.pathInfo != '/cart/' and app.request.pathInfo != '/checkout/' %}
+                <div class="header-main-block2  hidden-sm hidden-xs">
+                    {% include 'FlexyFtwoStoreBundle:Include/Base:menu.html.twig' %}
+                </div>
+             {% endif %}
+             <div class="header-bottom-inner">
+             	{% include 'FlexyFtwoStoreBundle:Include/Base:menu-mobile.html.twig' %}
+             </div>
         </div>
     </div>
     <i class="top-page fa fa-chevron-circle-up fa-4x" aria-hidden="true" id="gotop" title="to top"></i>
 </header>
+<div class="overlay-menu"></div>

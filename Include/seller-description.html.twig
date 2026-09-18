@@ -1,0 +1,13 @@
+{% if shoppingStore and shoppingStore.descriptionLong %}
+    <div class="seller-about">
+        <div class="seller-text-container">
+            <div class="seller-text-content">
+                {% if shoppingStore.descriptionLong %}
+                    <p>{{ shoppingStore.descriptionLong|striptags|raw }}</p>
+                {% else %}
+                    <p>Sem mais informações da loja.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+ {% endif %}

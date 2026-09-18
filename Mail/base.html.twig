@@ -1,11 +1,11 @@
 {% set style = {
     font: "font:14px Arial, Helvetica, sans-serif; color:#444;line-height:20px;",
-    title: "color:#428bca; padding: 0 0 10px 0;",
+    title: "color:#444; padding: 0 0 10px 0; font-weight: 500;",
     size: "width:640px; margin:20px auto; text-align:left; border:20px solid #f5f5f5;",
-    inner: "background:#ffffff; padding:20px 40px; margin-bottom:5px;",
-    header: "background: #428bca;color: #fff;border-top: 30px #fff solid;padding: 20px 40px;",
-    link: "color: #428bca; text-decoration: none;",
-    button: "padding:15px 20px; background:#428bca; color:#fff; font-size:18px; font-weight:bold; border-radius:5px; text-decoration:none;",
+    inner: "background:#ffffff; padding:20px 40px; margin-bottom:0;",
+    header: "background: #FFFFFF; color: #003b5c;border-top: 0 #003b5c solid;padding: 10px 40px;text-align: left; line-height: 30px; border-bottom: 1px solid #ddd;",
+    link: "color: #096; text-decoration: none;",
+    button: "padding:15px 20px; background:#096; color:#fff; font-size:18px; font-weight:bold; border-radius:5px; text-decoration:none;",
     whiteButton: "font-family:sans-serif,arial;list-style-type:none;box-sizing:border-box;text-decoration:none;transition:all .3s ease;display:inline-block;padding:6px 12px;margin-bottom:0;font-size:14px;font-weight:400;line-height:1.42857143;text-align:center;white-space:nowrap;vertical-align:middle;touch-action:manipulation;cursor:pointer;user-select:none;background-image:none;border:1px solid transparent;border-radius:4px;color:#333;background-color:#fff;border-color:#ccc;"
 } %}
 {% set mailSignature = "
@@ -21,9 +21,56 @@
 
 <div style="{{ style.font }} background:#F5F5F5; padding: 0; text-align: center;">
     <div style="{{ style.size }}">
+        <div style="text-align: left; background: transparent; padding: 20px 0;">
+            <img src="{{ flexy_ftwo_banner_image({'galleryReferenceCode' : 'layout-emails-transacionais', 'imageReferenceCode' : 'logo-email-topo'}).path }}" style="width: 180px; height: auto; display: inline-block; margin: 0; border-radius: 10px 10px 0 0;">
+        </div>
+        <div style="text-align: center; background: transparent; padding: 0;">
+            <img src="{{ flexy_ftwo_banner_image({'galleryReferenceCode' : 'layout-emails-transacionais', 'imageReferenceCode' : 'banner-header'}).path }}" style="width: 100%; height: auto; display: inline-block; margin: 0; border-radius: 10px 10px 0 0;">
+        </div>
         {% block content %}{% endblock %}
-        <div style="padding: 20px 10px 20px 0; text-align: right; border-bottom:20px solid #fff;">
-            <a href="{{ url('flexy_ftwo_store_index') }}" style="color:#666; text-decoration:none;" target="_blank">{{ url('flexy_ftwo_store_index') }}</a>
+
+        <div style="text-align: center; background: #fff; padding: 20px 0;">
+            <img src="{{ flexy_ftwo_banner_image({'galleryReferenceCode' : 'layout-emails-transacionais', 'imageReferenceCode' : 'banner-footer'}).path }}" style="width: 95%; height: auto; display: inline-block; margin: 0 auto; border-radius: 10px;">
+        </div>
+
+        <div style="text-align: center; background: #fff; padding:0; border-radius: 0 0 10px 10px;">
+            <table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="border-collapse:collapse;border-spacing:0px">
+                <tbody>
+                    <tr>
+                        <td align="center" style="padding:10px;margin:0px;font-size:0px">
+                            <table cellpadding="0" cellspacing="0" dir="ltr" role="presentation" style="border-collapse:collapse;border-spacing:0px">
+                                <tbody>
+                                    <tr>
+                                        <td align="center" valign="top" style="padding:0px 10px 0px 0px;margin:0px">
+                                            <a href="https://www.facebook.com/Segware/" style="text-decoration:underline;color:rgb(51,51,51);font-size:14px" target="_blank">
+                                            <img src="{{ flexy_ftwo_banner_image({'galleryReferenceCode' : 'layout-emails-transacionais', 'imageReferenceCode' : 'facebook'}).path }}" alt="Fb" title="Facebook" width="32" height="32" style="display:block;border:0px;outline:medium;text-decoration:none"></a>
+                                        </td>
+                                        <td align="center" valign="top" style="padding:0px 10px 0px 0px;margin:0px">
+                                            <a href="https://www.instagram.com/segware/" style="text-decoration:underline;color:rgb(51,51,51);font-size:14px" target="_blank">
+                                            <img src="{{ flexy_ftwo_banner_image({'galleryReferenceCode' : 'layout-emails-transacionais', 'imageReferenceCode' : 'instagram'}).path }}" alt="Ig" title="Instagram" width="32" height="32" style="display:block;border:0px;outline:medium;text-decoration:none"></a>
+                                        </td>
+                                        <td align="center" valign="top" style="padding:0px 10px 0px 0px;margin:0px">
+                                            <a href="https://www.youtube.com/channel/UCkHgCnd0XDTF7CqbbHEECUw" style="text-decoration:underline;color:rgb(51,51,51);font-size:14px" target="_blank">
+                                            <img src="{{ flexy_ftwo_banner_image({'galleryReferenceCode' : 'layout-emails-transacionais', 'imageReferenceCode' : 'youtube'}).path }}" alt="Yt" title="YouTube" width="32" height="32" style="display:block;border:0px;outline:medium;text-decoration:none"></a>
+                                        </td>
+                                        <td align="center" valign="top" style="padding:0px;margin:0px">
+                                            <a href="https://www.linkedin.com/company/segware" style="text-decoration:underline;color:rgb(51,51,51);font-size:14px" target="_blank">
+                                            <img src="{{ flexy_ftwo_banner_image({'galleryReferenceCode' : 'layout-emails-transacionais', 'imageReferenceCode' : 'linkedin'}).path }}" alt="In" title="LinkedIn" width="32" height="32" style="display:block;border:0px;outline:medium;text-decoration:none"></a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="background:transparent; padding: 20px 0; text-align: center;">
+            <div style="width: 100%; font-size: 12px;">
+                Segware, <a href="https://www.google.com/maps/search/R.+Gen.+Liberato+Bittencourt,+1475+Sala+714?entry=gmail&source=g" target="_blank" style="color: #444;">R. Gen. Liberato Bittencourt, 1475 Sala 714</a>, Florinanópolis - Santa Catarina, 88070-000, Brasil<br>
+                <a href="{{ url('flexy_ftwo_store_index') }}" style="color:#444; text-decoration:none;" target="_blank">{{ url('flexy_ftwo_store_index') }}</a>
+            </div>
         </div>
     </div>
 </div>

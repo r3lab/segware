@@ -20,7 +20,28 @@
 		error: function (data) { alert(data.responseJSON.message); }
 	   });
 	});
+
+	$("#login-edb").on("click", function(){
+		$.ajax({
+			url: '{{ path('flexy_ftwo_store_customer_login_db_dfa') }}',
+			type: 'post',
+			dataType: 'json',
+				data: {
+					codigoCliente: $("#input-codigo-cliente-edb").val(),
+					cpf: $("#input-cpf-edb").val(),
+					senha: $("#input-senha-edb").val()
+				},
+				success: function (data) { 
+					$('#input-email-edb').val(data);
+
+					$('#form-login-db').submit();
+				},
+				error: function (data) { alert(data.responseJSON.msg) }
+			});
+	});
+
 	</script>
+	
 
 {% endblock %}
 

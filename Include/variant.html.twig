@@ -33,42 +33,65 @@
 		{% endif %}
 	{% endif %}
 {% endif %}
-{% set hasStock = flexy_ftwo_variant_dto_has_stock(variant, dc) %}
+{% set hasStock = variant.hasStock %}
 {% set promotion = f2_store_variant_promotion_catalog_details(variant,(dc is defined)?dc:null) %}
 {% set installments = flexy_ftwo_installment_maximum_calculator(promotion ? promotion.finalPrice : finalPrice, {'variantReferenceCode': variant.referenceCode}) %}
-<article class="product light">
+<article class="product light{{ store.config.displayPrice  ? '' : ' card-small'}}">
 	<figure class="figure-hover-overlay">
-		{% if f2_store_product_has_category(variant.product, 'lancamentos') %}
+        {# Favoritos #}
+        <div class="product-favorite">                    
+            <form action="{{ path("flexy_ftwo_store_wishlist_add") }}" method="post">
+            	<input type="hidden" name="productId" value="{{ variant.product.id }}"/>
+            	<button type="submit" class="wishlist-btn favorite-variant-btn" alt="Ícone para adicionar produto na lista de desejos"><span class="lnr lnr-heart"></span></button>                           
+            </form>
+        </div> 
+        {#{% if f2_store_product_has_category(variant.product, 'lancamentos') %}
 			<div class="product-new">Novo</div>
-		{% endif %}
+		{% endif %}#}
 
 		{% if gift is defined and gift and gift.isTaken %}
 			<div class="product-gift-bought">Comprado</div>
 		{% endif %}
+        
+        {% if promotion %}
+            <div class="selo-desconto">
+            {% set porcentagem = promotion.discountPercent %}
+            <b>-{{ porcentagem|number_format(0, ',', '.') }}%</b>
+            </div>
+        {% endif %}
+        
 		<a class="flexy-product-image-container" href="{{ url }}" title="">
 			<span class="flexy-product-image-vertical-align-helper"></span>
-			<img src="{{ f2_store_image_placeholder_medium(variant.product.masterImage) }}" title="{{ variant.product.name }}" alt="{{ variant.product.name }}" class="flexy-product-image"/>
+			<img src="{{ f2_store_image_placeholder_medium(variant.product.masterImage) }}" title="{{ variant.product.name }}" alt="{{ variant.product.name }}" class="flexy-product-image" loading="lazy" decoding="async" />
 		</a>
-		<div class="product-options">
-			{% if hasStock and variant.product.isAvailableForSale and giftList is not defined %}
-				<a href="javascript:void(0);" class="btn flexy-add-to-cart" title="Adicionar ao carrinho" data-variant-id="{{ variant.id }}" data-distributioncenter="{{ shoppingStore?shoppingStore.referenceCode:null }}">
-					<i class="fa fa-shopping-cart"></i>
-					<span class="flexy-product-options-btn-label">Comprar</span>
-				</a>
-			{% endif %}
+        
+        <div class="product-options">
 
-			{% if gift is defined and giftList.belongsToCurrentCustomer %}
-				<a href="javascript:void(0);" class="f2-remove-product-gift-list" data-gift-id="{{ gift.id }}" title="Remover da minha lista de presentes">
-					<i class="fa fa-gift"></i>
-					<i class="fa fa-minus"></i>
-				</a>
-			{% endif %}
+            {% if hasStock and variant.product.isAvailableForSale and giftList is not defined %}
+                {% if store.config.displayPrice %}
+                <a href="javascript:void(0);" class="btn btn flexy-add-to-cart-custom" title="Adicionar ao carrinho" data-variant-id="{{ variant.id }}" data-distributioncenter="{{ shoppingStore?shoppingStore.referenceCode:null }}">
+                    Comprar
+                </a>
+                {% else %}
+                <a href="{{ url }}" class="btn" title="Mais informações">
+                    Ver detalhes
+                </a>
+                {% endif %}
+            {% endif %}
 
-			<a href="{{ url }}" title="Mais informações" class="btn">
-				<i class="fa fa-plus"></i>
-				<span class="flexy-product-options-btn-label">Detalhes</span>
-			</a>
-		</div>
+            {% if gift is defined and giftList.belongsToCurrentCustomer %}
+                <a href="javascript:void(0);" class="f2-remove-product-gift-list" data-gift-id="{{ gift.id }}" title="Remover da minha lista de presentes">
+                    <i class="fa fa-gift"></i>
+                    <i class="fa fa-minus"></i>
+                </a>
+            {% endif %}
+
+            {#<a href="{{ url }}" title="Mais informações" class="view-more-link">
+                Ver detalhes
+            </a>#}
+
+        </div>
+    
 	</figure>
 	<div class="product-caption">
 		<div class="block-name">
@@ -76,11 +99,11 @@
 			{% if store.config.displayPrice %}
 				<div class="product-price">
 					{% if (store.info.usesMultipleSales is empty and hasStock) or (store.info.usesMultipleSales and hasStock) %}
-						{% if promotion %}
-							<span class="full-price">de R$
-								{{ finalPrice|number_format(2, ',', '.') }}
-								por</span><br>
-						{% endif %}
+                        {% if promotion %}
+                            <span class="full-price">
+                            	R$ {{ finalPrice|number_format(2, ',', '.') }}
+                            </span>
+                        {% endif %}	
 						<span class="final-price">R$
 							{{ (promotion ? promotion.finalPrice : finalPrice)|number_format(2, ',', '.') }}</span>
 						{% if installments.installmentNumber > 0 %}
@@ -89,7 +112,8 @@
 						{% endif %}
 						{% if store.paymentMethod.boleto and store.paymentMethod.boleto.discount %}
 							<div class="one-time-payment">à vista por
-								{{ ((promotion ? promotion.finalPrice : finalPrice)*((100-store.paymentMethod.boleto.discount)/100))|number_format(2, ',', '.') }}</div>
+								<b>R$ {{ ((promotion ? promotion.finalPrice : finalPrice)*((100-store.paymentMethod.boleto.discount)/100))|number_format(2, ',', '.') }}</b>
+                            </div>
 						{% endif %}
 					{% else %}
 						<span class="product-unavailable">Indisponível</span>
@@ -98,4 +122,27 @@
 			{% endif %}
 		</div>
 	</div>
+    {# GRID - LIST #}
+    <div class="product-options list-display">
+
+        {% if hasStock and variant.product.isAvailableForSale and giftList is not defined %}
+            {% if store.config.displayPrice %}
+            <a href="javascript:void(0);" class="btn btn flexy-add-to-cart-custom" title="Adicionar ao carrinho" data-variant-id="{{ variant.id }}" data-distributioncenter="{{ shoppingStore?shoppingStore.referenceCode:null }}">
+                Comprar
+            </a>
+            {% else %}
+            <a href="{{ url }}" class="btn" title="Mais informações">
+                Ver detalhes
+            </a>
+            {% endif %}
+        {% endif %}
+
+        {% if gift is defined and giftList.belongsToCurrentCustomer %}
+            <a href="javascript:void(0);" class="f2-remove-product-gift-list" data-gift-id="{{ gift.id }}" title="Remover da minha lista de presentes">
+                <i class="fa fa-gift"></i>
+                <i class="fa fa-minus"></i>
+            </a>
+        {% endif %}
+
+    </div>
 </article>

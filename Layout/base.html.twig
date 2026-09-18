@@ -1,199 +1,259 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="utf-8">
-    <!--[if IE]>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <![endif]-->
 
-    <meta name="author" content="Flexy Negócios Digitais">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-    {% block metatag %}{% endblock %}
 
-    {% set favicon_path = '' %}
-    {% set shoppingStoreCurrent = f2_store_shoppingStore_current() %}
 
-    {% if store.info.faviconUrl and shoppingStoreCurrent is empty %}
-        {% set favicon_path = store.info.faviconUrl %}
-    {% elseif shoppingStoreCurrent is not empty and shoppingStoreCurrent.faviconUrl is not empty %}
-        {% set favicon_path = shoppingStoreCurrent.faviconUrl %}
-    {% else %}
-        {% set favicon = flexy_ftwo_banner_image({'galleryReferenceCode' : 'layout', 'imageReferenceCode' : 'favicon'}) %}
-        {% set favicon_path = favicon ? favicon.path : '' %}
-    {% endif %}
 
-    <link rel="shortcut icon" href="{{ favicon_path }}" />
-    <link href="{{ flexy_ftwo_resource_url_css('css/main.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ flexy_ftwo_resource_url_css('css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ flexy_ftwo_resource_url_css('css/yamm.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ flexy_ftwo_resource_url_css('css/font-awesome.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ flexy_ftwo_resource_url_css('css/animate.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ flexy_ftwo_resource_url_css('css/revolution-settings.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ flexy_ftwo_resource_url_css('css/owl.carousel.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ flexy_ftwo_resource_url_css('css/lightbox.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ flexy_ftwo_resource_url_css('css/responsiveslides.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ flexy_ftwo_resource_url_css('css/dark-version.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ asset('bundles/flexyftwostore/css/style.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ asset('bundles/flexyftwostore/css/responsive-adjustments.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ flexy_ftwo_resource_url_css('css/social-login-buttons/bootstrap-social.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ flexy_ftwo_resource_url_css('css/ie.style.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ flexy_ftwo_resource_url_css('js/bootstrap-select2/select2.css') }}" rel="stylesheet" type="text/css" />
 
-    <link href="{{ flexy_ftwo_resource_url_css('css/responsive.css') }}" rel="stylesheet" type="text/css" />
 
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/modernizr.js') }}"></script>
-    <!--[if IE 7]>
-        <link rel="stylesheet" href="{{ flexy_ftwo_resource_url_css('css/font-awesome-ie7.css') }}">
-    <![endif]-->
-    <!--[if IE 8]>
-        <script src="{{ flexy_ftwo_resource_url_js('js/vendor/less-1.3.3.js') }}"></script>
-    <![endif]-->
-    <!--[if gt IE 8]>
-        <script src="{{ flexy_ftwo_resource_url_js('js/vendor/less.js') }}"></script>
-    <!--<![endif]-->
 
-    {% block javascriptHead %}{% endblock %}
 
-    {% block css %}{% endblock %}
 
-    <script>
-        CART = {{ f2_store_current_cart()|json_encode|raw }}
-        SHOW_PRODUCT_PRICE = {{ store.config.displayPrice ? 'true' : 'false' }};
-    </script>
 
-    {% set current = store.info.pixelsConfiguration is not empty ? store.info : f2_store_shoppingStore_current() %}
-    {% for pixels in current.pixelsConfiguration %}
-        {% if pixels.SocialMedia.id == 1 %}
-            {% set pixels_google = pixels.pixelId %}
-            {% set label_conversion = pixels.labelConv %}
-            
-            <!-- Pixels Google-->
-            <script async src="https://www.googletagmanager.com/gtag/js?id={{ pixels_google }}"></script>
-            <script>
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
 
-                gtag('config', '{{ pixels_google }}');
-            </script>
-            <!-- Event snippet conversion -->
-            <script>
-            gtag('event', 'conversion', {
-                'send_to': '{{ pixels_google }}/{{ label_conversion }}',
-                'value': ,
-                'currency': '',
-                'transaction_id': '' 
-            });
-            </script>
-            <!-- End Pixels Google-->
+      <meta charset="utf-8">
+      <!--[if IE]>
+         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <![endif]-->
 
-        {% elseif pixels.SocialMedia.id == 2 %}
-            {% set pixels_meta = pixels.pixelId %}
-        
-        <!-- Meta Pixel Code -->
-            <script>
-            !function(f,b,e,v,n,t,s)
-            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;
-            t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t,s)}(window, document,'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', {{ pixels_meta }});
-            fbq('track', 'PageView');
+      <meta name="author" content="Flexy Negócios Digitais">
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-            </script>
-            <noscript><img height="1" width="1" style="display:none"
-            src="https://www.facebook.com/tr?id={{ pixels_meta }}&ev=PageView&noscript=1"/>
-            </noscript>
-            <!-- End Meta Pixel Code -->
+      {% block metatag %}{% endblock %}
 
-        {% endif %}
-    {% endfor %}
+      <!-- Open Graph Metatags -->
+      <meta property="og:site_name"     content="Segware Store" />
+      <meta property="og:url"           content="https://store.segware.com.br">
+      <meta property="og:type"          content="website" />
+      <meta property="og:title"         content="Segware Store" />
+      <meta property="og:description"   content="Marketplace Segware"/>
+      <meta property="og:image"         content="https://d8vlg9z1oftyc.cloudfront.net/segware/segware-file-manager/assets/images/icons/segware-og.png" />
+      <meta property="og:image:width"   content="450">
+      <meta property="og:image:height"  content="275">
+      <!-- End Open Graph Metatags -->
+      
+
+      {% set favicon_path = '' %}
+
+      <link rel="icon" href="https://d8vlg9z1oftyc.cloudfront.net/segware/segware-file-manager/assets/images/icons/fav-segware-192x192.png" sizes="192x192" />
+      <link rel="apple-touch-icon" href="https://d8vlg9z1oftyc.cloudfront.net/segware/segware-file-manager/assets/images/icons/fav-segware-180x180.png" />
+      <meta name="msapplication-TileImage" content="https://d8vlg9z1oftyc.cloudfront.net/segware/segware-file-manager/assets/images/icons/fav-segware-270x270.png" />
+    
+      {% set shoppingStoreCurrent = f2_store_shoppingStore_current() %}
+
+      {% if store.info.faviconUrl and shoppingStoreCurrent is empty %}
+         {% set favicon_path = store.info.faviconUrl %}
+      {% elseif shoppingStoreCurrent is not empty and shoppingStoreCurrent.faviconUrl is not empty %}
+         {% set favicon_path = shoppingStoreCurrent.faviconUrl %}
+      {% else %}
+         {% set favicon = flexy_ftwo_banner_image({'galleryReferenceCode' : 'layout', 'imageReferenceCode' : 'favicon'}) %}
+         {% set favicon_path = favicon ? favicon.path : '' %}
+      {% endif %}
+
+      <link rel="shortcut icon" href="{{ favicon_path }}" />
+      <style>[data-edge-filter] { display: none !important; } </style>
+
+      <link href="{{ flexy_ftwo_resource_url_css('css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
+      <link href="{{ flexy_ftwo_resource_url_css('css/font-awesome.css') }}" rel="stylesheet" type="text/css" />
+      <link href="{{ flexy_ftwo_resource_url_css('css/animate.css') }}" rel="stylesheet" type="text/css" />
+      <link href="{{ flexy_ftwo_resource_url_css('css/owl.carousel.css') }}" rel="stylesheet" type="text/css" />
+      <link href="{{ flexy_ftwo_resource_url_css('css/ie.style.css') }}" rel="stylesheet" type="text/css" />
+      <link href="{{ flexy_ftwo_resource_url_css('js/bootstrap-select2/select2.css') }}" rel="stylesheet" type="text/css" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css">
+
+
+      {# Swiper Slider #}
+      <link rel="stylesheet" href="https://d8vlg9z1oftyc.cloudfront.net/segware/segware-file-manager/assets/css/swiper-bundle-min.css" />
+
+      {# CSS Disabled #}
+      {#<link href="{{ flexy_ftwo_resource_url_css('css/main.css') }}" rel="stylesheet" type="text/css" />
+      <link href="{{ flexy_ftwo_resource_url_css('css/yamm.css') }}" rel="stylesheet" type="text/css" />
+      <link href="{{ flexy_ftwo_resource_url_css('css/dark-version.css') }}" rel="stylesheet" type="text/css" />
+      <link href="{{ asset('bundles/flexyftwostore/css/style.css') }}" rel="stylesheet" type="text/css" />
+      <link href="{{ asset('bundles/flexyftwostore/css/responsive-adjustments.css') }}" rel="stylesheet" type="text/css" />
+      <link href="{{ flexy_ftwo_resource_url_css('css/responsive.css') }}" rel="stylesheet" type="text/css" />
+      <link href="{{ flexy_ftwo_resource_url_css('css/social-login-buttons/bootstrap-social.css') }}" rel="stylesheet" type="text/css" />
+      <link href="{{ flexy_ftwo_resource_url_css('css/lightbox.css') }}" rel="stylesheet" type="text/css" />
+      <link href="{{ flexy_ftwo_resource_url_css('css/revolution-settings.css') }}" rel="stylesheet" type="text/css" />#}
+
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/modernizr.js') }}"></script>
+      <!--[if IE 7]>
+          <link rel="stylesheet" href="{{ flexy_ftwo_resource_url_css('css/font-awesome-ie7.css') }}">
+      <![endif]-->
+      <!--[if IE 8]>
+          <script src="{{ flexy_ftwo_resource_url_js('js/vendor/less-1.3.3.js') }}"></script>
+      <![endif]-->
+      <!--[if gt IE 8]>
+          <script src="{{ flexy_ftwo_resource_url_js('js/vendor/less.js') }}"></script>
+      <!--<![endif]-->
+
+
+      {% block javascriptHead %}{% endblock %}
+
+      <!-- Custom Styles -->
+      <link rel="stylesheet" href="https://cdn.linearicons.com/free/1.0.0/icon-font.min.css">
+      <!--Cheat Sheet: https://linearicons.com/free#cheatsheet -->
+      
+      {# Css Styles - Custom and Override #}
+      <link href="https://d8vlg9z1oftyc.cloudfront.net/segware/segware-file-manager/assets/css/segware-style-min.css" rel="stylesheet" type="text/css" />
+      <link href="https://d8vlg9z1oftyc.cloudfront.net/segware/segware-file-manager/assets/css/segware-style-responsive-min.css" rel="stylesheet" type="text/css" />
+         
+      {# Css Styles - Development #}
+      {#{% include 'FlexyFtwoStoreBundle:Css:css-style.html.twig' %}
+      {% include 'FlexyFtwoStoreBundle:Css:css-responsive-style.html.twig' %}#}
+
+	   {# Sweet Alert #}
+      <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
+
+      {% block css %}{% endblock %}
+
+      <script>
+          CART = {}
+          SHOW_PRODUCT_PRICE = {{ store.config.displayPrice ? 'true' : 'false' }};
+      </script>
+
+      {% set current = store.info.pixelsConfiguration is not empty ? store.info : f2_store_shoppingStore_current() %}
+      {% for pixels in current.pixelsConfiguration %}
+          {% if pixels.SocialMedia.id == 1 %}
+              {% set pixels_google = pixels.pixelId %}
+              {% set label_conversion = pixels.labelConv %}
+              
+              <!-- Pixels Google-->
+              <script async src="https://www.googletagmanager.com/gtag/js?id={{ pixels_google }}"></script>
+              <script>
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+
+                  gtag('config', '{{ pixels_google }}');
+              </script>
+              <!-- Event snippet conversion -->
+              <script>
+              gtag('event', 'conversion', {
+                  'send_to': '{{ pixels_google }}/{{ label_conversion }}',
+                  'value': ,
+                  'currency': '',
+                  'transaction_id': '' 
+              });
+              </script>
+              <!-- End Pixels Google-->
+
+          {% elseif pixels.SocialMedia.id == 2 %}
+              {% set pixels_meta = pixels.pixelId %}
+          
+          <!-- Meta Pixel Code -->
+              <script>
+              !function(f,b,e,v,n,t,s)
+              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+              n.queue=[];t=b.createElement(e);t.async=!0;
+              t.src=v;s=b.getElementsByTagName(e)[0];
+              s.parentNode.insertBefore(t,s)}(window, document,'script',
+              'https://connect.facebook.net/en_US/fbevents.js');
+              fbq('init', {{ pixels_meta }});
+              fbq('track', 'PageView');
+
+              </script>
+              <noscript><img height="1" width="1" style="display:none"
+              src="https://www.facebook.com/tr?id={{ pixels_meta }}&ev=PageView&noscript=1"/>
+              </noscript>
+              <!-- End Meta Pixel Code -->
+
+          {% endif %}
+      {% endfor %}
+  
+
+
+
+
+
+
+
+
 
 </head>
-<body class="{{ f2_store_shoppingStore_current() ? 'shopping-store' : '' }}">
-    {# cabeçalho da loja #}
-    {% include 'FlexyFtwoStoreBundle:Include/Base:header.html.twig' %}
 
-    {# alertas #}
-    {% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-success'), 'error' : false} %}
-    {% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-error'), 'error' : true} %}
-    {% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-login-error'), 'error' : true} %}
+   {# Pega path atual #}
+   {% set pathInfo = app.request.pathinfo %}
+      
+   {% set cartStyle = false %}
+   {% if 'cart' in app.request.getPathInfo or 'checkout' in app.request.getPathInfo or '/produto/listar' in app.request.getPathInfo  or 'customer' in app.request.getPathInfo or 'contato' in app.request.getPathInfo or '/loja' in app.request.getPathInfo or '/agent/' in app.request.getPathInfo or 'busca' in app.request.getPathInfo or '/customer/create' in app.request.getPathInfo %}
+      {% set cartStyle = true %}
+   {% endif %}
 
-    {% block content %}{% endblock %}
+   {% set whatsPosition = false %}
+   {% if 'contato' in app.request.getPathInfo or '/customer/create' in app.request.getPathInfo  %}
+      {% set whatsPosition = true %}
+   {% endif %}
 
-    {# Antifraude #}
-    {% include 'FlexyFtwoStoreBundle:AntiFraud:antiFraudBaseSnippetCode.html.twig' %}
+   <body class="{{ f2_store_shoppingStore_current() ? 'shopping-store' : '' }}{{ cartStyle ? 'pd-page' }}">
 
-    {# rodapé da loja #}
-    {% include 'FlexyFtwoStoreBundle:Include/Base:footer.html.twig' %}
+   	{# WhatsApp #}
+      <div class="wc_whatsapp_app{{whatsPosition ? ' reposition'}} {{ "checkout" in app.request.getPathInfo ? 'hide'}}">
+         <a href="https://api.whatsapp.com/send?l=pt_br&phone=55{{store.info.primaryPhone|replace({'(' : '', ')' : '', '-' : '', ' ' : ''})}}&text=Ol%C3%A1!%20Vim%20do%20site%20e%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20da%20loja." title="Contato via whatsapp" target="_blank" id="wc_whatsapp" class="wc_whatsapp"></a>
+      </div>
 
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/jquery.number.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.easing.1.3.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/bootstrap.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.flexisel.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/wow.min.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.transit.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.jcountdown.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.jPages.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/owl.carousel.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/responsiveslides.min.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.elevateZoom-3.0.8.min.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.themepunch.plugins.min.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.themepunch.revolution.min.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.scrollTo-1.4.2-min.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/jquery.cookie.js') }}"></script>
-    <script src="{{ asset('bundles/flexyftwostore/js/zipcode.js') }}"></script>
-    <script src="{{ asset('bundles/flexyftwostore/js/templates.js') }}"></script>
-    <script src="{{ asset('bundles/flexyftwostore/js/main.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/jquery.mask.min.js') }}"></script>
-    <script src="{{ asset('bundles/flexyftwostore/js/index.compiled.js') }}"></script>
-    <script src="{{ flexy_ftwo_resource_url_js('js/bootstrap-select2/select2.min.js') }}" type="text/javascript"></script>
-	<script type="module" src="{{ asset('bundles/flexyftwostore/js/aliquot/aliquot.js') }}"></script>
+      {# cabeçalho da loja #}
+      {% include 'FlexyFtwoStoreBundle:Include/Base:header.html.twig' %}
 
-    {% block javascript %}{% endblock %}
+      {# alertas #}
+      {% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-success'), 'error' : false} %}
+      {% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-error'), 'error' : true} %}
+      {% include 'FlexyFtwoStoreBundle:Include:alerts.html.twig' with {'alerts' : app.session.flashbag.get('store-login-error'), 'error' : true} %}
 
-    <script>
-        (function() {
-            $("#selectCustomer").change(function() {
-                var customerId = $(this).val();
+      {% block content %}{% endblock %}
 
-                if (customerId == "new") {
-                    window.location.href = "{{ path("flexy_ftwo_store_customer_create") }}";
-                    return;
-                }
+      {# Antifraude #}
+      {% include 'FlexyFtwoStoreBundle:AntiFraud:antiFraudBaseSnippetCode.html.twig' %}
 
-                $.ajax({
-                    url : '{{ path('flexy_ftwo_store_user_customer_choose') }}',
-                    data : {
-                        customerId : customerId
-                    },
-                    success : function() {
-                        window.location.reload();
-                    },
-                    error : function() {
-                        alert("{{ 'store.customerSelectError'|trans }}");
-                    }
-                });
-            });
-        })();
-    </script>
-    <script type="text/javascript">
-        $('#selectCustomer').select2(
-                {
-                    placeholder: ' - selecione um cliente -',
-                }
-        ).change(
-                function (e) {
-                    e.preventDefault();
-                    var selectedData = $(this).value();
-                    alert(selectedData);
-                }
-        );
-    </script>
-</body>
+      {# rodapé da loja #}
+      {% include 'FlexyFtwoStoreBundle:Include/Base:footer.html.twig' %}
+
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/jquery.number.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.easing.1.3.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/bootstrap.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.flexisel.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/wow.min.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.transit.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.jcountdown.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.jPages.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/owl.carousel.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/responsiveslides.min.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.elevateZoom-3.0.8.min.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.themepunch.plugins.min.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.themepunch.revolution.min.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/vendor/jquery.scrollTo-1.4.2-min.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/jquery.cookie.js') }}"></script>
+      <script src="{{ asset('bundles/flexyftwostore/js/zipcode.js') }}"></script>
+      <script src="{{ asset('bundles/flexyftwostore/js/templates.js') }}"></script>
+      <script src="{{ asset('bundles/flexyftwostore/js/main.js') }}"></script>
+      <script src="{{ flexy_ftwo_resource_url_js('js/jquery.mask.min.js') }}"></script>
+      <script src="{{ asset('bundles/flexyftwostore/js/index.compiled.js') }}"></script>
+      
+      <script src="{{ asset('bundles/flexyftwoadmin/ftwo/plugins/select2-4.0.5/dist/js/select2.min.js') }}"></script>
+
+      <script type="module" src="{{ asset('bundles/flexyftwostore/js/aliquot/aliquot.js') }}"></script>
+      <script type="text/javascript" src="{{ asset('bundles/flexyftwoadmin/webarch/plugins/messenger/messenger.min.js') }}"></script>
+      <script type="text/javascript" src="{{ asset('bundles/flexyftwoadmin/webarch/plugins/messenger/messenger-theme-flat.js') }}"></script>
+      <script type="text/javascript" src="{{ asset('bundles/flexyftwoadmin/webarch/plugins/bootbox.min.js') }}"></script>
+      <script type="text/javascript" src="{{ asset('bundles/flexyftwostore/js/widgetsV2.js') }}"></script>
+      <script type="text/javascript" src="{{ asset('bundles/flexyftwostore/js/SmartEdgeFilterEngine.js') }}"></script>
+
+      {# Swiper Slider #}
+      <script src="https://d8vlg9z1oftyc.cloudfront.net/segware/segware-file-manager/assets/js/swiper-bundle-min.js"></script>
+      
+      {# Sweet Alert #}
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+
+      {# Custom Scripts #}
+      {% include 'FlexyFtwoStoreBundle:Javascript:_custom-base.html.twig' %}
+
+      {% block javascript %}{% endblock %}
+   
+   </body>
 </html>

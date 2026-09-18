@@ -1,6 +1,6 @@
 {% set loginUser = app.user %}
 {% set customer = flexy_ftwo_current_customer() %}
-{% set showMultipleUsers = not store.info.usesMultipleSales and loginUser.master and customer.cnpj %}
+{% set showMultipleUsers = loginUser.master and customer.cnpj %}
 
 {% block content %}
     {% if customer %}
@@ -20,12 +20,13 @@
         <div class="welcome">
             <div>
                 <h3>Olá, {{ customer.fullName }}.</h3>
-                <p>Seja bem vindo à sua conta, aqui será possível acompanhar seus pedidos, verificar e alterar seus dados cadastrais, entre outros.</p>
+                <p>Seja bem-vindo à sua conta, aqui será possível acompanhar seus pedidos, verificar e alterar seus endereços.</p>
             </div>
             <hr/>
             <div class="customer-data">
-                    <div class="row">
+                    {#<div class="row">
                         <div class="col-md-6">
+                            <div><b>Usuário:</b> {{ loginUser.username }}</div>
                             <div><b>E-mail:</b> {{ loginUser.email }}</div>
                             {% if customer.isSocialLoginFilled() %}
                                 <div><b>Telefone:</b> {{ customer.primaryphone }}</div>
@@ -46,14 +47,15 @@
                                 <div><b>Insc.  Estadual:</b> {{ customer.cnpj.stateRegistration }}</div>
                             {% endif %}
                         </div>
-                    </div>
+                    </div>#}
                     {% if not app.user.agent %}
                         <hr/>
                         <div class="row">
-                            <div class="col-md-2"><a href="{{ path("flexy_ftwo_store_giftList_list") }}"><i class="fa fa-gift"></i> &nbsp;Lista de presentes</a></div>
-                            <div class="col-md-2"><a href="{{ path("flexy_ftwo_store_wishlist_my") }}"><i class="fa fa-star"></i> &nbsp;Lista de desejos</a></div>
+                            <div class="col-md-2"><a href="/customer/profile"><i class="fa fa-file"></i>&nbsp;Pedidos</a></div>
+                            {#<div class="col-md-2"><a href="{{ path("flexy_ftwo_store_giftList_list") }}"><i class="fa fa-gift"></i> &nbsp;Lista de presentes</a></div>
+                            <div class="col-md-2"><a href="{{ path("flexy_ftwo_store_wishlist_my") }}"><i class="fa fa-star"></i> &nbsp;Lista de desejos</a></div>#}
                             {% if loginUser.master %}
-                                <div class="col-md-2"><a href="{{ path("flexy_ftwo_store_customer_update") }}"><i class="fa fa-user"></i> &nbsp;Atualizar meus dados</a></div>
+                                <div class="col-md-2"><a href="{{ path("flexy_ftwo_store_customer_update") }}"><i class="fa fa-user"></i> &nbsp;Meus dados</a></div>
                             {% endif %}
                             <div class="col-md-2"><a href="{{ path("flexy_ftwo_store_customer_address_list") }}"><i class="fa fa-map-marker"></i> &nbsp;Endereços</a></div>
                             {% if showMultipleUsers %}
@@ -62,8 +64,12 @@
                                     <i class="fa fa-users"></i> &nbsp;Usuários</a>
                                 </div>
                             {% endif %}
-                            <div class="col-md-2"><a href="{{ path("flexy_ftwo_store_user_remember_password_reset") }}"><i class="fa fa-unlock-alt"></i> &nbsp;Trocar senha</a></div>
-                        </div>
+                            {#<div class="col-md-2"><a href="{{ path("flexy_ftwo_store_user_remember_password_reset") }}"><i class="fa fa-unlock-alt"></i> &nbsp;Trocar senha</a></div>
+
+                        {% if pagarmeActived %}
+                            <div class="col-md-2"><a href="{{ path("flexy_ftwo_store_customer_card_list") }}"><i class="fa fa-credit-card"></i> &nbsp;Salvar Cartão</a></div>
+                        {% endif %}#}
+                            </div>
                         <hr/>
                     {% else %}
                         <hr/>
