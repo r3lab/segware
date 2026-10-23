@@ -2,9 +2,10 @@
 {% block title %}Quote{% endblock %}
 {% set quoteVariables = flexy_ftwo_quote_list() %}
 {% set quoteUrl = path('flexy_ftwo_store_quote_finish') %}
+{% set quoteUploadConfiguration = flexy_ftwo_configuration_stores("QUOTE_UPLOAD_CONFIGURATION") %}
 {% block content %}
     <section>
-        <form method="post" action="{{ quoteUrl }}" class="f2-form">
+        <form method="post" action="{{ quoteUrl }}" class="f2-form" id="quote-form">
             <div class="second-page-container">
                 <div class="container">
                     {% include 'FlexyFtwoStoreBundle:Include:breadcrumbs.html.twig' with {path : [{'title' : 'Orçamento' }]} %}
@@ -14,16 +15,19 @@
                         </div>
                     {% endfor %}
                     <div class="header-for-light">
-                        <h1 class="wow fadeInRight animated animated" data-wow-duration="1s"
-                            style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
-                            Orçamento
-                        </h1>
+                        <h1>Orçamento</h1>
                     </div>
                     {% if quoteVariables.quote.allItems.count > 0 %}
                         {% set hasOrphanSale = quoteVariables.quote.hasOrphanSale %}
                         {% set hasNoOrphanSale = not hasOrphanSale %}
                         {% set quotes = quoteVariables.quotes %}
-                        {% include 'FlexyFtwoStoreBundle:Include/Cart:cart-list.html.twig' with {carts : quotes, changeQuantity : true, remove: true} %}
+                        {% include 'FlexyFtwoStoreBundle:Include/Cart:cart-list.html.twig' with {
+                            carts : quotes,
+                            changeQuantity : true,
+                            remove: true,
+                            hasOrphanSale: hasOrphanSale,
+                            quoteUploadConfiguration: quoteUploadConfiguration
+                        } %}
                         <div class="row">
                             {% if hasOrphanSale %}
                                 <div class="col-md-4">
@@ -50,24 +54,26 @@
                                 </div>
                                 <div class="col-md-8"></div>
                             {% endif %}
-                            <div class="col-md-12 text-right">
-                                {% if flexy_ftwo_current_user_exists() and hasNoOrphanSale %}
-                                    <a href="{{ path('flexy_ftwo_store_quote_export', { 'quoteId' : quoteVariables.quote.id}) }}"
-                                       class="btn btn-default pull-left">
-                                        <i class="fa fa-shopping-quote"></i> Imprimir orçamento
-                                    </a>
-                                {% endif %}
-                                {% if hasNoOrphanSale %}
-                                    <button type="submit" class="btn btn-checkout btn-light-blue">
-                                        <i class="fa fa-shopping-quote"></i> Solicitar orçamento
-                                    </button>
-                                {% endif %}
+                            
+                            <div>
+                                <div class="quote-actions col-md-12">
+                                    {% if flexy_ftwo_current_user_exists() and hasNoOrphanSale %}
+                                        <a href="{{ path('flexy_ftwo_store_quote_export', { 'quoteId' : quoteVariables.quote.id}) }}"
+                                           class="btn btn-default print-quote">
+                                            <i class="bi bi-printer"></i>&nbsp;Imprimir orçamento
+                                        </a>
+                                    {% endif %}
+                                    {% if hasNoOrphanSale %}
+                                        <button type="submit" class="btn btn-checkout btn-light-blue" id="quote-request-button">
+                                            <i class="bi bi-file-earmark"></i>&nbsp;Solicitar orçamento
+                                        </button>
+                                    {% endif %}
+                            	</div>
                             </div>
                         </div>
                     {% else %}
                         <div class="header-for-light">
-                            <h2 class="wow fadeInRight animated animated emptyCart" data-wow-duration="1s"
-                                style="visibility: visible;-webkit-animation-duration: 1s; -moz-animation-duration: 1s; animation-duration: 1s;">
+                            <h2 class="emptyCart">
                                 Nenhum produto em seu orçamento.
                             </h2>
                             <a href="/">&larr; Voltar</a>
@@ -77,4 +83,7 @@
             </div>
         </form>
     </section>
+{% endblock %}
+{% block javascript %}
+    <script src="{{ asset('bundles/flexyftwostore/js/quote/attach.js') }}"></script>
 {% endblock %}
